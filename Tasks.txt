@@ -1,0 +1,30 @@
+Tasks:
+1. Write solver class
+Should be so general that it works for both OpenMP, MPI and CUDA
+2. Write array creation, initialization and access code
+Should use 1D arrays and functions mapping 3D positions to 1D indices
+3. Write main function skeleton
+Use dummy functions of CFD solver
+4. Port progress bar etc.
+5. Write output code
+Probably, a binary format like NetCDF is suited best.
+Have a look e.g. at my code here: https://gitlab.com/chrismile/trajectorynetcdfconverter/blob/master/src/NetCDFConverter.cpp
+-> Write P,U,V,T to file
+6. Write a 3D CFD solver with OpenMP
+-> Use book by Griebel et al. as reference
+7. Write test cases:
+Driven cavity, natural convection, Rayleigh-Bernard convection
+8. Write particle tracer
+Decide: Just streamlines or also streaklines and pathlines?
+9. Write CUDA solver
+
+Optional:
+O.1. Checkpointing
+If the program is stopped, resume from output file.
+O.2. Arbitrary geometries
+O.2.1. Flag array in 3D - probably binary format with Christoph's BinaryStream class:
+https://github.com/chrismile/MarchingCubesServer/blob/master/src/BinaryStream.hpp
+-> Create programmatically
+O.2.2. Boundary conditions for internal boundaries
+O.2.3. Example cases for 3D
+Karman vortex street
