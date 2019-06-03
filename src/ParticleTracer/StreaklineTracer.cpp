@@ -5,8 +5,11 @@
 #include <algorithm>
 #include "StreaklineTracer.hpp"
 
-void StreaklineTracer::setParticleSeedingLocations(const std::vector<rvec3> &particleSeedingLocations) {
+void StreaklineTracer::setParticleSeedingLocations(
+        const rvec3 &gridOrigin, const rvec3 &gridSize, const std::vector<rvec3> &particleSeedingLocations) {
     this->particleSeedingLocations = particleSeedingLocations;
+    this->gridOrigin = gridOrigin;
+    this->gridSize = gridSize;
     stepIndex = 0;
     numParticles = particleSeedingLocations.size();
     lines.resize(numParticles);
@@ -19,7 +22,9 @@ void StreaklineTracer::timeStep(Real t, Real dt, int imax, int jmax, int kmax, R
     for (size_t i = 0; i < numParticles; i++) {
         for (size_t j = 0; j < stepIndex; j++) {
             rvec3 particlePosition = lines.at(i).at(j);
-            lines.at(i).at(j) = integrateParticlePositionEuler(particlePosition, imax, jmax, kmax, U, V, W, dt);
+            lines.at(i).at(j) = integrateParticlePositionEuler(
+                    particlePosition, gridOrigin, gridSize,
+                    imax, jmax, kmax, U, V, W, dt);
         }
         lines.at(i).push_back(particleSeedingLocations.at(i));
     }

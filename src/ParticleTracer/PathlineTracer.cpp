@@ -4,8 +4,11 @@
 
 #include "PathlineTracer.hpp"
 
-void PathlineTracer::setParticleSeedingLocations(const std::vector<rvec3> &particleSeedingLocations) {
+void PathlineTracer::setParticleSeedingLocations(
+        const rvec3 &gridOrigin, const rvec3 &gridSize, const std::vector<rvec3> &particleSeedingLocations) {
     this->particleSeedingLocations = particleSeedingLocations;
+    this->gridOrigin = gridOrigin;
+    this->gridSize = gridSize;
     numParticles = particleSeedingLocations.size();
     lines.resize(numParticles);
     for (size_t i = 0; i < numParticles; i++) {
@@ -16,7 +19,9 @@ void PathlineTracer::setParticleSeedingLocations(const std::vector<rvec3> &parti
 void PathlineTracer::timeStep(Real t, Real dt, int imax, int jmax, int kmax, Real *U, Real *V, Real *W) {
     for (size_t i = 0; i < numParticles; i++) {
         rvec3 particlePosition = lines.at(i).back();
-        rvec3 newParticlePosition = integrateParticlePositionEuler(particlePosition, imax, jmax, kmax, U, V, W, dt);
+        rvec3 newParticlePosition = integrateParticlePositionEuler(
+                particlePosition, gridOrigin, gridSize,
+                imax, jmax, kmax, U, V, W, dt);
         lines.at(i).push_back(newParticlePosition);
     }
 }

@@ -12,7 +12,9 @@ class StreamlineTracer : public SteadyFlowParticleTracer
 public:
     /**
      * Traces the characteristic lines of a given steady velocity vector field.
-     * @param particleSeedingLocations The seeding locations of the particles to trace in staggered grid coordinates.
+     * @param particleSeedingLocations The seeding locations of the particles to trace in world space.
+     * @param gridOrigin The origin of the grid in world coordinates.
+     * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
      * @param imax Number of cells in x direction inside of the domain.
      * @param jmax Number of cells in y direction inside of the domain.
      * @param kmax Number of cells in z direction inside of the domain.
@@ -22,7 +24,8 @@ public:
      * @param dt The time step to use for integrating the particle position.
      * @return The characteristic lines (an array containing the arrays of line points).
      */
-    virtual std::vector<std::vector<rvec3>> trace(const std::vector<rvec3> &particleSeedingLocations,
+    virtual std::vector<std::vector<rvec3>> trace(
+            const std::vector<rvec3> &particleSeedingLocations, const rvec3 &gridOrigin, const rvec3 &gridSize,
             int imax, int jmax, int kmax, Real *U, Real *V, Real *W, Real dt);
 };
 

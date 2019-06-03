@@ -16,9 +16,12 @@ class PathlineTracer : public TimeVaryingParticleTracer
 public:
     /**
      * Sets the seeding positions of the particles to trace during the (time-dependent) simulation.
-     * @param particleSeedingLocations The seeding locations of the particles to trace in staggered grid space.
+     * @param particleSeedingLocations The seeding locations of the particles to trace in world space.
+     * @param gridOrigin The origin of the grid in world coordinates.
+     * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
      */
-    virtual void setParticleSeedingLocations(const std::vector<rvec3> &particleSeedingLocations);
+    virtual void setParticleSeedingLocations(
+            const rvec3 &gridOrigin, const rvec3 &gridSize, const std::vector<rvec3> &particleSeedingLocations);
 
     /**
      * Integrates the position of all particles with the passed time step size.
@@ -40,6 +43,7 @@ public:
     virtual std::vector<std::vector<rvec3>> getLines();
 
 private:
+    rvec3 gridOrigin, gridSize;
     size_t numParticles;
     std::vector<rvec3> particleSeedingLocations;
     std::vector<std::vector<rvec3>> lines;

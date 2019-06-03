@@ -44,7 +44,9 @@ class SteadyFlowParticleTracer
 public:
     /**
      * Traces the characteristic lines of a given steady velocity vector field.
-     * @param particleSeedingLocations The seeding locations of the particles to trace in staggered grid coordinates.
+     * @param particleSeedingLocations The seeding locations of the particles to trace in world space.
+     * @param gridOrigin The origin of the grid in world coordinates.
+     * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
      * @param imax Number of cells in x direction inside of the domain.
      * @param jmax Number of cells in y direction inside of the domain.
      * @param kmax Number of cells in z direction inside of the domain.
@@ -54,7 +56,8 @@ public:
      * @param dt The time step to use for integrating the particle position.
      * @return The characteristic lines (an array containing the arrays of line points).
      */
-    virtual std::vector<std::vector<rvec3>> trace(const std::vector<rvec3> &particleSeedingLocations,
+    virtual std::vector<std::vector<rvec3>> trace(
+            const std::vector<rvec3> &particleSeedingLocations, const rvec3 &gridOrigin, const rvec3 &gridSize,
             int imax, int jmax, int kmax, Real *U, Real *V, Real *W, Real dt)=0;
 };
 
@@ -67,9 +70,12 @@ class TimeVaryingParticleTracer
 public:
     /**
      * Sets the seeding positions of the particles to trace during the (time-dependent) simulation.
-     * @param particleSeedingLocations The seeding locations of the particles to trace in staggered grid space.
+     * @param particleSeedingLocations The seeding locations of the particles to trace in world space.
+     * @param gridOrigin The origin of the grid in world coordinates.
+     * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
      */
-    virtual void setParticleSeedingLocations(const std::vector<rvec3> &particleSeedingLocations)=0;
+    virtual void setParticleSeedingLocations(
+            const rvec3 &gridOrigin, const rvec3 &gridSize, const std::vector<rvec3> &particleSeedingLocations)=0;
 
     /**
      * Integrates the position of all particles with the passed time step size.
@@ -94,7 +100,9 @@ public:
 /**
  * Integrates a particle position in the given velocity field using the passed time step size with the explicit Euler
  * scheme.
- * @param particleStartPosition The position of the particle in staggered grid coordinates.
+ * @param particleStartPosition The position of the particle in world coordinates.
+ * @param gridOrigin The origin of the grid in world coordinates.
+ * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
  * @param imax Number of cells in x direction inside of the domain.
  * @param jmax Number of cells in y direction inside of the domain.
  * @param kmax Number of cells in z direction inside of the domain.
@@ -104,21 +112,27 @@ public:
  * @param dt The time step to use for integrating the particle position.
  * @return The integrated particle position at time t+dt.
  */
-rvec3 integrateParticlePositionEuler(const rvec3 &particlePosition, int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real dt);
+rvec3 integrateParticlePositionEuler(
+        const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
+        int imax, int jmax, int kmax, Real *U, Real *V, Real *W, Real dt);
 
 /**
  * For internal use by the particle tracers. Returns the 3D velocity vector at a point in the staggered grid obtained
  * by trilinearly interpolating in U, V and W.
- * @param particlePosition
- * @param imax
- * @param jmax
- * @param kmax
- * @param U
- * @param V
- * @param W
- * @return
+ * @param particleStartPosition The position of the particle in world coordinates.
+ * @param gridOrigin The origin of the grid in world coordinates.
+ * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
+ * @param imax Number of cells in x direction inside of the domain.
+ * @param jmax Number of cells in y direction inside of the domain.
+ * @param kmax Number of cells in z direction inside of the domain.
+ * @param U The velocities in x direction.
+ * @param V The velocities in y direction.
+ * @param W The velocities in z direction.
+ * @param dt The time step to use for integrating the particle position.
+ * @return The velocity at the world space position particleStartPosition in the staggered grid.
  */
-rvec3 getVectorVelocityAt(const rvec3 &particlePosition, int imax, int jmax, int kmax, Real *U, Real *V, Real *W);
+rvec3 getVectorVelocityAt(
+        const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
+        int imax, int jmax, int kmax, Real *U, Real *V, Real *W);
 
 #endif //CFD3D_PARTICLETRACER_HPP
