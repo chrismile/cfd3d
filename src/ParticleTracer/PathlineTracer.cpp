@@ -10,24 +10,34 @@ void PathlineTracer::setParticleSeedingLocations(
     this->gridOrigin = gridOrigin;
     this->gridSize = gridSize;
     numParticles = particleSeedingLocations.size();
-    lines.resize(numParticles);
-    for (size_t i = 0; i < numParticles; i++) {
-        lines.at(i).push_back(particleSeedingLocations.at(i));
-    }
 }
 
-void PathlineTracer::timeStep(Real t, Real dt, int imax, int jmax, int kmax, Real *U, Real *V, Real *W) {
+void PathlineTracer::timeStep(
+        Real t, Real dt, int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
+        Real *U, Real *V, Real *W, Real *P, Real *T) {
+    // Initialize the trajectories first if this is the first time step.
+    if (trajectories.size() == 0) {
+        trajectories.resize(numParticles);
+        for (size_t i = 0; i < numParticles; i++) {
+            trajectories.at(i).positions.push_back(particleSeedingLocations.at(i));
+            pushTrajectoryAttributes(
+                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        }
+    }
+
     for (size_t i = 0; i < numParticles; i++) {
-        rvec3 particlePosition = lines.at(i).back();
+        rvec3 particlePosition = trajectories.at(i).positions.back();
         rvec3 newParticlePosition = integrateParticlePositionEuler(
                 particlePosition, gridOrigin, gridSize,
                 imax, jmax, kmax, U, V, W, dt);
-        lines.at(i).push_back(newParticlePosition);
+        trajectories.at(i).positions.push_back(newParticlePosition);
+        pushTrajectoryAttributes(
+                trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
     }
 }
 
-std::vector<std::vector<rvec3>> PathlineTracer::getLines() {
-    std::vector<std::vector<rvec3>> linesCopy = lines;
-    lines.clear();
-    return linesCopy;
+Trajectories PathlineTracer::getTrajectories() {
+    Trajectories trajectoriesCopy = trajectories;
+    trajectories.clear();
+    return trajectoriesCopy;
 }

@@ -6,10 +6,10 @@
 #include "Defines.hpp"
 
 void traceStreamlineParticle(
-        std::vector<rvec3> &currentLinePoints,
-        const rvec3 &particleStartPosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
-        int imax, int jmax, int kmax, Real *U, Real *V, Real *W, Real dt) {
-    currentLinePoints.push_back(particleStartPosition);
+        Trajectory &currentTrajectory, const rvec3 &particleStartPosition, const rvec3 &gridOrigin,
+        const rvec3 &gridSize, Real dt, int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
+        Real *U, Real *V, Real *W, Real *P, Real *T) {
+    currentTrajectory.positions.push_back(particleStartPosition);
     rvec3 particlePosition = particleStartPosition;
     glm::ivec3 particleGridPosition;
 
@@ -31,20 +31,23 @@ void traceStreamlineParticle(
         particlePosition = particlePosition + k1/Real(6.0) + k2/Real(3.0) + k3/Real(3.0) + k4/Real(6.0);
 
         // Add line segment between last and new position.
-        currentLinePoints.push_back(particlePosition);
+        currentTrajectory.positions.push_back(particlePosition);
+        pushTrajectoryAttributes(
+                currentTrajectory, gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
     } while(true);
 }
 
-std::vector<std::vector<rvec3>> StreamlineTracer::trace(
-        const std::vector<rvec3> &particleSeedingLocations, const rvec3 &gridOrigin, const rvec3 &gridSize,
-        int imax, int jmax, int kmax, Real *U, Real *V, Real *W, Real dt) {
-    std::vector<std::vector<rvec3>> lines;
-    lines.resize(particleSeedingLocations.size());
+Trajectories StreamlineTracer::trace(
+        const std::vector<rvec3> &particleSeedingLocations, const rvec3 &gridOrigin, const rvec3 &gridSize, Real dt,
+        int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real *U, Real *V, Real *W, Real *P, Real *T) {
+    Trajectories trajectories;
+    trajectories.resize(particleSeedingLocations.size());
     for (size_t i = 0; i < particleSeedingLocations.size(); i++) {
         const rvec3 &particleStartPosition = particleSeedingLocations.at(i);
-        std::vector<rvec3> &currentLinePoints = lines.at(i);
+        Trajectory &currentTrajectory = trajectories.at(i);
         traceStreamlineParticle(
-                currentLinePoints, gridOrigin, gridOrigin, particleStartPosition, imax, jmax, kmax, U, V, W, dt);
+                currentTrajectory, gridOrigin, gridOrigin, particleStartPosition,
+                dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
     }
-    return lines;
+    return trajectories;
 }

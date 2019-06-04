@@ -12,15 +12,23 @@
 #include "IO/ProgressBar.hpp"
 #include "IO/ScenarioFile.hpp"
 #include "IO/NetCdfWriter.hpp"
+#include "IO/TrajectoriesFile.hpp"
+#include "ParticleTracer/StreamlineTracer.hpp"
+#include "ParticleTracer/StreaklineTracer.hpp"
+#include "ParticleTracer/PathlineTracer.hpp"
 
 const std::string outputDirectory = "output/";
 const std::string scenarioDirectory = "scenarios/";
 const std::string geometryDirectory = "geometry/";
+const std::string lineDirectory = "lines/";
 
 int main(int argc, char *argv[]) {
     CfdSolver *cfdSolver = new CfdSolverCpp();
     ProgressBar progressBar;
     NetCdfWriter netCdfWriter;
+    bool traceStreamlines = false, traceStreaklines = false, tracePathlines = false;
+    std::vector<rvec3> particleSeedingLocations;
+    bool dataIsUpToDate = true;
 
     int imax, jmax, kmax, itermax;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
@@ -37,6 +45,11 @@ int main(int argc, char *argv[]) {
             tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
             Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz);
+    rvec3 gridOrigin = rvec3(xOrigin, yOrigin, zOrigin);
+    rvec3 gridSize = rvec3(xLength, yLength, zLength);
+    StreamlineTracer streamlineTracer;
+    StreaklineTracer streaklineTracer(dtWrite*0.1); // Tracing frequency multiple of write time step.
+    PathlineTracer pathlineTracer;
 
     if (!useTemperature){
         T_c = 0.0;
@@ -97,16 +110,49 @@ int main(int argc, char *argv[]) {
 
         cfdSolver->executeSorSolver();
         cfdSolver->calculateUvw();
+        dataIsUpToDate = false;
 
         t += dt;
         tWrite += dt;
         n++;
         if (tWrite - dtWrite > 0) {
-            cfdSolver->getDataForOutput(U, V, W, P, T);
+            if (!dataIsUpToDate) {
+                cfdSolver->getDataForOutput(U, V, W, P, T);
+                dataIsUpToDate = true;
+            }
             netCdfWriter.writeTimestep(n, t, U, V, W, P, T, Flag);
             progressBar.printOutput(n, t, 50);
             tWrite -= dtWrite;
         }
+        if (traceStreaklines || tracePathlines) {
+            if (!dataIsUpToDate) {
+                cfdSolver->getDataForOutput(U, V, W, P, T);
+                dataIsUpToDate = true;
+            }
+            if (traceStreaklines) {
+                streaklineTracer.timeStep(t, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+            }
+            if (tracePathlines) {
+                pathlineTracer.timeStep(t, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+            }
+        }
+    }
+
+    if (traceStreamlines) {
+        if (!dataIsUpToDate) {
+            cfdSolver->getDataForOutput(U, V, W, P, T);
+            dataIsUpToDate = true;
+        }
+        Trajectories streamlines = streamlineTracer.trace(
+                particleSeedingLocations, gridOrigin, gridSize, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
+    }
+
+    if (traceStreaklines) {
+        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streaklines.obj", streaklineTracer.getTrajectories());
+    }
+    if (tracePathlines) {
+        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-pathlines.obj", pathlineTracer.getTrajectories());
     }
 
     auto endTime = std::chrono::system_clock::now();

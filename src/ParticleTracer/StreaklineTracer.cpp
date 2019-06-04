@@ -10,32 +10,47 @@ void StreaklineTracer::setParticleSeedingLocations(
     this->particleSeedingLocations = particleSeedingLocations;
     this->gridOrigin = gridOrigin;
     this->gridSize = gridSize;
+    lastInjectTime = 0.0;
     stepIndex = 0;
     numParticles = particleSeedingLocations.size();
-    lines.resize(numParticles);
-    for (size_t i = 0; i < numParticles; i++) {
-        lines.at(i).push_back(particleSeedingLocations.at(i));
-    }
 }
 
-void StreaklineTracer::timeStep(Real t, Real dt, int imax, int jmax, int kmax, Real *U, Real *V, Real *W) {
+void StreaklineTracer::timeStep(
+        Real t, Real dt, int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
+        Real *U, Real *V, Real *W, Real *P, Real *T) {
+    // Initialize the trajectories first if this is the first time step.
+    if (trajectories.size() == 0) {
+        trajectories.resize(numParticles);
+        for (size_t i = 0; i < numParticles; i++) {
+            trajectories.at(i).positions.push_back(particleSeedingLocations.at(i));
+            pushTrajectoryAttributes(
+                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        }
+    }
+
     for (size_t i = 0; i < numParticles; i++) {
         for (size_t j = 0; j < stepIndex; j++) {
-            rvec3 particlePosition = lines.at(i).at(j);
-            lines.at(i).at(j) = integrateParticlePositionEuler(
+            rvec3 particlePosition = trajectories.at(i).positions.at(j);
+            trajectories.at(i).positions.at(j) = integrateParticlePositionEuler(
                     particlePosition, gridOrigin, gridSize,
                     imax, jmax, kmax, U, V, W, dt);
+            pushTrajectoryAttributes(
+                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
         }
-        lines.at(i).push_back(particleSeedingLocations.at(i));
+        if (t - lastInjectTime >= dtInject) {
+            trajectories.at(i).positions.push_back(particleSeedingLocations.at(i));
+            lastInjectTime = t;
+        }
     }
     stepIndex++;
 }
 
-std::vector<std::vector<rvec3>> StreaklineTracer::getLines() {
+Trajectories StreaklineTracer::getTrajectories() {
     for (size_t i = 0; i < numParticles; i++) {
-        std::reverse(lines.at(i).begin(), lines.at(i).end());
+        std::reverse(trajectories.at(i).positions.begin(), trajectories.at(i).positions.end());
+        std::reverse(trajectories.at(i).attributes.begin(), trajectories.at(i).attributes.end());
     }
-    std::vector<std::vector<rvec3>> linesCopy = lines;
-    lines.clear();
-    return linesCopy;
+    Trajectories trajectoriesCopy = trajectories;
+    trajectories.clear();
+    return trajectoriesCopy;
 }
