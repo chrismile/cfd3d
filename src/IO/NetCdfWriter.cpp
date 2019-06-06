@@ -77,7 +77,7 @@ bool NetCdfWriter::openFile(const std::string &filename,
     // Define the domain variables. The fastest changing index is on the right (C/C++ syntax).
     int dimsTimeIndependent3D[] = {xDim, yDim, zDim};
     int dimsTimeDependent3D[] = {timeDim, xDim, yDim, zDim};
-    nc_def_var(ncid, "Geometry", NC_UBYTE, 3, dimsTimeIndependent3D, &geometryVar);
+    nc_def_var(ncid, "geometry", NC_UBYTE, 3, dimsTimeIndependent3D, &geometryVar);
     nc_def_var(ncid, "U", NC_REAL, 4, dimsTimeDependent3D, &UVar);
     nc_def_var(ncid, "V", NC_REAL, 4, dimsTimeDependent3D, &VVar);
     nc_def_var(ncid, "W", NC_REAL, 4, dimsTimeDependent3D, &WVar);
