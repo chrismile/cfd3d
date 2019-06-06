@@ -7,16 +7,30 @@
 
 #include <glm/vec3.hpp>
 
+#define REAL_FLOAT
+
 /**
  * The type used for the Flag array. The array stores the type of each cell (i.e., fluid, type of obstacle cell, etc.).
  */
 typedef unsigned int FlagType;
 
+
 /**
  * The floating point type used for the simulation. float is faster, but double has a higher accuracy.
  */
+#ifdef REAL_FLOAT
 typedef float Real;
-//typedef double Real;
+#define nc_put_vara_real nc_put_vara_float
+#define nc_put_var1_real nc_put_var1_float
+#define NC_REAL 5
+#endif
+#ifdef REAL_DOUBLE
+typedef double Real;
+#define nc_put_vara_real nc_put_vara_double
+#define nc_put_var1_real nc_put_var1_double
+#define NC_REAL 6
+#endif
+
 typedef glm::vec<3, Real, glm::defaultp> rvec3;
 
 /**

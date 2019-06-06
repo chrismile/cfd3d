@@ -10,6 +10,8 @@
 
 class NetCdfWriter {
 public:
+    ~NetCdfWriter();
+
     /**
      * Opens a NetCDF file for writing. TODO: More about format.
      * @param filename The file name of the NetCDF file to write to.
@@ -22,8 +24,9 @@ public:
      * @param xOrigin The origin of the interior domain in world space (x coordinate).
      * @param yOrigin The origin of the interior domain in world space (y coordinate).
      * @param zOrigin The origin of the interior domain in world space (z coordinate).
+     * @return true if the file could be opened for writing successfully.
      */
-    void openFile(const std::string &filename,
+    bool openFile(const std::string &filename,
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
     /**
      * TODO: More about format.
@@ -40,8 +43,19 @@ public:
     void writeTimestep(int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
 
 private:
+    void writeTimeDependentVariable3D_Staggered(int timeStepNumber, int ncVar, int jsize, int ksize, Real *values);
+    void writeTimeDependentVariable3D_Normal(int timeStepNumber, int ncVar, int jsize, int ksize, Real *values);
+    void ncPutAttributeText(int varid, const std::string &name, const std::string &value);
     int imax, jmax, kmax;
     Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
+    Real *centerCellU;
+    Real *centerCellV;
+    Real *centerCellW;
+
+    int ncid;
+
+    // NetCDF variables
+    int timeVar, xVar, yVar, zVar, geometryVar, UVar, VVar, WVar, PVar, TVar;
 };
 
 
