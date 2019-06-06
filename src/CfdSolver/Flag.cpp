@@ -111,7 +111,7 @@ void nearestNeighborUpsampling(
 }
 
 void initFlagFromGeometryFile(const std::string &scenarioName, const std::string &geometryFilename,
-        int imax, int jmax, int kmax, FlagType *&FlagPtr) {
+        int imax, int jmax, int kmax, FlagType *&Flag) {
     int width, height, depth;
     std::vector<uint32_t> geometryValuesRead = loadValuesFromGeometryFile(geometryFilename, width, height, depth);
     std::vector<uint32_t> geometryValues;
@@ -124,16 +124,149 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
             // no-slip, free-slip, outflow, inflow, fluid
             0x2, 0x4, 0x8, 0x10, 0x1,
             // no-slip (hot), free-slip (hot), inflow (hot)
-            0x202, 0x204, 0x210,
+            0x802, 0x804, 0x810,
             // no-slip (cold), free-slip (cold), inflow (cold)
-            0x402, 0x404, 0x410,
+            0x1002, 0x1004, 0x1010,
             // coupling
-            0x802
+            0x2002
     };
+    const unsigned int NUM_PGM_VALUES = sizeof(FLAG_LOOKUP_TABLE) / sizeof(*FLAG_LOOKUP_TABLE);
 
-    // TODO: Implement.
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                unsigned int pgmValue = geometryValues[IDXFLAG(i,j,k)];
+                assert(pgmValue < NUM_PGM_VALUES);
+                unsigned int flagValue = FLAG_LOOKUP_TABLE[pgmValue];
+                Flag[IDXFLAG(i,j,k)] = flagValue;
+            }
+        }
+    }
+
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                if (!isFluid(Flag[IDXFLAG(i,j,k)])) {
+                    // Set B_L bit
+                    if (i > 0 && (Flag[IDXFLAG(i - 1, j, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x20;
+                    }
+                    // Set B_R bit
+                    if (i <= imax && (Flag[IDXFLAG(i + 1, j, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x40;
+                    }
+                    // Set B_D bit
+                    if (j > 0 && (Flag[IDXFLAG(i, j - 1, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x80;
+                    }
+                    // Set B_U bit
+                    if (j <= jmax && (Flag[IDXFLAG(i, j + 1, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x100;
+                    }
+                    // Set B_B bit
+                    if (k > 0 && (Flag[IDXFLAG(i, j, k - 1)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x200;
+                    }
+                    // Set B_F bit
+                    if (k <= kmax && (Flag[IDXFLAG(i, j, k + 1)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x400;
+                    }
+                }
+
+                //#ifdef DEBUG
+                int numNeighborsFluid = 0;
+                if (i > 0) numNeighborsFluid += Flag[IDXFLAG(i-1,j,k)] & 0x1;
+                if (i <= imax) numNeighborsFluid += Flag[IDXFLAG(i+1,j,k)] & 0x1;
+                if (j > 0) numNeighborsFluid += Flag[IDXFLAG(i,j-1,k)] & 0x1;
+                if (j <= jmax) numNeighborsFluid += Flag[IDXFLAG(i,j+1,k)] & 0x1;
+                if (k > 0) numNeighborsFluid += Flag[IDXFLAG(i,j,k-1)] & 0x1;
+                if (k <= kmax) numNeighborsFluid += Flag[IDXFLAG(i,j,k+1)] & 0x1;
+
+                // Rule out boundary cells having more than three fluid neighbours, i.e.:
+                // boundary cell => at most three fluid neighbors
+                // Please remember rule for implication: a => b == not a or b
+                assert((Flag[IDXFLAG(i,j,k)] & 0x1) == 1 || numNeighborsFluid <= 3);
+
+                // Fluid cell may not have temperature source or boundary flag set.
+                // fluid cell => none of the bits above set
+                assert((Flag[IDXFLAG(i,j,k)] & 0x1) == 0 || (Flag[IDXFLAG(i,j,k)] & 0x381E) == 0);
+
+                // Boundary cells with two opposite fluid cells are excluded (forbidden boundary cells).
+                // boundary cell => ((fluid left => not fluid right) and (fluid down => not fluid up)
+                // and (fluid back => not fluid front)).
+                bool fluidLeft = i > 0 && (Flag[IDXFLAG(i-1,j,k)] & 0x1) == 1;
+                bool fluidRight = i <= imax && (Flag[IDXFLAG(i+1,j,k)] & 0x1) == 1;
+                bool fluidDown = j > 0 && (Flag[IDXFLAG(i,j-1,k)] & 0x1) == 1;
+                bool fluidUp = j <= jmax && (Flag[IDXFLAG(i,j+1,k)] & 0x1) == 1;
+                bool fluidBack = j <= jmax && (Flag[IDXFLAG(i,j,k-1)] & 0x1) == 1;
+                bool fluidFront = j <= jmax && (Flag[IDXFLAG(i,j,k+1)] & 0x1) == 1;
+                assert((Flag[IDXFLAG(i,j,k)] & 0x1) == 1
+                        || ((!fluidLeft || !fluidRight) && (!fluidDown || !fluidUp) && (!fluidBack || !fluidFront)));
+
+                // Only one of the four boundary type bits may be set.
+                int boundaryNum = (Flag[IDXFLAG(i,j,k)] >> 1) & 0xF;
+                assert(boundaryNum == 0x0 || boundaryNum == 0x1 || boundaryNum == 0x2
+                        || boundaryNum == 0x4 || boundaryNum == 0x8);
+
+                // Cells in the interior of the domain may only be fluid or no-slip.
+                // interior cell => cell is fluid or no-slip
+                assert(!(i > 0 && j > 0 && i <= imax && j <= jmax)
+                        || ((Flag[IDXFLAG(i,j,k)] & 0x1) == 1 || boundaryNum == 1));
+                //#endif
+            }
+        }
+    }
 }
 
-void initFlagNoObstacles(const std::string &scenarioName, int imax, int jmax, int kmax, FlagType *&FlagPtr) {
-    // TODO: Implement.
+void initFlagNoObstacles(const std::string &scenarioName, int imax, int jmax, int kmax, FlagType *&Flag) {
+    // Standard geometry: Fluid surrounded by no-slip boundary cells.
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                if (i == 0 || j == 0 || k == 0 || i == imax+1 || j == jmax+1 || k == kmax+1) {
+                    Flag[IDXFLAG(i,j,k)] = 0x2; // no-slip
+                } else {
+                    Flag[IDXFLAG(i,j,k)] = 0x1; // fluid
+                }
+            }
+        }
+    }
+
+    // Set neighbor values.
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                if (!isFluid(Flag[IDXFLAG(i,j,k)])) {
+                    // Set B_L bit
+                    if (i > 0 && (Flag[IDXFLAG(i - 1, j, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x20;
+                    }
+                    // Set B_R bit
+                    if (i <= imax && (Flag[IDXFLAG(i + 1, j, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x40;
+                    }
+                    // Set B_D bit
+                    if (j > 0 && (Flag[IDXFLAG(i, j - 1, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x80;
+                    }
+                    // Set B_U bit
+                    if (j <= jmax && (Flag[IDXFLAG(i, j + 1, k)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x100;
+                    }
+                    // Set B_B bit
+                    if (k > 0 && (Flag[IDXFLAG(i, j, k - 1)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x200;
+                    }
+                    // Set B_F bit
+                    if (k <= kmax && (Flag[IDXFLAG(i, j, k + 1)] & 0x1) == 1) {
+                        Flag[IDXFLAG(i, j, k)] |= 0x400;
+                    }
+                }
+            }
+        }
+    }
 }

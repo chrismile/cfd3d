@@ -51,7 +51,7 @@ inline bool isFluid(unsigned int flag) { return (flag >> 0) & 1; }
  * The user is responsible for freeing the memory.
  */
 void initFlagFromGeometryFile(const std::string &scenarioName, const std::string &geometryFilename,
-        int imax, int jmax, int kmax, FlagType *&FlagPtr);
+        int imax, int jmax, int kmax, FlagType *&Flag);
 
 /**
  * For scenarios not using arbitrary geometries.
@@ -62,7 +62,7 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
  * @param kmax Number of cells in z direction inside of the domain.
  * @param FlagPtr A reference to a Flag array. This function uses new[] to allocate the memory of the Flag array.
  */
-void initFlagNoObstacles(const std::string &scenarioName, int imax, int jmax, int kmax, FlagType *&FlagPtr);
+void initFlagNoObstacles(const std::string &scenarioName, int imax, int jmax, int kmax, FlagType *&Flag);
 
 /**
  * Upsamples (or downsamples if necessary) the passed values to match a certain resolution.

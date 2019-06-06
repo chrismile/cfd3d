@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     int imax, jmax, kmax, itermax;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
-            dt, dx, dy, dz, alpha, omg, tau, eps, res, beta, T_h, T_c;
+            dt, dx, dy, dz, alpha, omg, tau, eps, beta, T_h, T_c;
     bool useTemperature = true;
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename;
 
