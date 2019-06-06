@@ -70,12 +70,14 @@ private:
     void writeTimeDependentVariable3D_Staggered(int timeStepNumber, int ncVar, int jsize, int ksize, Real *values);
     void writeTimeDependentVariable3D_Normal(int timeStepNumber, int ncVar, int jsize, int ksize, Real *values);
     void ncPutAttributeText(int varid, const std::string &name, const std::string &value);
+
     int imax, jmax, kmax;
     Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
     Real *centerCellU;
     Real *centerCellV;
     Real *centerCellW;
 
+    bool isFileOpen = false;
     int ncid;
 
     // NetCDF variables

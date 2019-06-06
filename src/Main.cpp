@@ -42,8 +42,8 @@
 #include "ParticleTracer/PathlineTracer.hpp"
 
 const std::string outputDirectory = "output/";
-const std::string scenarioDirectory = "scenarios/";
-const std::string geometryDirectory = "geometry/";
+const std::string scenarioDirectory = "../scenarios/";
+const std::string geometryDirectory = "../geometry/";
 const std::string lineDirectory = "lines/";
 
 int main(int argc, char *argv[]) {
@@ -53,6 +53,7 @@ int main(int argc, char *argv[]) {
     bool traceStreamlines = false, traceStreaklines = false, tracePathlines = false;
     std::vector<rvec3> particleSeedingLocations;
     bool dataIsUpToDate = true;
+    bool shallWriteOutput = true;
 
     int imax, jmax, kmax, itermax;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
@@ -60,7 +61,7 @@ int main(int argc, char *argv[]) {
     bool useTemperature = true;
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename;
 
-    scenarioFilename = outputDirectory + "driven-cavity.dat";
+    scenarioFilename = scenarioDirectory + "driven_cavity.dat";
     if (argc > 1) {
         scenarioFilename = scenarioDirectory + argv[1] + ".dat";
     }
@@ -117,8 +118,10 @@ int main(int argc, char *argv[]) {
 
     auto startTime = std::chrono::system_clock::now();
 
-    netCdfWriter.openFile(outputFilename, imax, jmax, kmax, dx, dy, dz, xOrigin, yOrigin, zOrigin);
-    netCdfWriter.writeTimestep(0, t, U, V, W, P, T, Flag);
+    if (shallWriteOutput) {
+        netCdfWriter.openFile(outputFilename, imax, jmax, kmax, dx, dy, dz, xOrigin, yOrigin, zOrigin);
+        netCdfWriter.writeTimestep(0, t, U, V, W, P, T, Flag);
+    }
     cfdSolver->initialize(scenarioName, Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T, Flag);
 
@@ -142,11 +145,13 @@ int main(int argc, char *argv[]) {
         tWrite += dt;
         n++;
         if (tWrite - dtWrite > 0) {
-            if (!dataIsUpToDate) {
-                cfdSolver->getDataForOutput(U, V, W, P, T);
-                dataIsUpToDate = true;
+            if (shallWriteOutput) {
+                if (!dataIsUpToDate) {
+                    cfdSolver->getDataForOutput(U, V, W, P, T);
+                    dataIsUpToDate = true;
+                }
+                netCdfWriter.writeTimestep(n, t, U, V, W, P, T, Flag);
             }
-            netCdfWriter.writeTimestep(n, t, U, V, W, P, T, Flag);
             progressBar.printOutput(n, t, 50);
             tWrite -= dtWrite;
         }
@@ -183,7 +188,7 @@ int main(int argc, char *argv[]) {
 
     auto endTime = std::chrono::system_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-    std::cout << "System time elapsed: " << (elapsedTime.count() * 1e-6) << std::endl << "s" << std::endl;
+    std::cout << "System time elapsed: " << (elapsedTime.count() * 1e-6) << "s" << std::endl;
 
     delete cfdSolver;
     delete[] U;

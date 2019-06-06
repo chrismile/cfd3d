@@ -7,9 +7,16 @@ geometry	none
 #--------------------------------------------
 #            Size of the domain             
 #--------------------------------------------
-xlength		1
-ylength		1
-zlength		1
+xLength		1
+yLength		1
+zLength		1
+
+#--------------------------------------------
+#         Bottom lower left corner
+#--------------------------------------------
+xOrigin    0
+yOrigin    0
+zOrigin    0
 
 #--------------------------------------------
 #             Number of cells

@@ -42,12 +42,21 @@ bool NetCdfWriter::openFile(const std::string &filename,
     this->yOrigin = yOrigin;
     this->zOrigin = zOrigin;
 
+    // Another file still open?
+    if (isFileOpen) {
+        delete[] centerCellU;
+        delete[] centerCellV;
+        delete[] centerCellW;
+        nc_close(ncid);
+    }
+
     // Open the NetCDF file for reading
     int status = nc_create(filename.c_str(), NC_NETCDF4, &ncid);
     if (status != 0) {
         std::cerr << "ERROR in loadNetCdfFile: File \"" << filename << "\" couldn't be opened!" << std::endl;
         return false;
     }
+    isFileOpen = true;
 
     // Create dimensions
     int timeDim, xDim, yDim, zDim;
@@ -66,12 +75,14 @@ bool NetCdfWriter::openFile(const std::string &filename,
     nc_def_var(ncid, "z", NC_REAL, 1, &yDim, &yVar);
 
     // Define the domain variables. The fastest changing index is on the right (C/C++ syntax).
-    int dims3D[] = {timeDim, xDim, yDim, zDim};
-    nc_def_var(ncid, "U", NC_REAL, 4, dims3D, &UVar);
-    nc_def_var(ncid, "V", NC_REAL, 4, dims3D, &VVar);
-    nc_def_var(ncid, "W", NC_REAL, 4, dims3D, &WVar);
-    nc_def_var(ncid, "P", NC_REAL, 4, dims3D, &PVar);
-    nc_def_var(ncid, "T", NC_REAL, 4, dims3D, &TVar);
+    int dimsTimeIndependent3D[] = {xDim, yDim, zDim};
+    int dimsTimeDependent3D[] = {timeDim, xDim, yDim, zDim};
+    nc_def_var(ncid, "Geometry", NC_UBYTE, 3, dimsTimeIndependent3D, &geometryVar);
+    nc_def_var(ncid, "U", NC_REAL, 4, dimsTimeDependent3D, &UVar);
+    nc_def_var(ncid, "V", NC_REAL, 4, dimsTimeDependent3D, &VVar);
+    nc_def_var(ncid, "W", NC_REAL, 4, dimsTimeDependent3D, &WVar);
+    nc_def_var(ncid, "P", NC_REAL, 4, dimsTimeDependent3D, &PVar);
+    nc_def_var(ncid, "T", NC_REAL, 4, dimsTimeDependent3D, &TVar);
 
     // Write the grid cell centers to the x, y and z variables.
     float gridPosition = xOrigin + Real(0.5) * dx;
@@ -125,10 +136,12 @@ void NetCdfWriter::writeTimeDependentVariable3D_Normal(
 }
 
 NetCdfWriter::~NetCdfWriter() {
-    delete[] centerCellU;
-    delete[] centerCellV;
-    delete[] centerCellW;
-    nc_close(ncid);
+    if (isFileOpen) {
+        delete[] centerCellU;
+        delete[] centerCellV;
+        delete[] centerCellW;
+        nc_close(ncid);
+    }
 }
 
 void NetCdfWriter::ncPutAttributeText(int varid, const std::string &name, const std::string &value) {
@@ -138,12 +151,12 @@ void NetCdfWriter::ncPutAttributeText(int varid, const std::string &name, const 
 void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T,
         FlagType *Flag) {
     if (timeStepNumber == 0) {
-        unsigned char *geometryData = new unsigned char[imax*jmax*kmax];
+        uint8_t *geometryData = new uint8_t[imax*jmax*kmax];
         #pragma omp parallel for
-        for (int i = 1; i <= imax; i++) {
-            for (int j = 1; j <= jmax; j++) {
-                for (int k = 1; k <= kmax; k++) {
-                    geometryData[i*jmax*kmax + j*kmax + k] = isFluid(Flag[IDXFLAG(i,j,k)]) ? 1 : 0;
+        for (int i = 0; i < imax; i++) {
+            for (int j = 0; j < jmax; j++) {
+                for (int k = 0; k < kmax; k++) {
+                    geometryData[i*jmax*kmax + j*kmax + k] = isFluid(Flag[IDXFLAG(i+1,j+1,k+1)]) ? 1 : 0;
                 }
             }
         }
@@ -152,12 +165,12 @@ void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V
     }
 
     #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
-                centerCellU[i*jmax*kmax + j*kmax + k] = (U[IDXU(i,j,k)] + U[IDXU(i-1,j,k)]) / Real(2.0);
-                centerCellV[i*jmax*kmax + j*kmax + k] = (V[IDXV(i,j,k)] + V[IDXV(i,j-1,k)]) / Real(2.0);
-                centerCellW[i*jmax*kmax + j*kmax + k] = (W[IDXW(i,j,k)] + W[IDXW(i,j,k-1)]) / Real(2.0);
+    for (int i = 0; i < imax; i++) {
+        for (int j = 0; j < jmax; j++) {
+            for (int k = 0; k < kmax; k++) {
+                centerCellU[i*jmax*kmax + j*kmax + k] = (U[IDXU(i+1,j+1,k+1)] + U[IDXU(i,j+1,k+1)]) / Real(2.0);
+                centerCellV[i*jmax*kmax + j*kmax + k] = (V[IDXV(i+1,j+1,k+1)] + V[IDXV(i+1,j,k+1)]) / Real(2.0);
+                centerCellW[i*jmax*kmax + j*kmax + k] = (W[IDXW(i+1,j+1,k+1)] + W[IDXW(i+1,j+1,k)]) / Real(2.0);
             }
         }
     }
@@ -170,4 +183,6 @@ void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V
     writeTimeDependentVariable3D_Normal(timeStepNumber, WVar, jmax, kmax, centerCellW);
     writeTimeDependentVariable3D_Staggered(timeStepNumber, PVar, jmax+2, kmax+2, P);
     writeTimeDependentVariable3D_Staggered(timeStepNumber, TVar, jmax+2, kmax+2, T);
+
+    //nc_sync(ncid);
 }
