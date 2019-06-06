@@ -44,12 +44,14 @@ typedef unsigned int FlagType;
  */
 #ifdef REAL_FLOAT
 typedef float Real;
+#define stringToReal std::stof
 #define nc_put_vara_real nc_put_vara_float
 #define nc_put_var1_real nc_put_var1_float
 #define NC_REAL 5
 #endif
 #ifdef REAL_DOUBLE
 typedef double Real;
+#define stringToReal std::stod
 #define nc_put_vara_real nc_put_vara_double
 #define nc_put_var1_real nc_put_var1_double
 #define NC_REAL 6

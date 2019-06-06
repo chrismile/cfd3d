@@ -65,9 +65,11 @@ int main(int argc, char *argv[]) {
         scenarioFilename = scenarioDirectory + argv[1] + ".dat";
     }
 
-    readScenarioConfigurationFromFile(scenarioFilename, scenarioName, geometryName,
+    readScenarioConfigurationFromFile(
+            scenarioFilename, scenarioName, geometryName,
             tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
-            Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
+            UI, VI, WI, PI, TI, GX, GY, GZ,
+            Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz);
     rvec3 gridOrigin = rvec3(xOrigin, yOrigin, zOrigin);
     rvec3 gridSize = rvec3(xLength, yLength, zLength);

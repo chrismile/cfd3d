@@ -45,6 +45,14 @@
  * @param xOrigin The origin of the interior domain in world space (x coordinate).
  * @param yOrigin The origin of the interior domain in world space (y coordinate).
  * @param zOrigin The origin of the interior domain in world space (z coordinate).
+ * @param UI The initialization value for U.
+ * @param VI The initialization value for V.
+ * @param WI The initialization value for W.
+ * @param PI The initialization value for P.
+ * @param TI The initialization value for T.
+ * @param GX The gravity in x direction.
+ * @param GY The gravity in y direction.
+ * @param GZ The gravity in z direction.
  * @param Re The Reynolds number used for the simulation.
  * @param Pr The Prandtl number used for the simulation.
  * @param omg The over-relaxation factor of the SOR solver.
@@ -55,9 +63,6 @@
  * @param dt If tau > 0: The constant time step to use for simulating. Otherwise, dt is overwritten each iteration.
  * @param tau Safety factor \in (0,1] for the maximum time step computation. If tau < 0, the passed value of dt is
  * used as a constant time step.
- * @param GX The gravity in x direction.
- * @param GY The gravity in y direction.
- * @param GZ The gravity in z direction.
  * @param useTemperature Whether the temperature should also be simulated.
  * @param T_h The temperature at boundary cells with the hot temperature flag.
  * @param T_c The temperature at boundary cells with the cold temperature flag.
@@ -78,8 +83,9 @@ void readScenarioConfigurationFromFile(
         const std::string &scenarioFilename, std::string &scenarioName, std::string &geometryName,
         Real &tEnd, Real &dtWrite, Real &xLength, Real &yLength, Real &zLength,
         Real &xOrigin, Real &yOrigin, Real &zOrigin,
+        Real &UI, Real &VI, Real &WI, Real &PI, Real &TI, Real &GX, Real &GY, Real &GZ,
         Real &Re, Real &Pr, Real &omg, Real &eps, int &itermax, Real &alpha, Real &beta, Real &dt, Real &tau,
-        Real &GX, Real &GY, Real &GZ, bool &useTemperature, Real &T_h, Real &T_c,
+        bool &useTemperature, Real &T_h, Real &T_c,
         int &imax, int &jmax, int &kmax, Real &dx, Real &dy, Real &dz);
 
 #endif //CFD3D_SCENARIOFILE_HPP
