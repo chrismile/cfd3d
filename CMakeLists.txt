@@ -1,13 +1,28 @@
 cmake_minimum_required (VERSION 3.8)
 project (cfd3d)
+option(USE_CUDA "USE_CUDA" OFF)
+option(USE_SYCL "USE_SYCL" OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 #MESSAGE(STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
 set (CMAKE_CXX_STANDARD 11)
 
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.c)
-add_executable(cfd3d ${SOURCES})
+file(GLOB_RECURSE CUDA_SOURCES src/*.cu)
 include_directories(src)
+
+if (NOT USE_SYCL)
+    list(REMOVE_ITEM SOURCES src/CfdSolver/Sycl/*.cpp)
+endif()
+
+if (USE_CUDA)
+    # For more details see https://devblogs.nvidia.com/building-cuda-applications-cmake/
+    enable_language(CUDA)
+    set_target_properties(cfd3d PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    add_executable(cfd3d ${SOURCES} ${CUDA_SOURCES})
+else()
+    add_executable(cfd3d ${SOURCES})
+endif()
 
 #make VERBOSE=1
 
@@ -22,7 +37,7 @@ include_directories(${NETCDF_INCLUDES})
 target_link_libraries(cfd3d ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${NETCDF_LIBRARIES})
 
 if(OPENMP_FOUND)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
