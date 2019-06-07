@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
     }
 
     auto endTime = std::chrono::system_clock::now();
-    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
     std::cout << "System time elapsed: " << (elapsedTime.count() * 1e-6) << "s" << std::endl;
 
     delete cfdSolver;
