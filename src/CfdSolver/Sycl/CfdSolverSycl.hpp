@@ -35,7 +35,7 @@
 class CfdSolverSycl : public CfdSolver {
 public:
     /**
-     * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
+     * Initializes the solver.
      * @param scenarioName The name of the scenario as a short string.
      * @param Re The Reynolds number used for the simulation.
      * @param Pr The Prandtl number used for the simulation.
@@ -71,6 +71,24 @@ public:
             Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
             Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag);
+
+    /**
+     * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
+     * This needs to be done in the constructor of the SYCL solver, as cl::sycl::buffer doesn't have a default
+     * constructor.
+     * @param imax Number of cells in x direction inside of the domain.
+     * @param jmax Number of cells in y direction inside of the domain.
+     * @param kmax Number of cells in z direction inside of the domain.
+     * @param U The velocities in x direction.
+     * @param V The velocities in y direction.
+     * @param W The velocities in z direction.
+     * @param P The pressure values.
+     * @param T The temperature values.
+     * @param Flag The flag values (@see Flag.hpp for more information).
+     */
+    CfdSolverSycl(
+        int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag);
 
     /**
      * The destructor frees the memory of the internal representations of U, V, W, P, T and Flag.
@@ -140,10 +158,11 @@ private:
     int itermax;
     int imax, jmax, kmax;
     Real dx, dy, dz;
-    Real *U, *V, *W , *P, *T, *T_temp, *F, *G, *H, *RS;
-    FlagType *Flag;
 
-    cl::sycl::buffer<Real, 1> UBuffer;
+    cl::sycl::buffer<Real, 1> UBuffer, VBuffer, WBuffer, PBuffer, TBuffer, T_tempBuffer,
+            FBuffer, GBuffer, HBuffer, RSBuffer;
+    cl::sycl::buffer<unsigned int, 1> FlagBuffer;
+    cl::sycl::queue queue;
 };
 
 

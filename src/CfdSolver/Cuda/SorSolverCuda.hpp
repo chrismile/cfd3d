@@ -26,4 +26,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CfdSolverCuda.hpp"
+#ifndef CFD3D_SORSOLVERCUDA_HPP
+#define CFD3D_SORSOLVERCUDA_HPP
+
+#include "Defines.hpp"
+
+void sorSolverCuda(
+        Real omg, Real eps, int itermax,
+        Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *P, Real *RS, FlagType *Flag);
+
+#endif //CFD3D_SORSOLVERCUDA_HPP

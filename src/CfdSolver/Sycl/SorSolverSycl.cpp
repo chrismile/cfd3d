@@ -30,9 +30,11 @@
 #include "SorSolverSycl.hpp"
 
 void sorSolverSycl(
+        cl::sycl::queue &queue,
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        Real *P, Real *RS, FlagType *Flag) {
+        cl::sycl::buffer<Real, 1> &P, cl::sycl::buffer<Real, 1> &RS,
+        cl::sycl::buffer<unsigned int, 1> &Flag) {
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {

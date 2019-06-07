@@ -31,6 +31,7 @@
 #include <CL/sycl.hpp>
 
 using RwAccReal = cl::sycl::accessor<Real, 1, cl::sycl::access::mode::read_write, cl::sycl::access::target::global_buffer>;
-using ReadAccUint = accessor<unsigned int, 1, cl::sycl::access::mode::read_write, access::target::global_buffer>;
+using ReadAccReal = cl::sycl::accessor<Real, 1, cl::sycl::access::mode::read_write, cl::sycl::access::target::global_buffer>;
+using ReadAccUint = cl::sycl::accessor<unsigned int, 1, cl::sycl::access::mode::read_write, cl::sycl::access::target::global_buffer>;
 
 #endif //CFD3D_SYCLDEFINES_HPP

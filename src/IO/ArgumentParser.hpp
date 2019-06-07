@@ -26,32 +26,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_BOUNDARYVALUESSYCL_HPP
-#define CFD3D_BOUNDARYVALUESSYCL_HPP
+#ifndef CFD3D_ARGUMENTPARSER_HPP
+#define CFD3D_ARGUMENTPARSER_HPP
 
 #include <string>
-#include "Defines.hpp"
-#include "SyclDefines.hpp"
 
 /**
- * Sets the boundary condition values of U, V, W and T using the Flag array.
+ * Parses the command line arguments passed to the program-
+ * @param argc The number of arguments.
+ * @param argv The arguments.
+ * @param scenarioName The parsed scenario name to use.
+ * @param solverName The passed solver name to use.
  */
-void setBoundaryValuesSycl(
-        cl::sycl::queue &queue,
-        Real T_h, Real T_c,
-        int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
-        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &T,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
+void parseArguments(int argc, char *argv[], std::string &scenarioName, std::string &solverName);
 
-/**
- * Sets special boundary conditions (typically something like inflow) specific to the different scenarios.
- */
-void setBoundaryValuesScenarioSpecificSycl(
-        cl::sycl::queue &queue,
-        const std::string &scenarioName,
-        int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V, cl::sycl::buffer<Real, 1> &W,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
-
-#endif //CFD3D_BOUNDARYVALUESSYCL_HPP
+#endif //CFD3D_ARGUMENTPARSER_HPP

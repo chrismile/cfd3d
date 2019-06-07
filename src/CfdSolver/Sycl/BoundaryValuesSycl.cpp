@@ -29,17 +29,20 @@
 #include "BoundaryValuesSycl.hpp"
 
 void setBoundaryValuesSycl(
+        cl::sycl::queue &queue,
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real *T,
-        FlagType *Flag) {
+        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
+        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &T,
+        cl::sycl::buffer<unsigned int, 1> &Flag) {
     // TODO: Implement.
 }
 
 void setBoundaryValuesScenarioSpecificSycl(
+        cl::sycl::queue &queue,
         const std::string &scenarioName,
         int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W,
-        FlagType *Flag) {
+        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V, cl::sycl::buffer<Real, 1> &W,
+        cl::sycl::buffer<unsigned int, 1> &Flag) {
     // TODO: Implement.
 }

@@ -26,32 +26,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_BOUNDARYVALUESSYCL_HPP
-#define CFD3D_BOUNDARYVALUESSYCL_HPP
+#include <iostream>
+#include "SorSolverCuda.hpp"
 
-#include <string>
-#include "Defines.hpp"
-#include "SyclDefines.hpp"
+void sorSolverCuda(
+        Real omg, Real eps, int itermax,
+        Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *P, Real *RS, FlagType *Flag) {
+    Real residual = 1e9;
+    int it = 0;
+    while (it < itermax && residual > eps) {
+        // TODO: Implement.
 
-/**
- * Sets the boundary condition values of U, V, W and T using the Flag array.
- */
-void setBoundaryValuesSycl(
-        cl::sycl::queue &queue,
-        Real T_h, Real T_c,
-        int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
-        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &T,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
+        it++;
+    }
 
-/**
- * Sets special boundary conditions (typically something like inflow) specific to the different scenarios.
- */
-void setBoundaryValuesScenarioSpecificSycl(
-        cl::sycl::queue &queue,
-        const std::string &scenarioName,
-        int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V, cl::sycl::buffer<Real, 1> &W,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
-
-#endif //CFD3D_BOUNDARYVALUESSYCL_HPP
+    if (residual > eps && it == itermax) {
+        std::cerr << "\nSOR solver reached maximum number of iterations without converging." << std::endl;
+    }
+}

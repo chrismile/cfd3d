@@ -30,10 +30,13 @@
 #define CFD3D_SORSOLVERSYCL_HPP
 
 #include "Defines.hpp"
+#include "SyclDefines.hpp"
 
 void sorSolverSycl(
+        cl::sycl::queue &queue,
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        Real *P, Real *RS, FlagType *Flag);
+        cl::sycl::buffer<Real, 1> &P, cl::sycl::buffer<Real, 1> &RS,
+        cl::sycl::buffer<unsigned int, 1> &Flag);
 
 #endif //CFD3D_SORSOLVERSYCL_HPP

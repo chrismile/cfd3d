@@ -32,7 +32,14 @@
 #include "CfdSolver/Flag.hpp"
 #include "CfdSolver/CfdSolver.hpp"
 #include "CfdSolver/Cpp/CfdSolverCpp.hpp"
+#ifdef USE_CUDA
+#include "CfdSolver/Cuda/CfdSolverCuda.hpp"
+#endif
+#ifdef USE_SYCL
+#include "CfdSolver/Sycl/CfdSolverSycl.hpp"
+#endif
 #include "IO/IOUtils.hpp"
+#include "IO/ArgumentParser.hpp"
 #include "IO/ProgressBar.hpp"
 #include "IO/ScenarioFile.hpp"
 #include "IO/NetCdfWriter.hpp"
@@ -47,7 +54,7 @@ const std::string geometryDirectory = "../geometry/";
 const std::string lineDirectory = "lines/";
 
 int main(int argc, char *argv[]) {
-    CfdSolver *cfdSolver = new CfdSolverCpp();
+    CfdSolver *cfdSolver;
     ProgressBar progressBar;
     NetCdfWriter netCdfWriter;
     bool traceStreamlines = false, traceStreaklines = false, tracePathlines = false;
@@ -59,12 +66,9 @@ int main(int argc, char *argv[]) {
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
             dt, dx, dy, dz, alpha, omg, tau, eps, beta, T_h, T_c;
     bool useTemperature = true;
-    std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename;
-
-    scenarioFilename = scenarioDirectory + "driven_cavity.dat";
-    if (argc > 1) {
-        scenarioFilename = scenarioDirectory + argv[1] + ".dat";
-    }
+    std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
+    parseArguments(argc, argv, scenarioName, solverName);
+    scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
     readScenarioConfigurationFromFile(
             scenarioFilename, scenarioName, geometryName,
@@ -121,6 +125,24 @@ int main(int argc, char *argv[]) {
     if (shallWriteOutput) {
         netCdfWriter.openFile(outputFilename, imax, jmax, kmax, dx, dy, dz, xOrigin, yOrigin, zOrigin);
         netCdfWriter.writeTimestep(0, t, U, V, W, P, T, Flag);
+    }
+
+
+    if (solverName == "cpp") {
+        cfdSolver = new CfdSolverCpp();
+    }
+#ifdef USE_CUDA
+        else if (solverName == "cuda") {
+        cfdSolver = new CfdSolverCuda();
+    }
+#endif
+#ifdef USE_SYCL
+        else if (solverName == "sycl") {
+        cfdSolver = new CfdSolverSycl(imax, jmax, kmax, U, V, W, P, T, Flag);
+    }
+#endif
+    else {
+        std::cerr << "Fatal error: Unsupported solver name \"" << solverName << "\"." << std::endl;
     }
     cfdSolver->initialize(scenarioName, Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T, Flag);

@@ -3,7 +3,7 @@
 A CFD solver using the incompressible Navier-Stokes equations in 3D.
 The solver is able to use either OpenMP or CUDA.
 
-## Building and running the programm
+## Building the programm
 
 On Ubuntu 18.04 for example, you can install all necessary packages with this command:
 
@@ -33,7 +33,7 @@ cmake .. -DUSE_CUDA=ON
 For SYCL support using the patched LLVM compiler from Intel (for more details see https://github.com/intel/llvm/blob/sycl/sycl/doc/GetStartedWithSYCLCompiler.md):
 
 ```
-CXX=$SYCL_HOME/build/bin/clang++ CXXFLAGS="-fsycl -lOpenCL" cmake .. -DUSE_SYCL=ON
+CXX=$SYCL_HOME/build/bin/clang++ CXXFLAGS="-fsycl" LDFLAGS="-lOpenCL" cmake .. -DUSE_SYCL=ON
 ```
 
 For SYCL support using hipSYCL with the CUDA backend (for more details see https://github.com/illuhad/hipSYCL):
@@ -41,3 +41,18 @@ For SYCL support using hipSYCL with the CUDA backend (for more details see https
 ```
 CXX=syclcc-clang CXXFLAGS="--hipsycl-platform=cuda" cmake .. -DUSE_SYCL=ON
 ```
+
+## Running the program
+
+To start the program, one can choose one of the two commands below.
+
+```
+./sim <scenario-name>
+./sim --solver <solver-name> <scenario-name>
+```
+
+The scenario name is the name of one of the scenario files in the 'scenario/' folder (without the file ending).
+
+The solver name is either 'cpp' for the C++ OpenMP-accelerated solver, 'cuda' for the NVIDIA CUDA solver, or 'sycl' for
+the SYCL solver. Please note that for the CUDA solver and the SYCL solver, the program needs to be built with the
+necessary flags.

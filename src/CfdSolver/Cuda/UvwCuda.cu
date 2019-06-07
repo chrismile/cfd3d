@@ -26,32 +26,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_BOUNDARYVALUESSYCL_HPP
-#define CFD3D_BOUNDARYVALUESSYCL_HPP
+#include "UvwCuda.hpp"
 
-#include <string>
-#include "Defines.hpp"
-#include "SyclDefines.hpp"
+void calculateFghCuda(
+        Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
+        Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
+    // TODO
+}
 
-/**
- * Sets the boundary condition values of U, V, W and T using the Flag array.
- */
-void setBoundaryValuesSycl(
-        cl::sycl::queue &queue,
-        Real T_h, Real T_c,
+void calculateRsCuda(
+        Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *F, Real *G, Real *H, Real *RS) {
+    // TODO
+}
+
+void calculateDtCuda(
+        Real Re, Real Pr, Real tau,
+        Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W,
+        bool useTemperature) {
+    // TODO
+}
+
+void calculateUvwCuda(
+        Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
+    // TODO
+}
+
+void calculateTemperatureCuda(
+        Real Re, Real Pr, Real alpha,
+        Real dt, Real dx, Real dy, Real dz,
         int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
-        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &T,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
-
-/**
- * Sets special boundary conditions (typically something like inflow) specific to the different scenarios.
- */
-void setBoundaryValuesScenarioSpecificSycl(
-        cl::sycl::queue &queue,
-        const std::string &scenarioName,
-        int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V, cl::sycl::buffer<Real, 1> &W,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
-
-#endif //CFD3D_BOUNDARYVALUESSYCL_HPP
+        Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
+    // TODO
+}

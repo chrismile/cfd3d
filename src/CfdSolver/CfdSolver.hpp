@@ -78,6 +78,8 @@ public:
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
             Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag)=0;
 
+    virtual ~CfdSolver() {}
+
 
     /**
      * Sets the boundary condition values of U, V, W and T using the Flag array.
