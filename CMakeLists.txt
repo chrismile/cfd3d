@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.8)
 project (cfd3d)
 option(USE_CUDA "USE_CUDA" OFF)
+option(USE_SYCL "USE_SYCL" OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 #MESSAGE(STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 
@@ -9,6 +10,13 @@ set (CMAKE_CXX_STANDARD 11)
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.c)
 file(GLOB_RECURSE CUDA_SOURCES src/*.cu)
 include_directories(src)
+
+if (NOT USE_SYCL)
+    list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/CfdSolver/Sycl/BoundaryValuesSycl.cpp)
+    list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/CfdSolver/Sycl/CfdSolverSycl.cpp)
+    list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/CfdSolver/Sycl/SorSolverSycl.cpp)
+    list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/CfdSolver/Sycl/UvwSycl.cpp)
+endif()
 
 if (USE_CUDA=ON)
     # For more details see https://devblogs.nvidia.com/building-cuda-applications-cmake/
