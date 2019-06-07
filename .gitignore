@@ -55,7 +55,8 @@ docs/html/*
 docs/latex/*
 
 /Debug/
-/build*
+build*/
+output*/
 Data/Models/Ship*
 
 # CLion
