@@ -30,6 +30,9 @@
 #include "GeometryFile.hpp"
 #include "GeometryCreator.hpp"
 
+/**
+ * For more details regarding these values, please see docs/FlagsBitfield.pdf.
+ */
 enum GeometryValues {
     G_NO_SLIP, G_FREE_SLIP, G_OUTFLOW, G_INFLOW, G_FLUID,
     G_NO_SLIP_HOT, G_FREE_SLIP_HOT, G_INFLOW_HOT,

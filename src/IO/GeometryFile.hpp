@@ -48,12 +48,11 @@ std::vector<uint32_t> loadValuesFromGeometryFile(
 /**
  * Stores the passed unsigned integer values in a binary geometry file (.bingeo).
  * For a mapping from these values to Flag entries, @see docs/BitfieldFlags.pdf.
- * @param geometryFilename The filename of the .bingeo file to load.
+ * @param geometryFilename The filename of the .bingeo file to write.
  * @param width The width of the domain (including the boundary cells).
  * @param width The width of the domain (including the boundary cells).
  * @param height The height of the domain (including the boundary cells).
  * @param depth The depth of the domain (including the boundary cells).
- * @return The unsigned integer values stored in the file.
  */
 void storeValuesInGeometryFile(
         const std::string &geometryFilename, const std::vector<uint32_t> &values, int width, int height, int depth);
