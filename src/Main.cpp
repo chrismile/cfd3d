@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <boost/filesystem.hpp>
 #include "CfdSolver/Init.hpp"
 #include "CfdSolver/Flag.hpp"
 #include "CfdSolver/CfdSolver.hpp"
@@ -44,6 +45,7 @@
 #include "IO/ScenarioFile.hpp"
 #include "IO/NetCdfWriter.hpp"
 #include "IO/TrajectoriesFile.hpp"
+#include "IO/GeometryCreator.hpp"
 #include "ParticleTracer/StreamlineTracer.hpp"
 #include "ParticleTracer/StreaklineTracer.hpp"
 #include "ParticleTracer/PathlineTracer.hpp"
@@ -115,6 +117,9 @@ int main(int argc, char *argv[]) {
     if (geometryName == "none") {
         initFlagNoObstacles(scenarioName, imax, jmax, kmax, Flag);
     } else {
+        if (!boost::filesystem::exists(geometryFilename)) {
+            generateScenario(scenarioName, geometryFilename, imax, jmax, kmax);
+        }
         initFlagFromGeometryFile(scenarioName, geometryFilename, imax, jmax, kmax, Flag);
     }
     initArrays(UI, VI, WI, PI, TI, imax, jmax, kmax, U, V, W, P, T, Flag);
