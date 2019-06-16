@@ -59,6 +59,15 @@ bool NetCdfWriter::openFile(const std::string &filename,
     isFileOpen = true;
     writeIndex = 0;
 
+    ncPutAttributeText(NC_GLOBAL, "Conventions", "CF-1.5");
+    ncPutAttributeText(NC_GLOBAL, "title", "Fluid simulation in 3D");
+    ncPutAttributeText(NC_GLOBAL, "history", "cfd3d");
+    ncPutAttributeText(NC_GLOBAL, "institution", "Technische Universitaet Muenchen, Department of Informatics");
+    ncPutAttributeText(NC_GLOBAL, "source", "Simulation using incompressible Navier-Stokes equations.");
+    ncPutAttributeText(NC_GLOBAL, "references", "https://gitlab.lrz.de/ga42wis/cfd3d");
+    ncPutAttributeText(NC_GLOBAL, "comment", "cfd3d was released under the 3-clause BSD license.");
+
+
     // Create dimensions
     int timeDim, xDim, yDim, zDim;
     nc_def_dim(ncid, "time", NC_UNLIMITED, &timeDim);
@@ -74,6 +83,13 @@ bool NetCdfWriter::openFile(const std::string &filename,
     nc_def_var(ncid, "x", NC_REAL, 1, &xDim, &xVar);
     nc_def_var(ncid, "y", NC_REAL, 1, &yDim, &yVar);
     nc_def_var(ncid, "z", NC_REAL, 1, &yDim, &zVar);
+    ncPutAttributeText(xVar, "coordinate_type", "Cartesian X");
+    ncPutAttributeText(yVar, "coordinate_type", "Cartesian Y");
+    ncPutAttributeText(zVar, "coordinate_type", "Cartesian Z");
+    ncPutAttributeText(xVar, "axis", "X");
+    ncPutAttributeText(yVar, "axis", "Y");
+    ncPutAttributeText(zVar, "axis", "Z");
+    ncPutAttributeText(timeVar, "axis", "T");
 
     // Define the domain variables. The fastest changing index is on the right (C/C++ syntax).
     int dimsTimeIndependent3D[] = {xDim, yDim, zDim};
