@@ -67,8 +67,8 @@ public:
     void writeTimestep(int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
 
 private:
-    void writeTimeDependentVariable3D_Staggered(int timeStepNumber, int ncVar, int jsize, int ksize, Real *values);
-    void writeTimeDependentVariable3D_Normal(int timeStepNumber, int ncVar, int jsize, int ksize, Real *values);
+    void writeTimeDependentVariable3D_Staggered(int ncVar, int jsize, int ksize, Real *values);
+    void writeTimeDependentVariable3D_Normal(int ncVar, int jsize, int ksize, Real *values);
     void ncPutAttributeText(int varid, const std::string &name, const std::string &value);
 
     int imax, jmax, kmax;
@@ -79,6 +79,7 @@ private:
 
     bool isFileOpen = false;
     int ncid;
+    size_t writeIndex;
 
     // NetCDF variables
     int timeVar, xVar, yVar, zVar, geometryVar, UVar, VVar, WVar, PVar, TVar;

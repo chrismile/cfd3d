@@ -34,8 +34,8 @@
 /**
  * Makes sure the directory 'outputDirectory' exists.
  * @param outputDirectory The output directory name.
- * @param scenarioName The name of the scenario to simulate.
+ * @param lineDirectory The line directory name.
  */
-void prepareOutputDirectory(const std::string &outputDirectory, const std::string &scenarioName);
+void prepareOutputDirectory(const std::string &outputDirectory, const std::string &lineDirectory);
 
 #endif //CFD3D_IOUTILS_HPP

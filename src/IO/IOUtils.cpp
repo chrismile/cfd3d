@@ -31,11 +31,17 @@
 #include <boost/filesystem.hpp>
 #include "IOUtils.hpp"
 
-void prepareOutputDirectory(const std::string &outputDirectory, const std::string &scenarioName) {
+void prepareOutputDirectory(const std::string &outputDirectory, const std::string &lineDirectory) {
     // Create the output directory.
     if (!boost::filesystem::exists(outputDirectory)) {
         if (!boost::filesystem::create_directory(outputDirectory)) {
             std::cerr << "Output directory could not be created" << std::endl;
+            exit(1);
+        }
+    }
+    if (!boost::filesystem::exists(lineDirectory)) {
+        if (!boost::filesystem::create_directory(lineDirectory)) {
+            std::cerr << "Line directory could not be created" << std::endl;
             exit(1);
         }
     }

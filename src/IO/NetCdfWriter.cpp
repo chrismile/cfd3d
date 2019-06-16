@@ -51,12 +51,13 @@ bool NetCdfWriter::openFile(const std::string &filename,
     }
 
     // Open the NetCDF file for reading
-    int status = nc_create(filename.c_str(), NC_NETCDF4, &ncid);
+    int status = nc_create(filename.c_str(), NC_NETCDF4 | NC_CLOBBER, &ncid);
     if (status != 0) {
         std::cerr << "ERROR in loadNetCdfFile: File \"" << filename << "\" couldn't be opened!" << std::endl;
         return false;
     }
     isFileOpen = true;
+    writeIndex = 0;
 
     // Create dimensions
     int timeDim, xDim, yDim, zDim;
@@ -72,12 +73,12 @@ bool NetCdfWriter::openFile(const std::string &filename,
 
     nc_def_var(ncid, "x", NC_REAL, 1, &xDim, &xVar);
     nc_def_var(ncid, "y", NC_REAL, 1, &yDim, &yVar);
-    nc_def_var(ncid, "z", NC_REAL, 1, &yDim, &yVar);
+    nc_def_var(ncid, "z", NC_REAL, 1, &yDim, &zVar);
 
     // Define the domain variables. The fastest changing index is on the right (C/C++ syntax).
     int dimsTimeIndependent3D[] = {xDim, yDim, zDim};
     int dimsTimeDependent3D[] = {timeDim, xDim, yDim, zDim};
-    nc_def_var(ncid, "geometry", NC_UBYTE, 3, dimsTimeIndependent3D, &geometryVar);
+    nc_def_var(ncid, "geometry", NC_REAL, 3, dimsTimeIndependent3D, &geometryVar);
     nc_def_var(ncid, "U", NC_REAL, 4, dimsTimeDependent3D, &UVar);
     nc_def_var(ncid, "V", NC_REAL, 4, dimsTimeDependent3D, &VVar);
     nc_def_var(ncid, "W", NC_REAL, 4, dimsTimeDependent3D, &WVar);
@@ -109,9 +110,8 @@ bool NetCdfWriter::openFile(const std::string &filename,
     return true;
 }
 
-void NetCdfWriter::writeTimeDependentVariable3D_Staggered(
-        int timeStepNumber, int ncVar, int jsize, int ksize, Real *values) {
-    size_t start[] = {(size_t)timeStepNumber, 0, 0, 0};
+void NetCdfWriter::writeTimeDependentVariable3D_Staggered(int ncVar, int jsize, int ksize, Real *values) {
+    size_t start[] = {writeIndex, 0, 0, 0};
     size_t count[] = {1, 1, 1, (size_t)kmax};
     for (int i = 1; i <= imax; i++) {
         start[1] = i-1;
@@ -122,9 +122,8 @@ void NetCdfWriter::writeTimeDependentVariable3D_Staggered(
     }
 }
 
-void NetCdfWriter::writeTimeDependentVariable3D_Normal(
-        int timeStepNumber, int ncVar, int jsize, int ksize, Real *values) {
-    size_t start[] = {(size_t)timeStepNumber, 0, 0, 0};
+void NetCdfWriter::writeTimeDependentVariable3D_Normal(int ncVar, int jsize, int ksize, Real *values) {
+    size_t start[] = {writeIndex, 0, 0, 0};
     size_t count[] = {1, 1, 1, (size_t)kmax};
     for (int i = 0; i < imax; i++) {
         start[1] = i;
@@ -151,7 +150,7 @@ void NetCdfWriter::ncPutAttributeText(int varid, const std::string &name, const 
 void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T,
         FlagType *Flag) {
     if (timeStepNumber == 0) {
-        uint8_t *geometryData = new uint8_t[imax*jmax*kmax];
+        Real *geometryData = new Real[imax*jmax*kmax];
         #pragma omp parallel for
         for (int i = 0; i < imax; i++) {
             for (int j = 0; j < jmax; j++) {
@@ -160,7 +159,7 @@ void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V
                 }
             }
         }
-        nc_put_var_ubyte(ncid, geometryVar, geometryData);
+        nc_put_var_real(ncid, geometryVar, geometryData);
         delete[] geometryData;
     }
 
@@ -176,13 +175,13 @@ void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V
     }
 
     // Write the new time
-    size_t uintTimeStepNumber = timeStepNumber;
-    nc_put_var1_real(ncid, timeVar, &uintTimeStepNumber, &time);
-    writeTimeDependentVariable3D_Normal(timeStepNumber, UVar, jmax, kmax, centerCellU);
-    writeTimeDependentVariable3D_Normal(timeStepNumber, VVar, jmax, kmax, centerCellV);
-    writeTimeDependentVariable3D_Normal(timeStepNumber, WVar, jmax, kmax, centerCellW);
-    writeTimeDependentVariable3D_Staggered(timeStepNumber, PVar, jmax+2, kmax+2, P);
-    writeTimeDependentVariable3D_Staggered(timeStepNumber, TVar, jmax+2, kmax+2, T);
+    nc_put_var1_real(ncid, timeVar, &writeIndex, &time);
+    writeTimeDependentVariable3D_Normal(UVar, jmax, kmax, centerCellU);
+    writeTimeDependentVariable3D_Normal(VVar, jmax, kmax, centerCellV);
+    writeTimeDependentVariable3D_Normal(WVar, jmax, kmax, centerCellW);
+    writeTimeDependentVariable3D_Staggered(PVar, jmax+2, kmax+2, P);
+    writeTimeDependentVariable3D_Staggered(TVar, jmax+2, kmax+2, T);
+    writeIndex++;
 
     //nc_sync(ncid);
 }

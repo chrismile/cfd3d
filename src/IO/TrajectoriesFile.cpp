@@ -56,9 +56,9 @@ bool writeTrajectoriesToObjFile(const std::string &filename, const Trajectories 
         for (size_t i = 0; i < trajectorySize; i++) {
             const glm::vec3 &v = trajectory.positions.at(i);
             file << "v " << std::setprecision(5) << v.x << " " << v.y << " " << v.z << "\n";
-            file << "vt " << std::setprecision(5) << trajectory.attributes.at(0).at(i) << "\n";
+            file << "vt ";// << std::setprecision(5) << trajectory.attributes.at(0).at(i) << "\n";
             for (size_t attributeIndex = 0; attributeIndex < trajectory.attributes.size(); attributeIndex++) {
-                file << std::setprecision(5) << trajectory.attributes.at(0).at(i);
+                file << std::setprecision(5) << trajectory.attributes.at(attributeIndex).at(i);
                 if (attributeIndex != trajectory.attributes.size()-1) {
                     file << " ";
                 }

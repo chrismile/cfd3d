@@ -30,5 +30,40 @@
 
 void initArrays(Real UI, Real VI, Real WI, Real PI, Real TI, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) {
-    // TODO: Implement.
+    #pragma omp parallel for
+    for (int i = 0; i <= imax; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                U[IDXU(i,j,k)] = UI;
+            }
+        }
+    }
+
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                V[IDXV(i,j,k)] = VI;
+            }
+        }
+    }
+
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax; k++) {
+                W[IDXW(i,j,k)] = WI;
+            }
+        }
+    }
+
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                P[IDXP(i,j,k)] = PI;
+                T[IDXT(i,j,k)] = TI;
+            }
+        }
+    }
 }
