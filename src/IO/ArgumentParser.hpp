@@ -36,8 +36,11 @@
  * @param argc The number of arguments.
  * @param argv The arguments.
  * @param scenarioName The parsed scenario name to use.
+ * @param numParticles The number of particles to seed when using a particle tracer.
  * @param solverName The passed solver name to use.
  */
-void parseArguments(int argc, char *argv[], std::string &scenarioName, std::string &solverName);
+void parseArguments(
+        int argc, char *argv[], std::string &scenarioName, std::string &solverName, int &numParticles,
+        bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines);
 
 #endif //CFD3D_ARGUMENTPARSER_HPP

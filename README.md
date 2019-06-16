@@ -44,15 +44,31 @@ CXX=syclcc-clang CXXFLAGS="--hipsycl-platform=cuda" cmake .. -DUSE_SYCL=ON
 
 ## Running the program
 
-To start the program, one can choose one of the two commands below.
+To start the program, the command below can be used.
 
 ```
-./sim <scenario-name>
-./sim --solver <solver-name> <scenario-name>
+./sim --scenario <scenario-name> --solver <solver-name> --tracestreamlines <true-or-false> \
+--tracestreaklines <true-or-false> --tracepathlines <true-or-false> --numparticles <numparticles>
 ```
 
 The scenario name is the name of one of the scenario files in the 'scenario/' folder (without the file ending).
+Here are some examples how to call the program.
+
+```
+./sim --scenario driven_cavity --solver cpp
+./sim --scenario driven_cavity --solver cuda --tracestreamlines true --numparticles 1000
+./sim --scenario natural_convection --solver cuda --tracestreaklines true --numparticles 4000
+./sim --scenario natural_convection --solver cuda --tracepathlines true
+```
 
 The solver name is either 'cpp' for the C++ OpenMP-accelerated solver, 'cuda' for the NVIDIA CUDA solver, or 'sycl' for
 the SYCL solver. Please note that for the CUDA solver and the SYCL solver, the program needs to be built with the
 necessary flags.
+
+The standard values for the arguments are:
+* scenario: driven_cavity
+* solver: cpp
+* tracestreamlines: false
+* tracestreaklines: false
+* tracepathlines: false
+* numparticles: 1000

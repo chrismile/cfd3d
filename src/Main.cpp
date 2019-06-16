@@ -64,12 +64,13 @@ int main(int argc, char *argv[]) {
     bool dataIsUpToDate = true;
     bool shallWriteOutput = true;
 
-    int imax, jmax, kmax, itermax;
+    int imax, jmax, kmax, itermax, numParticles;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
             dt, dx, dy, dz, alpha, omg, tau, eps, beta, T_h, T_c;
     bool useTemperature = true;
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
-    parseArguments(argc, argv, scenarioName, solverName);
+    parseArguments(argc, argv, scenarioName, solverName, numParticles,
+            traceStreamlines, traceStreaklines, tracePathlines);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
     readScenarioConfigurationFromFile(
@@ -83,6 +84,13 @@ int main(int argc, char *argv[]) {
     StreamlineTracer streamlineTracer;
     StreaklineTracer streaklineTracer(dtWrite*0.1); // Tracing frequency multiple of write time step.
     PathlineTracer pathlineTracer;
+    particleSeedingLocations = getParticleSeedingLocationsForScenario(scenarioName, numParticles, gridOrigin, gridSize);
+    if (traceStreaklines) {
+        streaklineTracer.setParticleSeedingLocations(gridOrigin, gridSize, particleSeedingLocations);
+    }
+    if (tracePathlines) {
+        pathlineTracer.setParticleSeedingLocations(gridOrigin, gridSize, particleSeedingLocations);
+    }
 
     if (!useTemperature){
         T_c = 0.0;
@@ -137,12 +145,12 @@ int main(int argc, char *argv[]) {
         cfdSolver = new CfdSolverCpp();
     }
 #ifdef USE_CUDA
-        else if (solverName == "cuda") {
+    else if (solverName == "cuda") {
         cfdSolver = new CfdSolverCuda();
     }
 #endif
 #ifdef USE_SYCL
-        else if (solverName == "sycl") {
+    else if (solverName == "sycl") {
         cfdSolver = new CfdSolverSycl(imax, jmax, kmax, U, V, W, P, T, Flag);
     }
 #endif

@@ -36,3 +36,16 @@ rvec3 integrateParticlePositionEuler(
             particlePosition, gridOrigin, gridSize, imax, jmax, kmax, U, V, W);
     return newPosition;
 }
+
+std::vector<rvec3> getParticleSeedingLocationsForScenario(
+        const std::string &scenarioName, int numParticles, const rvec3 &gridOrigin, const rvec3 &gridSize) {
+    std::vector<rvec3> particleSeedingLocations;
+    if (scenarioName == "driven_cavity") {
+        // Seed along diagonal wall
+        for (int i = 0; i < numParticles; i++) {
+            Real param = (Real(i) + Real(0.5)) / Real(numParticles);
+            particleSeedingLocations.push_back(gridOrigin + param*gridSize);
+        }
+    }
+    return particleSeedingLocations;
+}

@@ -154,4 +154,16 @@ rvec3 integrateParticlePositionEuler(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real *U, Real *V, Real *W, Real dt);
 
+/**
+ * This function returns the particle seeding locations for a special scenario.
+ * This is necessary, as sometimes we might want to seed the particles at inflow walls, sometimes at
+ * @param scenarioName The name of the scenario to get the particle seeding locations for.
+ * @param numParticles The number of particles to seed.
+ * @param gridOrigin The origin of the grid in world coordinates.
+ * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
+ * @return A list of particle seeding locations.
+ */
+std::vector<rvec3> getParticleSeedingLocationsForScenario(
+        const std::string &scenarioName, int numParticles, const rvec3 &gridOrigin, const rvec3 &gridSize);
+
 #endif //CFD3D_PARTICLETRACER_HPP

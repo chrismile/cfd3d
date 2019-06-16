@@ -29,19 +29,27 @@
 #include <cstring>
 #include "ArgumentParser.hpp"
 
-void parseArguments(int argc, char *argv[], std::string &scenarioName, std::string &solverName) {
+void parseArguments(
+        int argc, char *argv[], std::string &scenarioName, std::string &solverName, int &numParticles,
+        bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
     scenarioName = "driven_cavity";
     solverName = "cpp";
+    numParticles = 1000;
 
-    // The scenario name (if passed) is always the last index of argv.
-    if (argc == 2 || argc == 4) {
-        scenarioName = argv[argc-1];
-
-        // Go over all additional command line arguments.
-        for (int i = 1; i < argc-1; i += 2) {
-            if (strcmp(argv[i], "--solver") == 0 && i != argc-1) {
-                solverName = argv[i+1];
-            }
+    // Go over command line arguments.
+    for (int i = 1; i < argc; i += 2) {
+        if (strcmp(argv[i], "--scenario") == 0 && i != argc-1) {
+            scenarioName = argv[i+1];
+        } else if (strcmp(argv[i], "--solver") == 0 && i != argc-1) {
+            solverName = argv[i+1];
+        } else if (strcmp(argv[i], "--numparticles") == 0 && i != argc-1) {
+            numParticles = std::stoi(argv[i+1]);
+        } else if (strcmp(argv[i], "--tracestreamlines") == 0 && i != argc-1) {
+            traceStreamlines = strcmp(argv[i+1], "false") == 0 ? false : true;
+        } else if (strcmp(argv[i], "--tracestreaklines") == 0 && i != argc-1) {
+            traceStreaklines = strcmp(argv[i+1], "false") == 0 ? false : true;
+        } else if (strcmp(argv[i], "--tracepathlines") == 0 && i != argc-1) {
+            tracePathlines = strcmp(argv[i+1], "false") == 0 ? false : true;
         }
     }
 }
