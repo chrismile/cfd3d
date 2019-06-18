@@ -48,26 +48,43 @@ void pushTrajectoryAttributes(
 }
 
 Real getUAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+2))));
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+2))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(0,0,0)))
+            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+2)))) {
+        return 0;
+    }
     return U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)];
 }
 Real getVAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+2))));
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+2))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(0,0,0)))
+            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+2)))) {
+        return 0;
+    }
     return V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)];
 }
 Real getWAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+2,jmax+1))));
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+2,jmax+1))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(0,0,0)))
+            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+2,jmax+2,jmax+1)))) {
+        return 0;
+    }
     return W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)];
+}
+
+rvec3 worldPositionToStaggeredGrid(
+        const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize, int imax, int jmax, int kmax) {
+    return (particlePosition - gridOrigin) / gridSize * rvec3(imax, jmax, kmax) + rvec3(1, 1, 1);
 }
 
 Real trilinearInterpolationU(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real *U) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0, 0.5, 0.5);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(1, 0.5, 0.5);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -85,8 +102,8 @@ Real trilinearInterpolationU(
 Real trilinearInterpolationV(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real *V) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0.5, 0, 0.5);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(0.5, 1, 0.5);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -104,8 +121,8 @@ Real trilinearInterpolationV(
 Real trilinearInterpolationW(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real *W) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0.5, 0.5, 0);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(0.5, 0.5, 1);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -129,48 +146,48 @@ rvec3 getVectorVelocityAt(
     return rvec3(u, v, w);
 }
 
-Real getdUdyAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U, int dy) {
+Real getdUdyAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U, Real dy) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
            && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,jmax+2))));
     return (U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
-            - U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y-1, staggeredGridPosition.z)])/dy;
+            - U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y+1, staggeredGridPosition.z)])/dy;
 }
-Real getdUdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U, int dz) {
+Real getdUdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U, Real dz) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
            && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+1))));
     return (U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
-            - U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z-1)])/dz;
+            - U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z+1)])/dz;
 }
-Real getdVdxAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, int dx) {
+Real getdVdxAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, Real dx) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
            && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,jmax+2))));
     return (V[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
-            - V[IDXU(staggeredGridPosition.x-1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
+            - V[IDXU(staggeredGridPosition.x+1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
 }
-Real getdVdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, int dz) {
+Real getdVdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, Real dz) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
            && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+1))));
     return (V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
-            - V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z-1)])/dz;
+            - V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z+1)])/dz;
 }
-Real getdWdxAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W, int dx) {
+Real getdWdxAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W, Real dx) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
            && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+1))));
     return (W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
-            - W[IDXW(staggeredGridPosition.x-1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
+            - W[IDXW(staggeredGridPosition.x+1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
 }
-Real getdWdyAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W, int dy) {
+Real getdWdyAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W, Real dy) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
            && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+1))));
     return (W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
-            - W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y-1, staggeredGridPosition.z)])/dy;
+            - W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y+1, staggeredGridPosition.z)])/dy;
 }
 
 Real trilinearInterpolation_dUdy(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real dy, Real *U) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0, 0, 0.5);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(1, 1, 0.5);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -187,8 +204,8 @@ Real trilinearInterpolation_dUdy(
 Real trilinearInterpolation_dUdz(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real dz, Real *U) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0, 0.5, 0);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(1, 0.5, 1);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -205,8 +222,8 @@ Real trilinearInterpolation_dUdz(
 Real trilinearInterpolation_dVdx(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real dx, Real *U) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0, 0, 0.5);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(1, 1, 0.5);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -223,8 +240,8 @@ Real trilinearInterpolation_dVdx(
 Real trilinearInterpolation_dVdz(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real dz, Real *U) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0.5, 0, 0);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(0.5, 1, 1);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -241,8 +258,8 @@ Real trilinearInterpolation_dVdz(
 Real trilinearInterpolation_dWdx(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real dx, Real *U) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0, 0.5, 0);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(1, 0.5, 1);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
@@ -259,8 +276,8 @@ Real trilinearInterpolation_dWdx(
 Real trilinearInterpolation_dWdy(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real dy, Real *U) {
-    rvec3 staggeredGridRealPosition = (particlePosition - gridOrigin) / gridSize + rvec3(0, 0.5, 0);
-    glm::ivec3 staggeredGridPosition = glm::ivec3(particlePosition);
+    rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(0.5, 1, 1);
+    glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =

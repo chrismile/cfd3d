@@ -27,7 +27,7 @@
  */
 
 #include "StreamlineTracer.hpp"
-#include "Defines.hpp"
+#include "Intersection.hpp"
 
 void traceStreamlineParticle(
         Trajectory &currentTrajectory, const rvec3 &particleStartPosition, const rvec3 &gridOrigin,
@@ -43,7 +43,19 @@ void traceStreamlineParticle(
         oldParticlePosition = particlePosition;
         // Break if the position is outside of the domain.
         if (glm::any(glm::lessThan(particlePosition, gridOrigin))
-            || glm::any(glm::greaterThan(particlePosition, gridOrigin+gridSize))) {
+                || glm::any(glm::greaterThan(particlePosition, gridOrigin+gridSize))) {
+            if (currentTrajectory.positions.size() >= 1) {
+                // Clamp the position to the boundary.
+                rvec3 rayOrigin = currentTrajectory.positions.back();
+                rvec3 rayDirection = particlePosition - rayOrigin;
+                float tNear, tFar;
+                rayBoxIntersection(rayOrigin, rayDirection, gridOrigin, gridOrigin + gridSize, tNear, tFar);
+
+                rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;
+                currentTrajectory.positions.push_back(boundaryParticlePosition);
+                pushTrajectoryAttributes(
+                        currentTrajectory, gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+            }
             break;
         }
 
