@@ -27,6 +27,7 @@
  */
 
 #include <algorithm>
+#include "Intersection.hpp"
 #include "StreaklineTracer.hpp"
 
 void StreaklineTracer::setParticleSeedingLocations(
@@ -35,7 +36,6 @@ void StreaklineTracer::setParticleSeedingLocations(
     this->gridOrigin = gridOrigin;
     this->gridSize = gridSize;
     lastInjectTime = 0.0;
-    stepIndex = 0;
     numParticles = particleSeedingLocations.size();
 }
 
@@ -53,11 +53,31 @@ void StreaklineTracer::timeStep(
     }
 
     for (size_t i = 0; i < numParticles; i++) {
-        for (size_t j = 0; j < stepIndex; j++) {
+        trajectories.at(i).attributes.clear();
+
+        for (size_t j = 0; j < trajectories.at(i).positions.size(); j++) {
             rvec3 particlePosition = trajectories.at(i).positions.at(j);
-            trajectories.at(i).positions.at(j) = integrateParticlePositionEuler(
+            rvec3 newParticlePosition = integrateParticlePositionEuler(
                     particlePosition, gridOrigin, gridSize,
                     imax, jmax, kmax, U, V, W, dt);
+
+            // Break if the position is outside of the domain.
+            if (glm::any(glm::lessThan(particlePosition, gridOrigin))
+                    || glm::any(glm::greaterThan(particlePosition, gridOrigin+gridSize))) {
+                if (j != 0) {
+                    // Clamp the position to the boundary.
+                    rvec3 rayOrigin = trajectories.at(i).positions.at(j-1);
+                    rvec3 rayDirection = newParticlePosition - rayOrigin;
+                    float tNear, tFar;
+                    rayBoxIntersection(rayOrigin, rayDirection, gridOrigin, gridOrigin + gridSize, tNear, tFar);
+
+                    rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;
+                    trajectories.at(i).positions.at(j) = boundaryParticlePosition;
+                }
+                trajectories.at(i).positions.resize(j+1);
+            } else {
+                trajectories.at(i).positions.at(j) = particlePosition;
+            }
             pushTrajectoryAttributes(
                     trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
         }
@@ -66,7 +86,6 @@ void StreaklineTracer::timeStep(
             lastInjectTime = t;
         }
     }
-    stepIndex++;
 }
 
 Trajectories StreaklineTracer::getTrajectories() {

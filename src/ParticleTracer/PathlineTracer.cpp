@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Intersection.hpp"
 #include "PathlineTracer.hpp"
 
 void PathlineTracer::setParticleSeedingLocations(
@@ -54,9 +55,25 @@ void PathlineTracer::timeStep(
         rvec3 newParticlePosition = integrateParticlePositionEuler(
                 particlePosition, gridOrigin, gridSize,
                 imax, jmax, kmax, U, V, W, dt);
-        trajectories.at(i).positions.push_back(newParticlePosition);
-        pushTrajectoryAttributes(
-                trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+
+        // Break if the position is outside of the domain.
+        if (glm::any(glm::lessThan(particlePosition, gridOrigin))
+                || glm::any(glm::greaterThan(particlePosition, gridOrigin+gridSize))) {
+            // Clamp the position to the boundary.
+            rvec3 rayOrigin = particlePosition;
+            rvec3 rayDirection = newParticlePosition - rayOrigin;
+            float tNear, tFar;
+            rayBoxIntersection(rayOrigin, rayDirection, gridOrigin, gridOrigin + gridSize, tNear, tFar);
+
+            rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;
+            trajectories.at(i).positions.push_back(boundaryParticlePosition);
+            pushTrajectoryAttributes(
+                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        } else {
+            trajectories.at(i).positions.push_back(newParticlePosition);
+            pushTrajectoryAttributes(
+                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        }
     }
 }
 

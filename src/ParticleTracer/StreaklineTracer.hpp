@@ -81,7 +81,6 @@ private:
     Real lastInjectTime;
     rvec3 gridOrigin, gridSize;
     size_t numParticles;
-    size_t stepIndex;
     std::vector<rvec3> particleSeedingLocations;
     Trajectories trajectories;
 };
