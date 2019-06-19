@@ -77,7 +77,9 @@ void PathlineTracer::timeStep(
     }
 }
 
-Trajectories PathlineTracer::getTrajectories() {
+Trajectories PathlineTracer::getTrajectories(
+        int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
+        Real *U, Real *V, Real *W, Real *P, Real *T) {
     Trajectories trajectoriesCopy = trajectories;
     trajectories.clear();
     return trajectoriesCopy;

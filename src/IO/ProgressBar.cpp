@@ -29,10 +29,30 @@
 #include <iostream>
 #include "ProgressBar.hpp"
 
+const char prefix[] = "Progress: [";
+const char suffix[] = "]";
+const size_t prefixLength = sizeof(prefix) - 1;
+const size_t suffixLength = sizeof(suffix) - 1;
+
 void ProgressBar::printOutput(int n, Real t, std::size_t max) {
-    // TODO: Implement.
+    char output[] = "\rWrote file at %5s %6i %5s %10f\n";
+    size_t lengthToOverwrite = max + prefixLength + suffixLength + 30;
+    std::string buffer(lengthToOverwrite, ' ');
+
+    std::cout << "\r" << buffer;
+    std::cout.flush();
+
+    //std::cout << "\rWrote file at " << "n: " << n << " t: " << t;
+    printf(output, "n: ", n, "t:", t);
+    std::cout.flush();
 }
 
 void ProgressBar::printProgress(Real t, Real tEnd, std::size_t max) {
-    // TODO: Implement.
+    const size_t suffix_length = sizeof(suffix) - 1;
+    size_t progressChars = ((t / tEnd) * max);
+    std::string buffer = prefix + std::string(progressChars, '#') + std::string(max - progressChars, ' ') + suffix;
+
+    std::cout << "\r" << char(27) << "[2K\r" << buffer;
+    std::cout << (int)((t / tEnd) * 100) << "%\tt = " << t;
+    std::cout.flush();
 }

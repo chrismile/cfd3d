@@ -35,7 +35,7 @@ void parseArguments(
     scenarioName = "driven_cavity";
     solverName = "cpp";
     numParticles = 1000;
-    traceStreamlines = true;
+    traceStreamlines = false;
     traceStreaklines = false;
     tracePathlines = false;
 

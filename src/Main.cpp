@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     rvec3 gridOrigin = rvec3(xOrigin, yOrigin, zOrigin);
     rvec3 gridSize = rvec3(xLength, yLength, zLength);
     StreamlineTracer streamlineTracer;
-    StreaklineTracer streaklineTracer(dtWrite*0.1); // Tracing frequency multiple of write time step.
+    StreaklineTracer streaklineTracer(dtWrite*1); // Tracing frequency multiple of write time step.
     PathlineTracer pathlineTracer;
     particleSeedingLocations = getParticleSeedingLocationsForScenario(scenarioName, numParticles, gridOrigin, gridSize);
     if (traceStreaklines) {
@@ -202,6 +202,7 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    progressBar.printOutput(n, t, 50);
 
     if (traceStreamlines) {
         if (!dataIsUpToDate) {
@@ -214,10 +215,12 @@ int main(int argc, char *argv[]) {
     }
 
     if (traceStreaklines) {
-        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streaklines.obj", streaklineTracer.getTrajectories());
+        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streaklines.obj", streaklineTracer.getTrajectories(
+                imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
     }
     if (tracePathlines) {
-        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-pathlines.obj", pathlineTracer.getTrajectories());
+        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-pathlines.obj", pathlineTracer.getTrajectories(
+                imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
     }
 
     auto endTime = std::chrono::system_clock::now();

@@ -47,8 +47,6 @@ void StreaklineTracer::timeStep(
         trajectories.resize(numParticles);
         for (size_t i = 0; i < numParticles; i++) {
             trajectories.at(i).positions.push_back(particleSeedingLocations.at(i));
-            pushTrajectoryAttributes(
-                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
         }
     }
 
@@ -74,21 +72,35 @@ void StreaklineTracer::timeStep(
                     rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;
                     trajectories.at(i).positions.at(j) = boundaryParticlePosition;
                 }
-                trajectories.at(i).positions.resize(j+1);
+                if (trajectories.at(i).positions.size() > j+1) {
+                    trajectories.at(i).positions.resize(j+1);
+                    trajectories.at(i).attributes.resize(j+1);
+                }
             } else {
-                trajectories.at(i).positions.at(j) = particlePosition;
+                trajectories.at(i).positions.at(j) = newParticlePosition;
             }
-            pushTrajectoryAttributes(
-                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
         }
         if (t - lastInjectTime >= dtInject) {
             trajectories.at(i).positions.push_back(particleSeedingLocations.at(i));
-            lastInjectTime = t;
         }
+    }
+    if (t - lastInjectTime >= dtInject) {
+        lastInjectTime = t;
     }
 }
 
-Trajectories StreaklineTracer::getTrajectories() {
+Trajectories StreaklineTracer::getTrajectories(
+        int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
+        Real *U, Real *V, Real *W, Real *P, Real *T) {
+    // Add the trajectory attributes.
+    for (size_t i = 0; i < numParticles; i++) {
+        for (size_t j = 0; j < trajectories.at(i).positions.size(); j++) {
+            pushTrajectoryAttributes(
+                    trajectories.at(i), gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        }
+    }
+
+    // Reverse the trajectory lists, as new seeded points appended to the end of the list should now be at the front.
     for (size_t i = 0; i < numParticles; i++) {
         std::reverse(trajectories.at(i).positions.begin(), trajectories.at(i).positions.end());
         std::reverse(trajectories.at(i).attributes.begin(), trajectories.at(i).attributes.end());

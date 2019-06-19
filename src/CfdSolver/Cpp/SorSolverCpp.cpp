@@ -42,6 +42,7 @@ void sorSolverCpp(
     }
 
     if (residual > eps && it == itermax) {
-        std::cerr << "\nSOR solver reached maximum number of iterations without converging." << std::endl;
+        std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
+                << residual << ")." << std::endl;
     }
 }
