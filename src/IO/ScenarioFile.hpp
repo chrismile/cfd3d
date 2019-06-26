@@ -30,6 +30,8 @@
 #define CFD3D_SCENARIOFILE_HPP
 
 #include <string>
+#include <map>
+#include <vector>
 #include "Defines.hpp"
 
 /**
