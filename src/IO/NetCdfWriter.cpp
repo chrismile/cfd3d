@@ -76,13 +76,15 @@ bool NetCdfWriter::openFile(const std::string &filename,
     nc_def_dim(ncid, "z", kmax, &zDim);
 
     // Define the time and cell center variables.
+
+    nc_def_var(ncid, "x", NC_REAL, 1, &xDim, &xVar);
+    nc_def_var(ncid, "y", NC_REAL, 1, &yDim, &yVar);
+    nc_def_var(ncid, "z", NC_REAL, 1, &zDim, &zVar);
+
     nc_def_var(ncid, "time", NC_REAL, 1, &timeDim, &timeVar);
     ncPutAttributeText(timeVar, "long_name", "Time");
     ncPutAttributeText(timeVar, "units", "seconds since simulation start");
 
-    nc_def_var(ncid, "x", NC_REAL, 1, &xDim, &xVar);
-    nc_def_var(ncid, "y", NC_REAL, 1, &yDim, &yVar);
-    nc_def_var(ncid, "z", NC_REAL, 1, &yDim, &zVar);
     ncPutAttributeText(xVar, "coordinate_type", "Cartesian X");
     ncPutAttributeText(yVar, "coordinate_type", "Cartesian Y");
     ncPutAttributeText(zVar, "coordinate_type", "Cartesian Z");
