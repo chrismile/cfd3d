@@ -1,0 +1,58 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\usepackage{amsmath,amsfonts,amssymb}
+
+\begin{document}
+
+\section{Momentum equations}
+
+\begin{equation}
+\frac{\partial u}{\partial t} + \frac{\partial p}{\partial x} = 
+\frac{1}{Re} \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} + \frac{\partial^2 u}{\partial z^2} \right) - 
+\frac{\partial(u^2)}{\partial x} -\frac{\partial (uv)}{\partial y} - 
+\frac{\partial (uw)}{\partial z} +
+g_x 
+\end{equation}
+
+\begin{equation}
+\frac{\partial v}{\partial t} + \frac{\partial p}{\partial y} = 
+\frac{1}{Re} \left( \frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} + \frac{\partial^2 v}{\partial z^2} \right) - 
+\frac{\partial(uv)}{\partial x} -\frac{\partial (v^2)}{\partial y} - 
+\frac{\partial (vw)}{\partial z} +
+g_y
+\end{equation}
+
+\begin{equation}
+\frac{\partial w}{\partial t} + \frac{\partial p}{\partial z} = 
+\frac{1}{Re} \left( \frac{\partial^2 w}{\partial x^2} + \frac{\partial^2 w}{\partial y^2} + \frac{\partial^2 w}{\partial z^2} \right) - 
+\frac{\partial(uw)}{\partial x} -\frac{\partial (vw)}{\partial y} - 
+\frac{\partial (w^2)}{\partial z} +
+g_z
+\end{equation}
+
+\section{Continuity equation}
+
+\begin{equation}
+\frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} + \frac{\partial w}{\partial z} = 0
+\end{equation}
+
+\section{Energy equation}
+
+\begin{equation}
+\frac{\partial T}{\partial t} = 
+\frac{1}{Re} \frac{1}{Pr} \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} + \frac{\partial^2 T}{\partial z^2} \right) - 
+\frac{\partial(uT)}{\partial x} -\frac{\partial (uT)}{\partial y} - 
+\frac{\partial (uT)}{\partial z}
+\end{equation}
+
+\section{F, G, H}
+
+\begin{equation}
+\frac{\partial T}{\partial t} = 
+\frac{1}{Re} \frac{1}{Pr} \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} + \frac{\partial^2 T}{\partial z^2} \right) - 
+\frac{\partial(uT)}{\partial x} -\frac{\partial (uT)}{\partial y} - 
+\frac{\partial (uT)}{\partial z}
+\end{equation}
+
+\end{document}
