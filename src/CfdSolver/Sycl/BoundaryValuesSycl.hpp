@@ -40,9 +40,9 @@ void setBoundaryValuesSycl(
         cl::sycl::queue &queue,
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
-        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &T,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
+        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
+        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &TBuffer,
+        cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
 
 /**
  * Sets special boundary conditions (typically something like inflow) specific to the different scenarios.
@@ -51,7 +51,7 @@ void setBoundaryValuesScenarioSpecificSycl(
         cl::sycl::queue &queue,
         const std::string &scenarioName,
         int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V, cl::sycl::buffer<Real, 1> &W,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
+        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer, cl::sycl::buffer<Real, 1> &WBuffer,
+        cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
 
 #endif //CFD3D_BOUNDARYVALUESSYCL_HPP

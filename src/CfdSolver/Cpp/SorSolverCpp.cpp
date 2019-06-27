@@ -27,17 +27,86 @@
  */
 
 #include <iostream>
+#include <cmath>
+#include "../Flag.hpp"
 #include "SorSolverCpp.hpp"
+
+void sorSolverIterationCpp(
+        Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
+    // Set the boundary values for the pressure on the x-y-planes.
+    #pragma omp parallel for
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            P[IDXP(i,j,0)] = P[IDXP(i,j,1)];
+            P[IDXP(i,j,kmax+1)] = P[IDXP(i,j,kmax)];
+        }
+    }
+
+    // Set the boundary values for the pressure on the x-z-planes.
+    #pragma omp parallel for
+    for (int i = 1; i <= imax; i++) {
+        for (int k = 1; k <= kmax; k++) {
+            P[IDXP(i,0,k)] = P[IDXP(i,1,k)];
+            P[IDXP(i,jmax+1,k)] = P[IDXP(i,jmax,k)];
+        }
+    }
+
+    // Set the boundary values for the pressure on the y-z-planes.
+    #pragma omp parallel for
+    for (int j = 1; j <= jmax; j++) {
+        for (int k = 1; k <= kmax; k++) {
+            P[IDXP(0,j,k)] = P[IDXP(1,j,k)];
+            P[IDXP(imax+1,j,k)] = P[IDXP(imax,j,k)];
+        }
+    }
+
+
+    // Now start with the actual SOR iteration.
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                P[IDXP(i,j,k)] = (1.0-omg)*P[IDXP(i,j,k)] + coeff *
+                        ((P[IDXP(i+1,j,k)]+P[IDXP(i-1,j,k)])/(dx*dx)
+                        + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
+                        + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
+                        - RS[IDXRS(i,j,k)]);
+            }
+        }
+    }
+
+    // Compute the residual.
+    residual = 0;
+    #pragma omp parallel for reduction(+: residual)
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                if (isFluid(Flag[IDXFLAG(i,j,k)])){
+                    residual += SQR(
+                               (P[IDXP(i+1,j,k)] - 2.0*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
+                             + (P[IDXP(i,j+1,k)] - 2.0*P[IDXP(i,j,k)] + P[IDXP(i,j-1,k)])/(dy*dy)
+                             + (P[IDXP(i,j,k+1)] - 2.0*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
+                             - RS[IDXRS(i,j,k)]
+                    );
+                }
+            }
+        }
+    }
+
+    // The residual is normalized by dividing by the total number of fluid cells.
+    residual = std::sqrt(residual/(imax*jmax*kmax));
+}
 
 void sorSolverCpp(
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        Real *P, Real *RS, FlagType *Flag) {
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
+    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
-        // TODO: Implement.
-
+        memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+        sorSolverIterationCpp(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
     }
 

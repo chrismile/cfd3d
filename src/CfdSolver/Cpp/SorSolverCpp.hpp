@@ -31,9 +31,12 @@
 
 #include "Defines.hpp"
 
+/**
+ * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
+ */
 void sorSolverCpp(
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        Real *P, Real *RS, FlagType *Flag);
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag);
 
 #endif //CFD3D_SORSOLVERCPP_HPP

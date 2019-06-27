@@ -139,7 +139,7 @@ private:
     int itermax;
     int imax, jmax, kmax;
     Real dx, dy, dz;
-    Real *U, *V, *W , *P, *T, *T_temp, *F, *G, *H, *RS;
+    Real *U, *V, *W , *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
     FlagType *Flag;
 };
 

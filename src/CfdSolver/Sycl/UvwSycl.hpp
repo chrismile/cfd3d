@@ -39,10 +39,10 @@ void calculateFghSycl(
         cl::sycl::queue &queue,
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
-        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &T,
-        cl::sycl::buffer<Real, 1> &F, cl::sycl::buffer<Real, 1> &G,
-        cl::sycl::buffer<Real, 1> &H, cl::sycl::buffer<unsigned int, 1> &Flag);
+        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
+        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &TBuffer,
+        cl::sycl::buffer<Real, 1> &FBuffer, cl::sycl::buffer<Real, 1> &GBuffer,
+        cl::sycl::buffer<Real, 1> &HBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
 
 /*
  * Computes the right hand side of the Pressure Poisson Equation (PPE).
@@ -50,8 +50,8 @@ void calculateFghSycl(
 void calculateRsSycl(
         cl::sycl::queue &queue,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &F, cl::sycl::buffer<Real, 1> &G,
-        cl::sycl::buffer<Real, 1> &H, cl::sycl::buffer<Real, 1> &RS);
+        cl::sycl::buffer<Real, 1> &FBuffer, cl::sycl::buffer<Real, 1> &GBuffer,
+        cl::sycl::buffer<Real, 1> &HBuffer, cl::sycl::buffer<Real, 1> &RSBuffer);
 
 /*
  * Determines the maximum time step size. The time step size is restricted according to the CFL theorem.
@@ -60,7 +60,7 @@ void calculateDtSycl(
         cl::sycl::queue &queue,
         Real Re, Real Pr, Real tau,
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V, cl::sycl::buffer<Real, 1> &W,
+        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer, cl::sycl::buffer<Real, 1> &WBuffer,
         bool useTemperature);
 
 /*
@@ -69,10 +69,10 @@ void calculateDtSycl(
 void calculateUvwSycl(
         cl::sycl::queue &queue,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
-        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &F,
-        cl::sycl::buffer<Real, 1> &G, cl::sycl::buffer<Real, 1> &H,
-        cl::sycl::buffer<Real, 1> &P, cl::sycl::buffer<unsigned int, 1> &Flag);
+        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
+        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &FBuffer,
+        cl::sycl::buffer<Real, 1> &GBuffer, cl::sycl::buffer<Real, 1> &HBuffer,
+        cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
 
 /*
  * Calculates the new temperature values.
@@ -82,8 +82,8 @@ void calculateTemperatureSycl(
         Real Re, Real Pr, Real alpha,
         Real dt, Real dx, Real dy, Real dz,
         int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &U, cl::sycl::buffer<Real, 1> &V,
-        cl::sycl::buffer<Real, 1> &W, cl::sycl::buffer<Real, 1> &T,
-        cl::sycl::buffer<Real, 1> &T_temp, cl::sycl::buffer<unsigned int, 1> &Flag);
+        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
+        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &TBuffer,
+        cl::sycl::buffer<Real, 1> &T_tempBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
 
 #endif //CFD3D_UVWSYCL_HPP
