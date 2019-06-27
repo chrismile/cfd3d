@@ -31,6 +31,11 @@
 #include "../Flag.hpp"
 #include "SorSolverCpp.hpp"
 
+// Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
+#define SOR_GAUSS_SEIDL
+//#define SOR_JACOBI
+//#define SOR_HYBRID
+
 void sorSolverIterationCpp(
         Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
@@ -63,6 +68,7 @@ void sorSolverIterationCpp(
 
 
     // Now start with the actual SOR iteration.
+#ifdef SOR_GAUSS_SEIDL
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -74,6 +80,36 @@ void sorSolverIterationCpp(
             }
         }
     }
+#endif
+#ifdef SOR_JACOBI
+    #pragma omp parallel for
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                P[IDXP(i,j,k)] = (1.0-omg)*P_temp[IDXP(i,j,k)] + coeff *
+                        ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
+                         + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
+                         + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
+                         - RS[IDXRS(i,j,k)]);
+            }
+        }
+    }
+#endif
+#ifdef SOR_HYBRID
+    #pragma omp parallel for
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Just use Jacobi scheme in i direction, as we have only parallelized the outer loop.
+                P[IDXP(i,j,k)] = (1.0-omg)*P[IDXP(i,j,k)] + coeff *
+                        ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
+                         + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
+                         + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
+                         - RS[IDXRS(i,j,k)]);
+            }
+        }
+    }
+#endif
 
     // Compute the residual.
     residual = 0;
@@ -105,7 +141,9 @@ void sorSolverCpp(
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
+#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
         memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+#endif
         sorSolverIterationCpp(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
     }
