@@ -39,6 +39,7 @@ CfdSolverSycl::CfdSolverSycl(
         VBuffer(V, cl::sycl::range<1>((imax+2)*(jmax+1)*(kmax+2))),
         WBuffer(W, cl::sycl::range<1>((imax+2)*(jmax+2)*(kmax+1))),
         PBuffer(P, cl::sycl::range<1>((imax+2)*(jmax+2)*(kmax+2))),
+        P_tempBuffer(P, cl::sycl::range<1>((imax+2)*(jmax+2)*(kmax+2))),
         TBuffer(T, cl::sycl::range<1>((imax+2)*(jmax+2)*(kmax+2))),
         T_tempBuffer(cl::sycl::range<1>((imax+2)*(jmax+2)*(kmax+2))),
         FBuffer(cl::sycl::range<1>((imax+1)*(jmax+1)*(kmax+1))),
@@ -127,7 +128,7 @@ void CfdSolverSycl::calculateRs() {
 
 
 void CfdSolverSycl::executeSorSolver() {
-    sorSolverSycl(queue, omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, PBuffer, RSBuffer, FlagBuffer);
+    sorSolverSycl(queue, omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, PBuffer, P_tempBuffer, RSBuffer, FlagBuffer);
 }
 
 void CfdSolverSycl::calculateUvw() {
@@ -138,11 +139,11 @@ void CfdSolverSycl::calculateUvw() {
 void CfdSolverSycl::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T) {
     // Copy the content of U, V, W, P, T in the internal representation to the specified output arrays.
     queue.submit([&](cl::sycl::handler &cgh) {
-        ReadAccReal URead = UBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
-        ReadAccReal VRead = VBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
-        ReadAccReal WRead = WBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
-        ReadAccReal PRead = PBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
-        ReadAccReal TRead = TBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
+        ReadAccReal URead = UBuffer.get_access<cl::sycl::access::mode::read>(cgh);
+        ReadAccReal VRead = VBuffer.get_access<cl::sycl::access::mode::read>(cgh);
+        ReadAccReal WRead = WBuffer.get_access<cl::sycl::access::mode::read>(cgh);
+        ReadAccReal PRead = PBuffer.get_access<cl::sycl::access::mode::read>(cgh);
+        ReadAccReal TRead = TBuffer.get_access<cl::sycl::access::mode::read>(cgh);
         cgh.copy(URead, U);
         cgh.copy(VRead, V);
         cgh.copy(WRead, W);
@@ -153,6 +154,6 @@ void CfdSolverSycl::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T
     try {
         queue.wait_and_throw();
     } catch (cl::sycl::exception const& exception) {
-        std::cout << "Caught synchronous SYCL exception:n" << std::endl << exception.what() << std::endl;
+        std::cout << "Caught synchronous SYCL exception: " << std::endl << exception.what() << std::endl;
     }
 }

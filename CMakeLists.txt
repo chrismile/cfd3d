@@ -10,7 +10,8 @@ file(GLOB_RECURSE CUDA_SOURCES src/*.cu)
 include_directories(src)
 
 if (USE_SYCL)
-    add_compile_definitions(USE_SYCL)
+    #add_compile_definitions(USE_SYCL) # Doesn't work on older versions of CMake
+    add_definitions(-DUSE_SYCL)
 else()
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/CfdSolver/Sycl/BoundaryValuesSycl.cpp)
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/CfdSolver/Sycl/CfdSolverSycl.cpp)
@@ -23,7 +24,9 @@ if (USE_CUDA)
     enable_language(CUDA)
     add_executable(cfd3d ${SOURCES} ${CUDA_SOURCES})
     set_target_properties(cfd3d PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-    add_compile_definitions(USE_CUDA)
+    #add_compile_definitions(USE_CUDA) # Doesn't work on older versions of CMake
+    add_definitions(-DUSE_CUDA)
+
 else()
     add_executable(cfd3d ${SOURCES})
 endif()
