@@ -159,6 +159,8 @@ private:
     int imax, jmax, kmax;
     Real dx, dy, dz;
 
+    int timeStepNumber = 0;
+
     cl::sycl::buffer<Real, 1> UBuffer, VBuffer, WBuffer, PBuffer, TBuffer, T_tempBuffer,
             FBuffer, GBuffer, HBuffer, RSBuffer;
     cl::sycl::buffer<unsigned int, 1> FlagBuffer;

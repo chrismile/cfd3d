@@ -111,6 +111,9 @@ Real CfdSolverCpp::calculateDt() {
 
 
 void CfdSolverCpp::calculateTemperature() {
+    Real *temp = T;
+    T = T_temp;
+    T_temp = temp;
     calculateTemperatureCpp(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
