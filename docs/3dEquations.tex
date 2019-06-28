@@ -91,10 +91,6 @@ w_{i,j,k} & + \delta t \Bigl(
 \subsubsection{F}
 
 \begin{equation}
-\left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k}
-\end{equation}
-
-\begin{equation}
 \left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k} =
 \frac{u_{i+1,j,k} - 2u_{i,j,k} + u_{i-1,j,k}}{(\delta x)^2}
 \end{equation}
@@ -107,6 +103,54 @@ w_{i,j,k} & + \delta t \Bigl(
 \begin{equation}
 \left[\frac{\partial^2 u}{\partial z^2}\right]_{i,j,k} =
 \frac{u_{i,j,k+1} - 2u_{i,j,k} + u_{i,j,k-1}}{(\delta z)^2}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(u^2)}{\partial x}\right]_{i,j,k} = &
+\frac{1}{\delta x}
+\left(
+	\left(\frac{u_{i,j,k}+u_{i+1,j,k}}{2}\right)^2 -
+	\left(\frac{u_{i-1,j,k}+u_{i,j,k}}{2}\right)^2
+\right) + \\
+& \frac{\gamma}{\delta x}
+\left(
+	\frac{|u_{i,j,k}+u_{i+1,j,k}|}{2} \frac{(u_{i,j,k}-u_{i+1,j,k})}{2} +
+	\frac{|u_{i-1,j,k}+u_{i,j,k}|}{2} \frac{(u_{i-1,j,k}-u_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(uv)}{\partial y}\right]_{i,j,k} = &
+\frac{1}{\delta y}
+\left(
+	\frac{(v_{i,j,k}+v_{i+1,j,k})}{2} \frac{(u_{i,j,k}+u_{i,j+1,k})}{2} -
+	\frac{(v_{i,j-1,k}+v_{i+1,j-1,k})}{2} \frac{(u_{i,j-1,k}+u_{i,j,k})}{2}
+\right) + \\
+& \frac{\gamma}{\delta y}
+\left(
+	\frac{|v_{i,j,k}+v_{i+1,j,k}|}{2} \frac{(u_{i,j,k}-u_{i,j+1,k})}{2} -
+	\frac{|v_{i,j-1,k}+v_{i+1,j-1,k}|}{2} \frac{(u_{i,j-1,k}-u_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(uw)}{\partial z}\right]_{i,j,k} = &
+\frac{1}{\delta z}
+\left(
+	\frac{(w_{i,j,k}+w_{i+1,j,k})}{2} \frac{(u_{i,j,k}+u_{i,j,k+1})}{2} -
+	\frac{(w_{i,j,k-1}+w_{i+1,j,k-1})}{2} \frac{(u_{i,j,k-1}+u_{i,j,k})}{2}
+\right) + \\
+& \frac{\gamma}{\delta z}
+\left(
+	\frac{|w_{i,j,k}+w_{i+1,j,k}|}{2} \frac{(u_{i,j,k}-u_{i,j,k+1})}{2} -
+	\frac{|w_{i,j,k-1}+w_{i+1,j,k-1}|}{2} \frac{(u_{i,j,k-1}-u_{i,j,k})}{2}
+\right)
+\end{split}
 \end{equation}
 
 
