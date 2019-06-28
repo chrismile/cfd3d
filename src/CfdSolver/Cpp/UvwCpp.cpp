@@ -26,6 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cmath>
+#include <algorithm>
+#include "Defines.hpp"
 #include "UvwCpp.hpp"
 
 void calculateFghCpp(
@@ -46,7 +49,57 @@ void calculateDtCpp(
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
         bool useTemperature) {
-    // TODO
+    Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
+
+    // First, compute the maximum absolute velocities in x, y and z direction.
+    #pragma omp parallel for reduction(max: uMaxAbs)
+    for (int i = 0; i <= imax; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                uMaxAbs = std::max(uMaxAbs, std::abs(U[IDXU(i,j,k)]));
+            }
+        }
+    }
+    #pragma omp parallel for reduction(max: vMaxAbs)
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                vMaxAbs = std::max(vMaxAbs, std::abs(V[IDXV(i,j,k)]));
+            }
+        }
+    }
+
+    #pragma omp parallel for reduction(max: wMaxAbs)
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax; k++) {
+                wMaxAbs = std::max(wMaxAbs, std::abs(V[IDXW(i,j,k)]));
+            }
+        }
+    }
+
+    if (tau < Real(0.0)) {
+        // Constant time step manually specified in configuration file. Check for stability.
+        assert(2 / Re * dt < dx * dx * dy * dy / (dx * dx + dy * dy));
+        assert(uMaxAbs * dt < dx);
+        assert(vMaxAbs * dt < dy);
+        if (useTemperature){
+            assert(dt < (Re*Pr/2)*(1/((1/(dx*dx))+1/(dy*dy))));
+        }
+        return;
+    }
+
+    // Now, use formula (14) from worksheet 1 to compute the time step size.
+    dt = std::min(dx / uMaxAbs, dy / vMaxAbs);
+    dt = std::min(dt, dz / wMaxAbs);
+    dt = std::min(dt, (Re / Real(2.0)) * (Real(1.0) / (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy)
+            + Real(1.0) / (dz*dz))));
+    if (useTemperature){
+        dt = std::min(dt, (Re * Pr / Real(2.0)) * (Real(1.0) / (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy)
+                + Real(1.0) / (dz*dz))));
+    }
+    dt = tau * dt;
+
 }
 
 void calculateUvwCpp(
