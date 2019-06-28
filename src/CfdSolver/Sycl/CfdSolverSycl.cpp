@@ -112,13 +112,24 @@ Real CfdSolverSycl::calculateDt() {
 
 
 void CfdSolverSycl::calculateTemperature() {
-    calculateTemperatureSycl(queue, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax,
-            UBuffer, VBuffer, WBuffer, TBuffer, T_tempBuffer, FlagBuffer);
+    if (timeStepNumber % 2 == 0) {
+        calculateTemperatureSycl(queue, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax,
+                UBuffer, VBuffer, WBuffer, T_tempBuffer, TBuffer, FlagBuffer);
+    } else {
+        calculateTemperatureSycl(queue, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax,
+                UBuffer, VBuffer, WBuffer, TBuffer, T_tempBuffer, FlagBuffer);
+    }
+    timeStepNumber++;
 }
 
 void CfdSolverSycl::calculateFgh() {
-    calculateFghSycl(queue, Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax,
-            UBuffer, VBuffer, WBuffer, TBuffer, FBuffer, GBuffer, HBuffer, FlagBuffer);
+    if (timeStepNumber % 2 == 0) {
+        calculateFghSycl(queue, Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax,
+                UBuffer, VBuffer, WBuffer, TBuffer, FBuffer, GBuffer, HBuffer, FlagBuffer);
+    } else {
+        calculateFghSycl(queue, Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax,
+                UBuffer, VBuffer, WBuffer, T_tempBuffer, FBuffer, GBuffer, HBuffer, FlagBuffer);
+    }
 }
 
 void CfdSolverSycl::calculateRs() {
@@ -142,12 +153,19 @@ void CfdSolverSycl::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T
         ReadAccReal VRead = VBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
         ReadAccReal WRead = WBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
         ReadAccReal PRead = PBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
-        ReadAccReal TRead = TBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
         cgh.copy(URead, U);
         cgh.copy(VRead, V);
         cgh.copy(WRead, W);
         cgh.copy(PRead, P);
         cgh.copy(TRead, T);
+
+        if (timeStepNumber % 2 == 0) {
+            ReadAccReal TRead = TBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
+            cgh.copy(TRead, T);
+        } else {
+            ReadAccReal T_tempRead = T_tempBuffer.get_access<cl::sycl::access::mode::read_write>(cgh);
+            cgh.copy(T_tempRead, T);
+        }
     });
 
     try {
