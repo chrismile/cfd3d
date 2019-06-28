@@ -1,7 +1,8 @@
 \documentclass[10pt]{article}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 
-\usepackage{amsmath,amsfonts,amssymb}
+\usepackage[fleqn]{amsmath}
+\usepackage{xcolor}
 
 \begin{document}
 
@@ -42,17 +43,103 @@ g_z
 \begin{equation}
 \frac{\partial T}{\partial t} = 
 \frac{1}{Re} \frac{1}{Pr} \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} + \frac{\partial^2 T}{\partial z^2} \right) - 
-\frac{\partial(uT)}{\partial x} -\frac{\partial (uT)}{\partial y} - 
-\frac{\partial (uT)}{\partial z}
+\frac{\partial(uT)}{\partial x} -\frac{\partial (vT)}{\partial y} - 
+\frac{\partial (wT)}{\partial z}
 \end{equation}
 
 \section{F, G, H}
 
+\subsection{equations}
+
 \begin{equation}
-\frac{\partial T}{\partial t} = 
-\frac{1}{Re} \frac{1}{Pr} \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} + \frac{\partial^2 T}{\partial z^2} \right) - 
-\frac{\partial(uT)}{\partial x} -\frac{\partial (uT)}{\partial y} - 
-\frac{\partial (uT)}{\partial z}
+\begin{split}
+F_{i,j,k} =
+u_{i,j,k} & + \delta t \Bigl(
+\frac{1}{Re} \left( \left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 u}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 u}{\partial z^2}\right]_{i,j,k} \right) - 
+\left[\frac{\partial(u^2)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (uv)}{\partial y}\right]_{i,j,k} - 
+\left[\frac{\partial (uw)}{\partial z}\right]_{i,j,k}\\
+& + \textcolor{red}{g_x} - \frac{\beta}{2} \left( T^{(n+1)}_{i,j,k} + T^{(n+1)}_{i+1,j,k} \right) g_x \Bigr)\\
+& i = 1,\ldots,imax-1; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax
+\end{split}
 \end{equation}
+
+\begin{equation}
+\begin{split}
+G_{i,j,k} = 
+v_{i,j,k} & + \delta t \Bigl(
+\frac{1}{Re} \left( \left[\frac{\partial^2 v}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 v}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 v}{\partial z^2}\right]_{i,j,k} \right) - 
+\left[\frac{\partial(uv)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (v^2)}{\partial y}\right]_{i,j,k} - 
+\left[\frac{\partial (vw)}{\partial z}\right]_{i,j,k}\\
+& + \textcolor{red}{g_y} - \frac{\beta}{2} \left( T^{(n+1)}_{i,j,k} + T^{(n+1)}_{i,j+1,k} \right) g_y \Bigr)\\
+& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax-1; \quad k = 1,\ldots,kmax
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+H_{i,j,k} = 
+w_{i,j,k} & + \delta t \Bigl(
+\frac{1}{Re} \left( \left[\frac{\partial^2 w}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 w}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 w}{\partial z^2}\right]_{i,j,k} \right) - 
+\left[\frac{\partial(uw)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (vw)}{\partial y}\right]_{i,j,k} - 
+\left[\frac{\partial (w^2)}{\partial z}\right]_{i,j,k}\\
+& + \textcolor{red}{g_z} - \frac{\beta}{2} \left( T^{(n+1)}_{i,j,k} + T^{(n+1)}_{i,j,k+1} \right) g_y \Bigr)\\
+& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax-1
+\end{split}
+\end{equation}
+
+\subsection{discretization}
+\subsubsection{F}
+
+\begin{equation}
+\left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k} =
+\frac{u_{i+1,j,k} - 2u_{i,j,k} + u_{i-1,j,k}}{(\delta x)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 u}{\partial y^2}\right]_{i,j,k} =
+\frac{u_{i,j+1,k} - 2u_{i,j,k} + u_{i,j-1,k}}{(\delta y)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 u}{\partial z^2}\right]_{i,j,k} =
+\frac{u_{i,j,k+1} - 2u_{i,j,k} + u_{i,j,k-1}}{(\delta z)^2}
+\end{equation}
+
+
+\section{calculate uvw}
+\begin{equation}
+\begin{split}
+u^{(n+1)}_{i,j,k} = & F^{(n)}_{i,j,k} - \frac{\delta t}{\delta x}\left(p^{(n+1)}_{i+1,j,k} - p^{(n+1)}_{i,j,k}\right)\\
+& i = 1,\ldots,imax-1; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+v^{(n+1)}_{i,j,k} = & G^{(n)}_{i,j,k} - \frac{\delta t}{\delta y}\left(p^{(n+1)}_{i,j+1,k} - p^{(n+1)}_{i,j,k}\right)\\
+& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax-1; \quad k = 1,\ldots,kmax
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+w^{(n+1)}_{i,j,k} = & H^{(n)}_{i,j,k} - \frac{\delta t}{\delta z}\left(p^{(n+1)}_{i,j,k+1} - p^{(n+1)}_{i,j,k}\right)\\
+& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax-1
+\end{split}
+\end{equation}
+
+\section{Energy Equation}
+\begin{equation}
+T^{(n+1)}_{i,j,k} = T^{(n)}_{i,j,k} +  \delta t \left(
+\frac{1}{Re} \frac{1}{Pr} \left( \left[\frac{\partial^2 T}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial z^2}\right]_{i,j,k} \right) - 
+\left[\frac{\partial(uT)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (vT)}{\partial y}\right]_{i,j,k} - 
+\left[\frac{\partial (wT)}{\partial z}\right]_{i,j,k}
+\right)
+\end{equation}
+
 
 \end{document}
