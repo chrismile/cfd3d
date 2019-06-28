@@ -41,7 +41,16 @@ void calculateFghCpp(
 void calculateRsCpp(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *F, Real *G, Real *H, Real *RS) {
-    // TODO
+
+	for (int i; i <= imax; i++) {
+		for (int j; j <= jmax; j++) {
+			for (int k; k <= kmax; k++) {
+				RS[IDXRS(i, j, k)] = ((F[IDXF(i, j, k)] - F[IDXF(i - 1, j, k)]) / dx +
+					(G[IDXG(i, j, k)] - G[IDXG(i, j - 1, k)]) / dy +
+					(H[IDXH(i, j, k)] - H[IDXH(i, j, k - 1)]) / dz) / dt;
+			}
+		}
+	}
 }
 
 void calculateDtCpp(
@@ -105,7 +114,30 @@ void calculateDtCpp(
 void calculateUvwCpp(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
-    // TODO
+ 
+	for (int i; i <= imax - 1; i++) {
+		for (int j; j <= jmax; j++) {
+			for (int k; k <= kmax; k++) {
+				U[IDXU(i, j, k)] = F[IDXF(i, j, k)] - dt / dx * (P[IDXP(i + 1, j, k)] - P[IDXP(i, j, k)]);
+			}
+		}
+	}
+
+	for (int i; i <= imax; i++) {
+		for (int j; j <= jmax - 1; j++) {
+			for (int k; k <= kmax; k++) {
+				V[IDXV(i, j, k)] = G[IDXG(i, j, k)] - dt / dy * (P[IDXP(i, j + 1, k)] - P[IDXP(i, j, k)]);
+			}
+		}
+	}
+
+	for (int i; i <= imax; i++) {
+		for (int j; j <= jmax; j++) {
+			for (int k; k <= kmax - 1; k++) {
+				W[IDXW(i, j, k)] = H[IDXH(i, j, k)] - dt / dz * (P[IDXP(i, j, k + 1)] - P[IDXP(i, j, k)]);
+			}
+		}
+	}
 }
 
 void calculateTemperatureCpp(
@@ -113,5 +145,58 @@ void calculateTemperatureCpp(
         Real dt, Real dx, Real dy, Real dz,
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
-    // TODO
+            
+	Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
+	for (int i; i <= imax; i++) {
+		for (int j; j <= jmax; j++) {
+			for (int k; k <= kmax; k++) {
+				duT_dx =
+					1 / dx * (
+						U[IDXU(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i + 1, j, k)]) / 2) -
+						U[IDXU(i - 1, j, k)] * ((T_temp[IDXT(i - 1, j, k)] + T_temp[IDXT(i, j, k)]) / 2) +
+						alpha * (
+							std::abs(U[IDXU(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i + 1, j, k)]) / 2) -
+							std::abs(U[IDXU(i - 1, j, k)])*((T_temp[IDXT(i - 1, j, k)] - T_temp[IDXT(i, j, k)]) / 2)
+							)
+						);
+
+				dvT_dy =
+					1 / dy * (
+						V[IDXV(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j + 1, k)]) / 2) -
+						V[IDXV(i, j - 1, k)] * ((T_temp[IDXT(i, j - 1, k)] + T_temp[IDXT(i, j, k)]) / 2) +
+						alpha * (
+							std::abs(V[IDXV(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i, j + 1, k)]) / 2) -
+							std::abs(V[IDXV(i, j - 1, k)])*((T_temp[IDXT(i, j - 1, k)] - T_temp[IDXT(i, j, k)]) / 2)
+							)
+						);
+
+				dwT_dz =
+					1 / dz * (
+						W[IDXW(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j, k + 1)]) / 2) -
+						W[IDXW(i, j, k - 1)] * ((T_temp[IDXT(i, j, k - 1)] + T_temp[IDXT(i, j, k)]) / 2) +
+						alpha * (
+							std::abs(W[IDXW(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i, j, k + 1)]) / 2) -
+							std::abs(W[IDXW(i, j, k - 1)])*((T_temp[IDXT(i, j, k - 1)] - T_temp[IDXT(i, j, k)]) / 2)
+							)
+						);
+
+				d2T_dx2 =
+					(T_temp[IDXT(i + 1, j, k)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i - 1, j, k)]) / (dx*dx);
+
+				d2T_dy2 =
+					(T_temp[IDXT(i, j + 1, k)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j - 1, k)]) / (dy*dy);
+
+				d2T_dz2 =
+					(T_temp[IDXT(i, j, k + 1)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j, k - 1)]) / (dz*dz);
+
+				T[IDXT(i, j, k)] = T_temp[IDXT(i, j, k)] + dt * (
+					(1 / (Re*Pr))*(d2T_dx2 + d2T_dy2 + d2T_dz2) -
+					duT_dx -
+					dvT_dy -
+					dwT_dz
+					);
+			}
+		}
+	}
+
 }
