@@ -29,15 +29,22 @@
 #include <iostream>
 #include "SorSolverCuda.hpp"
 
+void sorSolverIterationCuda(
+        Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
+    // TODO
+}
+
 void sorSolverCuda(
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        Real *P, Real *RS, FlagType *Flag) {
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
+    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
-        // TODO: Implement.
-
+        cudaMemcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToDevice);
+        sorSolverIterationCuda(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
     }
 

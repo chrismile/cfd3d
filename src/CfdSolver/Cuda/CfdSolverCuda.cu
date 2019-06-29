@@ -63,9 +63,10 @@ void CfdSolverCuda::initialize(const std::string &scenarioName,
     // Create all arrays for the simulation.
     cudaMalloc(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real)); 
     cudaMalloc(&this->V, (imax+2)*(jmax+1)*(kmax+2)*sizeof(Real)); 
-    cudaMalloc(&this->W, (imax+2)*(jmax+2)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->P, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
-    cudaMalloc(&this->T, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
+    cudaMalloc(&this->W, (imax+2)*(jmax+2)*(kmax+1)*sizeof(Real));
+    cudaMalloc(&this->P, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMalloc(&this->P_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMalloc(&this->T, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
     cudaMalloc(&this->T_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
     cudaMalloc(&this->F, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
     cudaMalloc(&this->G, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
@@ -87,6 +88,7 @@ CfdSolverCuda::~CfdSolverCuda() {
     cudaFree(V);
     cudaFree(W);
     cudaFree(P);
+    cudaFree(P_temp);
     cudaFree(T);
     cudaFree(T_temp);
     cudaFree(F);
@@ -127,7 +129,7 @@ void CfdSolverCuda::calculateRs() {
 
 
 void CfdSolverCuda::executeSorSolver() {
-    sorSolverCuda(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, RS, Flag);
+    sorSolverCuda(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
 }
 
 void CfdSolverCuda::calculateUvw() {

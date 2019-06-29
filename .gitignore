@@ -62,3 +62,9 @@ Data/Models/Ship*
 # CLion
 .idea/*
 cmake-build-*/
+
+#Latex
+docs/*.aux
+docs/*.dvi
+docs/*.log
+docs/*.synctex.gz

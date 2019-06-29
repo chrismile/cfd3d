@@ -29,17 +29,31 @@
 #include <iostream>
 #include "SorSolverSycl.hpp"
 
+void sorSolverIterationSycl(
+        cl::sycl::queue &queue,
+        Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
+        cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
+        cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer,
+        Real &residual) {
+    // TODO
+}
+
 void sorSolverSycl(
         cl::sycl::queue &queue,
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &P, cl::sycl::buffer<Real, 1> &RS,
-        cl::sycl::buffer<unsigned int, 1> &Flag) {
+        cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
+        cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer) {
+    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
-        // TODO: Implement.
-
+        queue.submit([&](cl::sycl::handler &cgh) {
+            ReadAccReal PRead = PBuffer.get_access<cl::sycl::access::mode::read>(cgh);
+            ReadAccReal P_tempWrite = P_tempBuffer.get_access<cl::sycl::access::mode::write>(cgh);
+            cgh.copy(PRead, P_tempWrite);
+        });
+        sorSolverIterationSycl(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
     }
 

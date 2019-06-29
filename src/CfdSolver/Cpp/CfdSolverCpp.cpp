@@ -65,6 +65,7 @@ void CfdSolverCpp::initialize(const std::string &scenarioName,
     this->V = new Real[(imax+2)*(jmax+1)*(kmax+2)];
     this->W = new Real[(imax+2)*(jmax+2)*(kmax+1)];
     this->P = new Real[(imax+2)*(jmax+2)*(kmax+2)];
+    this->P_temp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
     this->T = new Real[(imax+2)*(jmax+2)*(kmax+2)];
     this->T_temp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
     this->F = new Real[(imax+1)*(jmax+1)*(kmax+1)];
@@ -87,6 +88,7 @@ CfdSolverCpp::~CfdSolverCpp() {
     delete[] V;
     delete[] W;
     delete[] P;
+    delete[] P_temp;
     delete[] T;
     delete[] T_temp;
     delete[] F;
@@ -127,7 +129,7 @@ void CfdSolverCpp::calculateRs() {
 
 
 void CfdSolverCpp::executeSorSolver() {
-    sorSolverCpp(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, RS, Flag);
+    sorSolverCpp(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
 }
 
 void CfdSolverCpp::calculateUvw() {

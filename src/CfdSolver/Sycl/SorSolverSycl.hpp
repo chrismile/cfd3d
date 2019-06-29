@@ -32,11 +32,14 @@
 #include "Defines.hpp"
 #include "SyclDefines.hpp"
 
+/**
+ * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
+ */
 void sorSolverSycl(
         cl::sycl::queue &queue,
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &P, cl::sycl::buffer<Real, 1> &RS,
-        cl::sycl::buffer<unsigned int, 1> &Flag);
+        cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
+        cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
 
 #endif //CFD3D_SORSOLVERSYCL_HPP

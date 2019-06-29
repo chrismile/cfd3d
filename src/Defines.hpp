@@ -61,6 +61,9 @@ typedef double Real;
 
 typedef glm::vec<3, Real, glm::defaultp> rvec3;
 
+// Computes the square of a number.
+#define SQR(x) ((x)*(x))
+
 /**
  * For accessing 1D-arrays as 3D-arrays.
  */
