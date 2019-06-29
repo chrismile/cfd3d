@@ -246,6 +246,7 @@ void setBoundaryValuesScenarioSpecificCpp(
         Real *U, Real *V, Real *W,
         FlagType *Flag) {
     if (scenarioName == "driven_cavity") {
+        #pragma omp parallel for
         for (int i = 1; i <= imax; i++) {
             for (int k = 1; k <= kmax; k++) {
                 // Upper wall

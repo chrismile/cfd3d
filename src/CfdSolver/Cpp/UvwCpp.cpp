@@ -46,6 +46,7 @@ void calculateFghCpp(
     
     Real Dx = 1/dx, Dy = 1/dy, Dz = 1/dz;
 
+    #pragma omp parallel for private(d2u_dx2, d2u_dy2, d2u_dz2, du2_dx, duv_dy, duw_dz)
     for (int i = 1; i <= imax-1; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -89,6 +90,7 @@ void calculateFghCpp(
         }
     }
 
+    #pragma omp parallel for private(d2v_dx2, d2v_dy2, d2v_dz2, duv_dx, dv2_dy, dvw_dz)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax-1; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -130,8 +132,9 @@ void calculateFghCpp(
                 );
             }
         }
-    } 
+    }
 
+    #pragma omp parallel for private(d2w_dx2, d2w_dy2, d2w_dz2, duw_dx, dvw_dy, dw2_dz)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax-1; k++) {
@@ -180,7 +183,7 @@ void calculateFghCpp(
 void calculateRsCpp(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *F, Real *G, Real *H, Real *RS) {
-
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -253,7 +256,7 @@ void calculateDtCpp(
 void calculateUvwCpp(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
- 
+    #pragma omp parallel for
     for (int i = 1; i <= imax - 1; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -262,6 +265,7 @@ void calculateUvwCpp(
         }
     }
 
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax - 1; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -270,6 +274,7 @@ void calculateUvwCpp(
         }
     }
 
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax - 1; k++) {
@@ -284,8 +289,9 @@ void calculateTemperatureCpp(
         Real dt, Real dx, Real dy, Real dz,
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
-
     Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
+
+    #pragma omp parallel for private(duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -334,5 +340,4 @@ void calculateTemperatureCpp(
             }
         }
     }
-
 }
