@@ -50,9 +50,9 @@
 #include "ParticleTracer/StreaklineTracer.hpp"
 #include "ParticleTracer/PathlineTracer.hpp"
 
-const std::string outputDirectory = "output/";
 const std::string scenarioDirectory = "../scenarios/";
-const std::string geometryDirectory = "../geometry/";
+const std::string outputDirectory = "output/";
+const std::string geometryDirectory = "geometry/";
 const std::string lineDirectory = "lines/";
 
 int main(int argc, char *argv[]) {
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Geometry file: " << geometryFilename << std::endl;
     std::cout << "Output file: " << geometryFilename << std::endl;
 
-    prepareOutputDirectory(outputDirectory, lineDirectory);
+    prepareOutputDirectory(outputDirectory, lineDirectory, geometryDirectory);
 
     Real n = 0;
     Real t = 0;

@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <boost/algorithm/string/predicate.hpp>
 #include "PgmFile.hpp"
 #include "GeometryFile.hpp"
 #include "GeometryCreator.hpp"
@@ -128,7 +129,7 @@ void generateScenario(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     if (scenarioName == "natural_convection") {
         createNaturalConvectionGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
-    } else if (scenarioName == "rayleigh_benard") {
-        createNaturalConvectionGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
+        createRayleighBenardGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     }
 }

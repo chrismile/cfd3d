@@ -1,15 +1,16 @@
 #--------------------------------------------
 #     Scenario name and geometry file             
 #--------------------------------------------
-scenario	driven_cavity
-geometry	none
+scenario	rayleigh_benard_convection
+geometry	rayleigh_benard_convection.bingeo
 
 #--------------------------------------------
 #            Size of the domain             
 #--------------------------------------------
-xLength		1
-yLength		1
-zLength		1
+# Interesting according to Griebel et al. e.g.: 8:2:1, 8:2:2, 8:2:4
+xLength		8
+yLength		2
+zLength		4
 
 #--------------------------------------------
 #         Bottom lower left corner
@@ -21,40 +22,47 @@ zOrigin    0
 #--------------------------------------------
 #             Number of cells
 #--------------------------------------------
-imax		50
-jmax		50
-kmax		50
+# Interesting according to Griebel et al. e.g.: 8:2:1, 8:2:2, 8:2:4
+imax		80
+jmax		20
+kmax		40
 
 #--------------------------------------------
 #                Time steps
 #--------------------------------------------
 dt			0.05
-tEnd		50.0
+tEnd		45000.0
 tau			0.5
 
 #--------------------------------------------
 #                 Output
 #--------------------------------------------
-dtWrite		0.5
+dtWrite		100.0
 
 #--------------------------------------------
 #                Pressure
 #--------------------------------------------
-itermax		1000
-eps			0.001
+itermax		100
+eps			0.00001
 omg			1.7
 alpha		0.5
 
 #--------------------------------------------
-#             Reynolds number
+#    Reynolds number and Prandtl numbers
 #--------------------------------------------
-Re			10000
+Re			33.73
+Pr			12500
 
 #--------------------------------------------
-#                Gravity
+#      coefficient of thermal expansion
+#--------------------------------------------
+beta		0.00179
+
+#--------------------------------------------
+#                 Gravity
 #--------------------------------------------
 GX			0
-GY			0
+GY			-0.3924
 GZ			0
 
 #--------------------------------------------
@@ -68,3 +76,10 @@ PI			0
 UI			0
 VI			0
 WI			0
+
+#--------------------------------------------
+#        Temperature Initialization
+#--------------------------------------------
+TI			293
+T_h			294.78
+T_c			291.20

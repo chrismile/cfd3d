@@ -32,10 +32,12 @@
 #include <string>
 
 /**
- * Makes sure the directory 'outputDirectory' exists.
+ * Makes sure the directories 'outputDirectory', 'outputDirectory' and 'outputDirectory' exists.
  * @param outputDirectory The output directory name.
  * @param lineDirectory The line directory name.
+ * @param geometryDirectory The geometry directory name.
  */
-void prepareOutputDirectory(const std::string &outputDirectory, const std::string &lineDirectory);
+void prepareOutputDirectory(
+        const std::string &outputDirectory, const std::string &lineDirectory, const std::string &geometryDirectory);
 
 #endif //CFD3D_IOUTILS_HPP
