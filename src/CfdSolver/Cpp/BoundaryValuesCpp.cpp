@@ -29,14 +29,6 @@
 #include "BoundaryValuesCpp.hpp"
 #include "../Flag.hpp"
 
-void setBoundaryValuesCpp(
-        Real T_h, Real T_c,
-        int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real *T,
-        FlagType *Flag) {
-    // TODO: Implement.
-}
-
 void setLeftRightBoundaries(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
@@ -79,7 +71,7 @@ void setLeftRightBoundaries(
                 W[IDXW(imax,j,k)] = W[IDXW(imax-1,j,k)];                
             }
 
-            // Right boundary T
+            // Left boundary T
             if (isHot(Flag[IDXFLAG(0,j,k)])) {
                 T[IDXT(0,j,k)] = 2 * T_h - T[IDXT(1,j,k)];
             } 
@@ -90,7 +82,7 @@ void setLeftRightBoundaries(
                 T[IDXT(0,j,k)] = T[IDXT(1,j,k)];
             }
             
-            // Left boundary T
+            // Right boundary T
             if (isHot(Flag[IDXF(imax+1,j,k)])) {
                 T[IDXT(imax+1,j,k)] = 2 * T_h - T[IDXT(imax,j,k)];
             } 
@@ -102,7 +94,6 @@ void setLeftRightBoundaries(
             }            
         }
     }
-
 }
 
 void setDownUpBoundaries(
@@ -170,7 +161,6 @@ void setDownUpBoundaries(
             }            
         }
     }
-
 }
 
 void setFrontBackBoundaries(
@@ -238,7 +228,16 @@ void setFrontBackBoundaries(
             }            
         }
     }
+}
 
+void setBoundaryValuesCpp(
+        Real T_h, Real T_c,
+        int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *T,
+        FlagType *Flag) {
+    setLeftRightBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setDownUpBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setFrontBackBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 }
 
 void setBoundaryValuesScenarioSpecificCpp(
@@ -247,44 +246,11 @@ void setBoundaryValuesScenarioSpecificCpp(
         Real *U, Real *V, Real *W,
         FlagType *Flag) {
     if (scenarioName == "driven_cavity") {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
-                // Left wall
-                U[IDXU(0,j,k)] = 0.0;
-                V[IDXV(0,j,k)] = -V[IDXV(1,j,k)];
-                W[IDXW(0,j,k)] = 0.0;
-                // Right wall
-                U[IDXU(imax,j,k)] = 0.0;
-                V[IDXV(imax+1,j,k)] = -V[IDXV(imax,j,k)];
-                W[IDXW(imax,j,k)] = 0.0;                
-            }
-        }
-
         for (int i = 1; i <= imax; i++) {
             for (int k = 1; k <= kmax; k++) {
-                // Down wall
-                U[IDXU(i,0,k)] = -U[IDXU(i,1,k)];
-                V[IDXV(i,0,k)] = 0.0;
-                W[IDXW(i,0,k)] = 0.0;
-                // Up wall
+                // Upper wall
                 U[IDXU(i,jmax+1,k)] = 2.0-U[IDXU(i,jmax,k)];
-                V[IDXV(i,jmax,k)] = 0.0;
-                W[IDXW(i,jmax,k)] = 0.0;            
             }
         }
-
-        for (int i = 1; i <= imax; i++) {
-            for (int j = 1; j <= jmax; j++) {
-                // Front wall
-                U[IDXU(i,j,0)] = 0.0;
-                V[IDXV(i,j,0)] = 0.0;
-                W[IDXW(i,j,0)] = -W[IDXW(i,j,1)];
-                // Back wall
-                U[IDXU(i,j,kmax)] = 0.0;
-                V[IDXV(i,j,kmax)] = 0.0;
-                W[IDXW(i,j,kmax+1)] = -W[IDXW(i,j,kmax)];                       
-            }
-        }    
-                    
     }
 }
