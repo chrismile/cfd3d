@@ -49,7 +49,7 @@ g_z
 
 \section{F, G, H}
 
-\subsection{equations}
+\subsection{Equations}
 
 \begin{equation}
 \begin{split}
@@ -87,7 +87,7 @@ w_{i,j,k} & + \delta t \Bigl(
 \end{split}
 \end{equation}
 
-\subsection{discretization}
+\subsection{Discretization}
 \subsubsection{F}
 
 \begin{equation}
@@ -153,6 +153,134 @@ w_{i,j,k} & + \delta t \Bigl(
 \end{split}
 \end{equation}
 
+\subsubsection{G}
+\begin{equation}
+\left[\frac{\partial^2 v}{\partial x^2}\right]_{i,j,k} =
+\frac{v_{i+1,j,k} - 2v_{i,j,k} + v_{i-1,j,k}}{(\delta x)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 v}{\partial y^2}\right]_{i,j,k} =
+\frac{v_{i,j+1,k} - 2v_{i,j,k} + v_{i,j-1,k}}{(\delta y)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 v}{\partial z^2}\right]_{i,j,k} =
+\frac{v_{i,j,k+1} - 2v_{i,j,k} + v_{i,j,k-1}}{(\delta z)^2}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(uv)}{\partial x}\right]_{i,j,k} = &
+\frac{1}{\delta x}
+\left(
+	\frac{(u_{i,j,k}+u_{i,j+1,k})}{2} \frac{(v_{i,j,k}+v_{i+1,j,k})}{2} -
+	\frac{(u_{i-1,j,k}+u_{i-1,j+1,k})}{2} \frac{(v_{i-1,j,k}+v_{i,j,k})}{2}
+\right) + \\
+& \frac{1}{\delta x}
+\left(
+	\frac{|u_{i,j,k}+u_{i,j+1,k}|}{2} \frac{(v_{i,j,k}-v_{i+1,j,k})}{2} -
+	\frac{|u_{i-1,j,k}+u_{i-1,j+1,k}|}{2} \frac{(v_{i-1,j,k}-v_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(v^2)}{\partial y}\right]_{i,j,k} = &
+\frac{1}{\delta y}
+\left(
+	\left(\frac{v_{i,j,k}+v_{i,j+1,k}}{2}\right)^2 -
+	\left(\frac{v_{i,j-1,k}+v_{i,j,k}}{2}\right)^2
+\right) + \\
+& \frac{\gamma}{\delta x}
+\left(
+	\frac{|v_{i,j,k}+v_{i,j+1,k}|}{2} \frac{(v_{i,j,k}-v_{i,j+1,k})}{2} +
+	\frac{|v_{i,j-1,k}+v_{i,j,k}|}{2} \frac{(v_{i,j-1,k}-u_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(vw)}{\partial z}\right]_{i,j,k} = &
+\frac{1}{\delta z}
+\left(
+	\frac{(w_{i,j,k}+w_{i,j+1,k})}{2} \frac{(v_{i,j,k}+v_{i,j,k+1})}{2} -
+	\frac{(w_{i,j,k-1}+w_{i,j+1,k-1})}{2} \frac{(v_{i,j,k-1}+v_{i,j,k})}{2}
+\right) + \\
+& \frac{\gamma}{\delta z}
+\left(
+	\frac{|w_{i,j,k}+w_{i,j+1,k}|}{2} \frac{(v_{i,j,k}-v_{i,j,k+1})}{2} -
+	\frac{|w_{i,j,k-1}+w_{i,j+1,k-1}|}{2} \frac{(v_{i,j,k-1}-v_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
+\subsubsection{H}
+\begin{equation}
+\left[\frac{\partial^2 w}{\partial x^2}\right]_{i,j,k} =
+\frac{w_{i+1,j,k} - 2w_{i,j,k} + w_{i-1,j,k}}{(\delta x)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 w}{\partial y^2}\right]_{i,j,k} =
+\frac{w_{i,j+1,k} - 2w_{i,j,k} + w_{i,j-1,k}}{(\delta y)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 w}{\partial z^2}\right]_{i,j,k} =
+\frac{w_{i,j,k+1} - 2w_{i,j,k} + w_{i,j,k-1}}{(\delta z)^2}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(uw)}{\partial x}\right]_{i,j,k} = &
+\frac{1}{\delta x}
+\left(
+	\frac{(u_{i,j,k}+u_{i,j,k+1})}{2} \frac{(w_{i,j,k}+w_{i+1,j,k})}{2} -
+	\frac{(u_{i-1,j,k}+u_{i-1,j,k+1})}{2} \frac{(w_{i-1,j,k}+w_{i,j,k})}{2}
+\right) + \\
+& \frac{1}{\delta x}
+\left(
+	\frac{|u_{i,j,k}+u_{i,j,k+1}|}{2} \frac{(w_{i,j,k}-w_{i+1,j,k})}{2} -
+	\frac{|u_{i-1,j,k}+u_{i-1,j,k+1}|}{2} \frac{(w_{i-1,j,k}-w_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(vw)}{\partial y}\right]_{i,j,k} = &
+\frac{1}{\delta y}
+\left(
+	\frac{(v_{i,j,k}+v_{i,j,k+1})}{2} \frac{(w_{i,j,k}+w_{i,j+1,k})}{2} -
+	\frac{(v_{i,j-1,k}+v_{i,j-1,k+1})}{2} \frac{(w_{i,j-1,k}+w_{i,j,k})}{2}
+\right) + \\
+& \frac{\gamma}{\delta y}
+\left(
+	\frac{|v_{i,j,k}+v_{i,j,k+1}|}{2} \frac{(w_{i,j,k}-w_{i,j+1,k})}{2} -
+	\frac{|v_{i,j-1,k}+v_{i,j-1,k+1}|}{2} \frac{(w_{i,j-1,k}-w_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(w^2)}{\partial z}\right]_{i,j,k} = &
+\frac{1}{\delta z}
+\left(
+	\left(\frac{w_{i,j,k}+w_{i,j,k+1}}{2}\right)^2 -
+	\left(\frac{w_{i,j,k-1}+w_{i,j,k}}{2}\right)^2
+\right) + \\
+& \frac{\gamma}{\delta x}
+\left(
+	\frac{|w_{i,j,k}+v_{i,j,k+1}|}{2} \frac{(w_{i,j,k}-w_{i,j,k+1})}{2} +
+	\frac{|w_{i,j,k-1}+w_{i,j,k}|}{2} \frac{(w_{i,j,k-1}-w_{i,j,k})}{2}
+\right)
+\end{split}
+\end{equation}
+
 
 \section{SOR solver}
 \begin{equation}
@@ -192,6 +320,8 @@ w^{(n+1)}_{i,j,k} = & H^{(n)}_{i,j,k} - \frac{\delta t}{\delta z}\left(p^{(n+1)}
 \end{equation}
 
 \section{Energy Equation}
+\subsection{equation}
+
 \begin{equation}
 T^{(n+1)}_{i,j,k} = T^{(n)}_{i,j,k} +  \delta t \left(
 \frac{1}{Re} \frac{1}{Pr} \left( \left[\frac{\partial^2 T}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial z^2}\right]_{i,j,k} \right) - 
@@ -200,5 +330,69 @@ T^{(n+1)}_{i,j,k} = T^{(n)}_{i,j,k} +  \delta t \left(
 \right)
 \end{equation}
 
+\subsection{Discretization}
+
+\begin{equation}
+\left[\frac{\partial^2 T}{\partial x^2}\right]_{i,j,k} =
+\frac{T_{i+1,j,k} - 2T_{i,j,k} + T_{i-1,j,k}}{(\delta x)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 T}{\partial y^2}\right]_{i,j,k} =
+\frac{T_{i,j+1,k} - 2T_{i,j,k} + T_{i,j-1,k}}{(\delta y)^2}
+\end{equation}
+
+\begin{equation}
+\left[\frac{\partial^2 T}{\partial z^2}\right]_{i,j,k} =
+\frac{T_{i,j,k+1} - 2T_{i,j,k} + T_{i,j,k-1}}{(\delta z)^2}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(uT)}{\partial x}\right]_{i,j,k} = &
+\frac{1}{\delta x}
+\left(
+	u_{i,j,k} \frac{T_{i,j,k}+T_{i+1,j,k}}{2} -
+	u_{i-1,j,k} \frac{T_{i-1,j,k}+T_{i,j,k}}{2}
+\right) + \\
+& \frac{\gamma}{\delta x}
+\left(
+	|u_{i,j,k}| \frac{T_{i,j,k}-T_{i+1,j,k}}{2} -
+	|u_{i-1,j,k}| \frac{T_{i-1,j,k}-T_{i,j,k}}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(vT)}{\partial y}\right]_{i,j,k} = &
+\frac{1}{\delta y}
+\left(
+	v_{i,j,k} \frac{T_{i,j,k}+T_{i,j+1,k}}{2} -
+	v_{i,j-1,k} \frac{T_{i,j-1,k}+T_{i,j,k}}{2}
+\right) + \\
+& \frac{\gamma}{\delta y}
+\left(
+	|v_{i,j,k}| \frac{T_{i,j,k}-T_{i,j+1,k}}{2} -
+	|v_{i,j-1,k}| \frac{T_{i,j-1,k}-T_{i,j,k}}{2}
+\right)
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\left[\frac{\partial(wT)}{\partial z}\right]_{i,j,k} = &
+\frac{1}{\delta z}
+\left(
+	w_{i,j,k} \frac{T_{i,j,k}+T_{i,j,k+1}}{2} -
+	w_{i,j,k-1} \frac{T_{i,j,k-1}+T_{i,j,k}}{2}
+\right) + \\
+& \frac{\gamma}{\delta z}
+\left(
+	|w_{i,j,k}| \frac{T_{i,j,k}-T_{i,j,k+1}}{2} -
+	|w_{i,j,k-1}| \frac{T_{i,j,k-1}-T_{i,j,k}}{2}
+\right)
+\end{split}
+\end{equation}
 
 \end{document}
