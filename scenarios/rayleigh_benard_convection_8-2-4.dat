@@ -1,8 +1,8 @@
 #--------------------------------------------
 #     Scenario name and geometry file             
 #--------------------------------------------
-scenario	rayleigh_benard_convection
-geometry	rayleigh_benard_convection.bingeo
+scenario	rayleigh_benard_convection_8-2-4
+geometry	rayleigh_benard_convection_8-2-4.bingeo
 
 #--------------------------------------------
 #            Size of the domain             
