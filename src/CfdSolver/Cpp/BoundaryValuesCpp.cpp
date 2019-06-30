@@ -131,7 +131,7 @@ void setDownUpBoundaries(
             // Down boundary T
             if (isHot(Flag[IDXFLAG(i,0,k)])) {
                 T[IDXT(i,0,k)] = 2 * T_h - T[IDXT(i,1,k)];
-            }  else if (isCold(Flag[IDXFLAG(i,0,k)])) {
+            } else if (isCold(Flag[IDXFLAG(i,0,k)])) {
                 T[IDXT(i,0,k)] = 2 * T_c - T[IDXT(i,1,k)];
             } else {
                 T[IDXT(i,0,k)] = T[IDXT(i,1,k)];
@@ -141,7 +141,7 @@ void setDownUpBoundaries(
             if (isHot(Flag[IDXFLAG(i,jmax+1,k)])) {
                 T[IDXT(i,jmax+1,k)] = 2 * T_h - T[IDXT(i,jmax,k)];
             } else if (isCold(Flag[IDXFLAG(i,jmax+1,k)])) {
-                T[IDXT(i,jmax+1,k)] = 2 * T_c - T[IDXT(i,jmax+1,k)];
+                T[IDXT(i,jmax+1,k)] = 2 * T_c - T[IDXT(i,jmax,k)];
             } else {
                 T[IDXT(i,jmax+1,k)] = T[IDXT(i,jmax,k)];
             }            
