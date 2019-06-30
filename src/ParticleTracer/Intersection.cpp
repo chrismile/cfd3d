@@ -28,13 +28,13 @@
 
 #include "Intersection.hpp"
 
-#define BIAS 0.001
+#define BIAS (Real(0.00001))
 
 /**
  * Helper function for rayBoxIntersection (see below).
  */
 bool rayBoxPlaneIntersection(
-        float rayOriginX, float rayDirectionX, float lowerX, float upperX, float &tNear, float &tFar) {
+        Real rayOriginX, Real rayDirectionX, Real lowerX, Real upperX, Real &tNear, Real &tFar) {
     if (std::abs(rayDirectionX) < BIAS) {
         // Ray is parallel to the x planes
         if (rayOriginX < lowerX || rayOriginX > upperX) {
@@ -77,9 +77,9 @@ bool rayBoxPlaneIntersection(
  */
 bool rayBoxIntersection(
         const rvec3 &rayOrigin, const rvec3 &rayDirection, const rvec3 &lower, const rvec3 &upper,
-        float &tNear, float &tFar) {
-    tNear = -1e7;
-    tFar = 1e7;
+        Real &tNear, Real &tFar) {
+    tNear = -1e20;
+    tFar = 1e20;
     for (int i = 0; i < 3; i++) {
         if (!rayBoxPlaneIntersection(rayOrigin[i], rayDirection[i], lower[i], upper[i], tNear, tFar)) {
             return false;

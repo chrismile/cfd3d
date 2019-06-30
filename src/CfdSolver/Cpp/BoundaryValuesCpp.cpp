@@ -34,8 +34,7 @@ void setLeftRightBoundaries(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int j = 1; j <= jmax; j++) {
         for (int k = 1; k <= kmax; k++) {
             // Left wall
@@ -76,7 +75,7 @@ void setLeftRightBoundaries(
                 T[IDXT(0,j,k)] = 2 * T_h - T[IDXT(1,j,k)];
             } else if (isCold(Flag[IDXFLAG(0,j,k)])) {
                 T[IDXT(0,j,k)] = 2 * T_c - T[IDXT(1,j,k)];
-            } else{
+            } else {
                 T[IDXT(0,j,k)] = T[IDXT(1,j,k)];
             }
             
@@ -85,7 +84,7 @@ void setLeftRightBoundaries(
                 T[IDXT(imax+1,j,k)] = 2 * T_h - T[IDXT(imax,j,k)];
             }  else if (isCold(Flag[IDXFLAG(imax+1,j,k)])) {
                 T[IDXT(imax+1,j,k)] = 2 * T_c - T[IDXT(imax,j,k)];
-            } else{
+            } else {
                 T[IDXT(imax+1,j,k)] = T[IDXT(imax,j,k)];
             }            
         }
@@ -97,7 +96,6 @@ void setDownUpBoundaries(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-
     #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int k = 1; k <= kmax; k++) {
@@ -135,7 +133,7 @@ void setDownUpBoundaries(
                 T[IDXT(i,0,k)] = 2 * T_h - T[IDXT(i,1,k)];
             }  else if (isCold(Flag[IDXFLAG(i,0,k)])) {
                 T[IDXT(i,0,k)] = 2 * T_c - T[IDXT(i,1,k)];
-            } else{
+            } else {
                 T[IDXT(i,0,k)] = T[IDXT(i,1,k)];
             }
             
@@ -144,7 +142,7 @@ void setDownUpBoundaries(
                 T[IDXT(i,jmax+1,k)] = 2 * T_h - T[IDXT(i,jmax,k)];
             } else if (isCold(Flag[IDXFLAG(i,jmax+1,k)])) {
                 T[IDXT(i,jmax+1,k)] = 2 * T_c - T[IDXT(i,jmax+1,k)];
-            } else{
+            } else {
                 T[IDXT(i,jmax+1,k)] = T[IDXT(i,jmax,k)];
             }            
         }
@@ -156,7 +154,6 @@ void setFrontBackBoundaries(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-
     #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
@@ -200,7 +197,7 @@ void setFrontBackBoundaries(
             else if (isCold(Flag[IDXFLAG(i,j,0)])) {
                 T[IDXT(i,j,0)] = 2 * T_c - T[IDXT(i,j,1)];
             }
-            else{
+            else {
                 T[IDXT(i,j,0)] = T[IDXT(i,j,1)];
             }
             
@@ -211,7 +208,7 @@ void setFrontBackBoundaries(
             else if (isCold(Flag[IDXFLAG(i,j,kmax+1)])) {
                 T[IDXT(i,j,kmax+1)] = 2 * T_c - T[IDXT(i,j,kmax)];
             }
-            else{
+            else {
                 T[IDXT(i,j,kmax+1)] = T[IDXT(i,j,kmax)];
             }            
         }

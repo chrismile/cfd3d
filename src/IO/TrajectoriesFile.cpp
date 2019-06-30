@@ -101,6 +101,7 @@ bool writeTrajectoriesToBinLinesFile(const std::string &filename, const Trajecto
     for (uint32_t trajectoryIndex = 0; trajectoryIndex < numTrajectories; trajectoryIndex++) {
         const Trajectory &currentTrajectory = trajectories.at(trajectoryIndex);
         size_t trajectoryNumPoints = currentTrajectory.positions.size();
+        stream.write(uint32_t(trajectoryNumPoints));
         stream.write((void*)&currentTrajectory.positions.front(), sizeof(glm::vec3)*trajectoryNumPoints);
 
         assert(numAttributes == currentTrajectory.attributes.size());
