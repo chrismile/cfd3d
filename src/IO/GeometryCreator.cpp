@@ -41,7 +41,7 @@ enum GeometryValues {
     G_COUPLING
 };
 
-GeometryCreator::GeometryCreator(int imax, int kmax, int jmax, unsigned int boundaryType)
+GeometryCreator::GeometryCreator(int imax, int jmax, int kmax, unsigned int boundaryType)
         : imax(imax), jmax(jmax), kmax(kmax) {
     // Initialize the domain with fluid cells in the interior, and no-slip cells on the boundary.
     geometryValues.resize((imax+2)*(jmax+2)*(kmax+2), boundaryType);
