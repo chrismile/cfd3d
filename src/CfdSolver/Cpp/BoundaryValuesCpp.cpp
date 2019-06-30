@@ -64,7 +64,7 @@ void setLeftRightBoundaries(
                 V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
                 W[IDXW(imax,j,k)] = 0.0;            
             }
-            else if (isOutflow(Flag[IDXFLAG(0,j,k)])) {
+            else if (isOutflow(Flag[IDXFLAG(imax+1,j,k)])) {
                 U[IDXU(imax,j,k)] = U[IDXU(imax-1,j,k)];
                 V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
                 W[IDXW(imax,j,k)] = W[IDXW(imax-1,j,k)];                
