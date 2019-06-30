@@ -64,9 +64,9 @@ void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerSt
     std::vector<unsigned int> pgmValues;
     nearestNeighborUpsampling2D(pgmValuesRead, pgmWidth, pgmHeight, pgmValues, imax+2, jmax+2);
 
-    for (int i = 0; i < imax+2; i++) {
-        for (int j = 0; i < jmax+2; j++) {
-            for (int k = layerStart; i <= layerEnd; i++) {
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = layerStart; k <= layerEnd; k++) {
                 geometryValues[IDXFLAG(i,j,k)] = pgmValues[i*(imax+2) + j];
             }
         }
@@ -74,9 +74,9 @@ void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerSt
 }
 
 void GeometryCreator::setLayersConstant(FlagType value, int layerStart, int layerEnd) {
-    for (int i = 0; i < imax+2; i++) {
-        for (int j = 0; i < jmax+2; j++) {
-            for (int k = layerStart; i <= layerEnd; i++) {
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = layerStart; k <= layerEnd; k++) {
                 geometryValues[IDXFLAG(i,j,k)] = value;
             }
         }
@@ -85,9 +85,9 @@ void GeometryCreator::setLayersConstant(FlagType value, int layerStart, int laye
 
 void GeometryCreator::setLayersInObject(
         FlagType value, int layerStart, int layerEnd, std::function<bool(int,int,int)> membershipFunctor) {
-    for (int i = 0; i < imax+2; i++) {
-        for (int j = 0; i < jmax+2; j++) {
-            for (int k = layerStart; i <= layerEnd; i++) {
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = layerStart; k <= layerEnd; k++) {
                 if (membershipFunctor(i,j,k)) {
                     geometryValues[IDXFLAG(i,j,k)] = value;
                 }
