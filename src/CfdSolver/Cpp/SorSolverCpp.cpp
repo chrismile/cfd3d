@@ -142,6 +142,11 @@ void sorSolverCpp(
     const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
     Real residual = 1e9;
     int it = 0;
+
+#ifdef REAL_FLOAT
+    eps = 0.00005f;
+#endif
+
     while (it < itermax && residual > eps) {
 #if defined(SOR_JACOBI) || defined(SOR_HYBRID)
         //memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
