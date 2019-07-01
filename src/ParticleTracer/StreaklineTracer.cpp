@@ -66,7 +66,7 @@ void StreaklineTracer::timeStep(
                     // Clamp the position to the boundary.
                     rvec3 rayOrigin = trajectories.at(i).positions.at(j-1);
                     rvec3 rayDirection = newParticlePosition - rayOrigin;
-                    float tNear, tFar;
+                    Real tNear, tFar;
                     rayBoxIntersection(rayOrigin, rayDirection, gridOrigin, gridOrigin + gridSize, tNear, tFar);
 
                     rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;
