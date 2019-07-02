@@ -1,8 +1,8 @@
 #--------------------------------------------
 #     Scenario name and geometry file             
 #--------------------------------------------
-scenario	rayleigh_benard_convection_8-2-1
-geometry	rayleigh_benard_convection_8-2-1.bingeo
+scenario	rayleigh_benard_convection_2d
+geometry	rayleigh_benard_convection_2d.bingeo
 
 #--------------------------------------------
 #            Size of the domain             
@@ -10,7 +10,7 @@ geometry	rayleigh_benard_convection_8-2-1.bingeo
 # Interesting according to Griebel et al. e.g.: 8:2:1, 8:2:2, 8:2:4
 xLength		8
 yLength		2
-zLength		1
+zLength		0.125
 
 #--------------------------------------------
 #         Bottom lower left corner
@@ -25,7 +25,7 @@ zOrigin    0
 # Interesting according to Griebel et al. e.g.: 8:2:1, 8:2:2, 8:2:4
 imax		64
 jmax		16
-kmax		8
+kmax		1
 
 #--------------------------------------------
 #                Time steps

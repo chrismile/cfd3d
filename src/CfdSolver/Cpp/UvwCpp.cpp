@@ -224,7 +224,7 @@ void calculateDtCpp(
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax; k++) {
-                wMaxAbs = std::max(wMaxAbs, std::abs(V[IDXW(i,j,k)]));
+                wMaxAbs = std::max(wMaxAbs, std::abs(W[IDXW(i,j,k)]));
             }
         }
     }
@@ -234,7 +234,7 @@ void calculateDtCpp(
         assert(2 / Re * dt < dx * dx * dy * dy * dz * dz / (dx * dx + dy * dy + dz * dz));
         assert(uMaxAbs * dt < dx);
         assert(vMaxAbs * dt < dy);
-        assert(vMaxAbs * dt < dz);
+        assert(wMaxAbs * dt < dz);
         if (useTemperature){
             assert(dt < (Re*Pr/2)*(1/((1/(dx*dx))+1/(dy*dy)+1/(dz*dz))));
         }
@@ -251,7 +251,6 @@ void calculateDtCpp(
                 + Real(1.0) / (dz*dz))));
     }
     dt = tau * dt;
-
 }
 
 void calculateUvwCpp(

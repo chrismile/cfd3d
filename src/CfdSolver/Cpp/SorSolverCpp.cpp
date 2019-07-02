@@ -163,6 +163,11 @@ void sorSolverCpp(
     const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
     Real residual = Real(1e9);
     int it = 0;
+
+#ifdef REAL_FLOAT
+    eps = 0.00005f;
+#endif
+
     while (it < itermax && residual > eps) {
         sorSolverIterationCpp(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
