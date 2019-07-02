@@ -125,11 +125,23 @@ void createRayleighBenardGeometry(
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
+void createFlowOverStepGeometry(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    // Step box.
+    geometryCreator.setLayersInObject(G_NO_SLIP, 0, kmax+1, [&](int i, int j, int k) {
+        return i <= 10 && j <= 10;
+    });
+    geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
 void generateScenario(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     if (scenarioName == "natural_convection") {
         createNaturalConvectionGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
         createRayleighBenardGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "flow_over_step")) {
+        createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     }
 }
