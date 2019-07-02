@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <glm/glm.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include "PgmFile.hpp"
 #include "GeometryFile.hpp"
@@ -62,7 +63,7 @@ void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerSt
     int pgmWidth, pgmHeight;
     std::vector<unsigned int> pgmValuesRead = loadPgmFile(filename, &pgmWidth, &pgmHeight);
     std::vector<unsigned int> pgmValues;
-    nearestNeighborUpsampling2D(pgmValuesRead, pgmWidth, pgmHeight, pgmValues, imax+2, jmax+2);
+    nearestNeighborUpsamplingPgm2D(pgmValuesRead, pgmWidth, pgmHeight, pgmValues, imax+2, jmax+2);
 
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
@@ -94,6 +95,22 @@ void GeometryCreator::setLayersInObject(
             }
         }
     }
+}
+
+
+bool isValidCell(int i, int j, int k, int imax, int jmax, int kmax, FlagType *Flag) {
+    // Boundary cells with two opposite fluid cells are excluded (forbidden boundary cells).
+    // boundary cell => ((fluid left => not fluid right) and (fluid bottom => not fluid top)
+    // and (fluid back => not fluid front))
+    bool fluidLeft = i > 0 && (Flag[IDXFLAG(i-1,j,k)] & 0x1) == 1;
+    bool fluidRight = i <= imax && (Flag[IDXFLAG(i+1,j,k)] & 0x1) == 1;
+    bool fluidBottom = j > 0 && (Flag[IDXFLAG(i,j-1,k)] & 0x1) == 1;
+    bool fluidTop = j <= jmax && (Flag[IDXFLAG(i,j+1,k)] & 0x1) == 1;
+    bool fluidBack = j > 0 && (Flag[IDXFLAG(i,j,k-1)] & 0x1) == 1;
+    bool fluidFront = j <= jmax && (Flag[IDXFLAG(i,j,k+1)] & 0x1) == 1;
+    return ((Flag[IDXFLAG(i,j,k)] & 0x1) == 1
+            || ((!fluidLeft || !fluidRight) && (!fluidBottom || !fluidTop)
+                && (!fluidBack || !fluidFront)));
 }
 
 
@@ -135,6 +152,50 @@ void createFlowOverStepGeometry(
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
+void createTowerGeometry(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    // Create a tower centered at 'towerCenter' with the specified width (= depth) and height.
+    glm::ivec3 towerCenter(imax/3, 0, kmax/2);
+    int width = kmax / 4;
+    int height = jmax*2/3;
+    glm::ivec3 towerMin = towerCenter + glm::ivec3(-width/2, 0, -width/2);
+    glm::ivec3 towerMax = towerCenter + glm::ivec3(width/2, height, width/2);
+
+    GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    geometryCreator.setLayersInObject(G_NO_SLIP, 0, kmax+1, [&](int i, int j, int k) {
+        glm::ivec3 coords(i, j, k);
+        return glm::all(glm::greaterThanEqual(coords, towerMin)) && glm::all(glm::lessThanEqual(coords, towerMax));
+    });
+    geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
+void createTerrainGeometry(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    // Load the height map from the specified .pgm image file.
+    int pgmWidth = 0;
+    int pgmHeight = 0;
+    std::vector<unsigned int> heightMapPgmData = loadPgmFile("../geometry-pgm/heightmap1.pgm", &pgmWidth, &pgmHeight);
+    std::vector<unsigned int> heightMapInt;
+    nearestNeighborUpsampling2D(heightMapPgmData, pgmWidth, pgmHeight, heightMapPgmData, imax, kmax);
+    std::vector<float> heightMapFloat;
+    heightMapFloat.resize(heightMapPgmData.size());
+    for (size_t i = 0; i < heightMapPgmData.size(); i++) {
+        heightMapFloat[i] = heightMapPgmData[i]/255.0f;
+    }
+
+    // Now set all cells below the specified heights to no-slip obstacles.
+    GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    geometryCreator.setLayersInObject(G_NO_SLIP, 1, kmax, [&](int i, int j, int k) {
+        if (i < 1 || i > imax || j < 1 || j > jmax) {
+            return false;
+        }
+        float heightMapEntry = heightMapFloat.at(i * kmax + k);
+        int integerHeight = static_cast<int>(heightMapEntry * jmax);
+        return j <= integerHeight;
+    });
+    geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
 void generateScenario(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     if (scenarioName == "natural_convection") {
@@ -142,6 +203,8 @@ void generateScenario(
     } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
         createRayleighBenardGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "flow_over_step")) {
+        createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "single_tower")) {
         createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     }
 }
