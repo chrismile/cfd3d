@@ -130,7 +130,7 @@ void createFlowOverStepGeometry(
     GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
     // Step box.
     geometryCreator.setLayersInObject(G_NO_SLIP, 0, kmax+1, [&](int i, int j, int k) {
-        return i <= 10 && j <= 10;
+        return i <= jmax/2 && j <= jmax/2;
     });
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }

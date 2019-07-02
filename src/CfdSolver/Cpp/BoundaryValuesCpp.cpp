@@ -241,5 +241,13 @@ void setBoundaryValuesScenarioSpecificCpp(
                 U[IDXU(i,jmax+1,k)] = 2.0-U[IDXU(i,jmax,k)];
             }
         }
+    } else if (scenarioName == "flow_over_step") {
+        #pragma omp parallel for
+        for (int j = jmax/2+1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Upper wall
+                U[IDXU(0,j,k)] = 1.0;
+            }
+        }
     }
 }
