@@ -34,7 +34,7 @@
 /*
  * Determines the value of F, H and H for computing RS.
  */
-void calculateFghCuda(
+__global__ void calculateFghCuda(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag);
