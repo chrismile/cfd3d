@@ -32,7 +32,7 @@
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName, int &numParticles,
         bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
-    scenarioName = "natural_convection"; // driven_cavity
+    scenarioName = "flow_over_step"; // driven_cavity natural_convection
     solverName = "cpp";
     numParticles = 1000;
     traceStreamlines = false;
