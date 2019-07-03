@@ -97,20 +97,32 @@ void GeometryCreator::setLayersInObject(
     }
 }
 
-
 bool isValidCell(int i, int j, int k, int imax, int jmax, int kmax, FlagType *Flag) {
     // Boundary cells with two opposite fluid cells are excluded (forbidden boundary cells).
     // boundary cell => ((fluid left => not fluid right) and (fluid bottom => not fluid top)
     // and (fluid back => not fluid front))
-    bool fluidLeft = i > 0 && (Flag[IDXFLAG(i-1,j,k)] & 0x1) == 1;
-    bool fluidRight = i <= imax && (Flag[IDXFLAG(i+1,j,k)] & 0x1) == 1;
-    bool fluidBottom = j > 0 && (Flag[IDXFLAG(i,j-1,k)] & 0x1) == 1;
-    bool fluidTop = j <= jmax && (Flag[IDXFLAG(i,j+1,k)] & 0x1) == 1;
-    bool fluidBack = j > 0 && (Flag[IDXFLAG(i,j,k-1)] & 0x1) == 1;
-    bool fluidFront = j <= jmax && (Flag[IDXFLAG(i,j,k+1)] & 0x1) == 1;
-    return ((Flag[IDXFLAG(i,j,k)] & 0x1) == 1
+    bool fluidLeft = i > 0 && Flag[IDXFLAG(i-1,j,k)] == G_FLUID;
+    bool fluidRight = i <= imax && Flag[IDXFLAG(i+1,j,k)] == G_FLUID;
+    bool fluidBottom = j > 0 && Flag[IDXFLAG(i,j-1,k)] == G_FLUID;
+    bool fluidTop = j <= jmax && Flag[IDXFLAG(i,j+1,k)] == G_FLUID;
+    bool fluidBack = j > 0 && Flag[IDXFLAG(i,j,k-1)] == G_FLUID;
+    bool fluidFront = j <= jmax && Flag[IDXFLAG(i,j,k+1)] == G_FLUID;
+    return (Flag[IDXFLAG(i,j,k)] == G_FLUID
             || ((!fluidLeft || !fluidRight) && (!fluidBottom || !fluidTop)
                 && (!fluidBack || !fluidFront)));
+}
+
+void GeometryCreator::removeInvalidCells() {
+    // Go over all layers in y direction.
+    for (int j = 1; j <= jmax+1; j++) {
+        for (int i = 1; i <= imax+1; i++) {
+            for (int k = 1; k <= kmax+1; k++) {
+                if (!isValidCell(i, j, k, imax, jmax, kmax, &geometryValues.front())) {
+                    geometryValues[IDXFLAG(i,j,k)] = G_FLUID;
+                }
+            }
+        }
+    }
 }
 
 
@@ -193,6 +205,7 @@ void createTerrainGeometry(
         int integerHeight = static_cast<int>(heightMapEntry * jmax);
         return j <= integerHeight;
     });
+    geometryCreator.removeInvalidCells();
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
