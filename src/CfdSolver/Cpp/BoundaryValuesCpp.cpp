@@ -218,15 +218,7 @@ void setFrontBackBoundaries(
     }
 }
 
-void setBoundaryValuesCpp(
-        Real T_h, Real T_c,
-        int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real *T,
-        FlagType *Flag) {
-    setLeftRightBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
-    setDownUpBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
-    setFrontBackBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
-}
+
 
 void setBoundaryValuesScenarioSpecificCpp(
         const std::string &scenarioName,
@@ -242,4 +234,531 @@ void setBoundaryValuesScenarioSpecificCpp(
             }
         }
     }
+}
+
+void setInternalUBoundaries(
+        int imax, int jmax, int kmax,
+        Real *U,
+        FlagType *Flag) {
+
+    for (int i = 1; i <= imax-1; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+
+                if(!isFluid(Flag[IDXFLAG(i,j,k)]))
+                {
+                    if (B_R(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        U[IDXU(i,j,k)] = Real(0);
+                    }
+                    else if(B_L(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        U[IDXU(i-1,j,k)] = Real(0);
+                    }
+                    else if(B_U(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        U[IDXU(i-1,j,k)] = -U[IDXU(i-1,j+1,k)];
+                        U[IDXU(i,j,k)] = -U[IDXU(i,j+1,k)];
+                    }
+                    else if(B_D(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        U[IDXU(i-1,j,k)] = -U[IDXU(i-1,j-1,k)];
+                        U[IDXU(i,j,k)] = -U[IDXU(i,j-1,k)];
+                    }
+                    else if(B_B(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        U[IDXU(i-1,j,k)] = -U[IDXU(i-1,j,k-1)];
+                        U[IDXU(i,j,k)] = -U[IDXU(i,j,k-1)];
+                    }
+                    else if(B_F(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        U[IDXU(i-1,j,k)] = -U[IDXU(i-1,j,k+1)];
+                        U[IDXU(i,j,k)] = -U[IDXU(i,j,k+1)];
+                    }
+                    /**else if(B_RU(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        U[IDXU(i,j,k)] = Real(0);
+                        U[IDXU(i-1,j,k)] = -U[IDXU(i-1,j+1,k)];
+                    }
+                    else if(B_RD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LU(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_UF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_UB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }   */                                                                                    
+                }
+ 
+
+            }   
+        }
+    }     
+}
+
+void setInternalVBoundaries(
+        int imax, int jmax, int kmax,
+        Real *V,
+        FlagType *Flag) {
+
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax-1; j++) {
+            for (int k = 1; k <= kmax; k++) {
+
+                if(!isFluid(Flag[IDXFLAG(i,j,k)]))
+                {
+                    if (B_R(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        V[IDXV(i,j-1,k)] = - V[IDXV(i+1,j-1,k)]; 
+                        V[IDXV(i,j,k)] = - V[IDXV(i+1,j,k)];
+                    }
+                    else if(B_L(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        V[IDXV(i,j-1,k)] = - V[IDXV(i-1,j-1,k)]; 
+                        V[IDXV(i,j,k)] = - V[IDXV(i-1,j,k)];
+                    }
+                    else if(B_U(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        V[IDXV(i,j,k)] = Real(0);
+                    }
+                    else if(B_D(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        V[IDXV(i,j-1,k)] = Real(0);    
+                    }
+                    else if(B_B(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        V[IDXV(i,j-1,k)] = - V[IDXV(i,j-1,k-1)]; 
+                        V[IDXV(i,j,k)] = - V[IDXV(i,j,k-1)];
+                    }
+                    else if(B_F(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        V[IDXV(i,j-1,k)] = - V[IDXV(i,j-1,k+1)]; 
+                        V[IDXV(i,j,k)] = - V[IDXV(i,j,k+1)];
+                    }
+                    /**else if(B_RU(Flag[IDXFLAG(i,j,k)]))
+                    {   
+                        V[IDXV(i,j-1,k)] = - V[IDXV(i+1,j-1,k)];
+                        V[IDXV(i,j,k)] = Real(0);
+
+                    }
+                    else if(B_RD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LU(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_UF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_UB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }   */                                                                                   
+                }
+
+            }             
+        }
+    }   
+        
+        }
+
+void setInternalWBoundaries(
+        int imax, int jmax, int kmax,
+        Real *W,
+        FlagType *Flag) {
+
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax-1; k++) {
+
+                if(!isFluid(Flag[IDXFLAG(i,j,k)]))
+                {
+                    if (B_R(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        W[IDXW(i,j,k-1)] = - W[IDXW(i+1,j,k-1)]; 
+                        W[IDXW(i,j,k)] = - W[IDXW(i+1,j,k)];                        
+                    }
+                    else if(B_L(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        W[IDXW(i,j,k-1)] = - W[IDXW(i-1,j,k-1)]; 
+                        W[IDXW(i,j,k)] = - W[IDXW(i-1,j,k)];   
+                    }
+                    else if(B_U(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        W[IDXW(i,j,k-1)] = - W[IDXW(i,j+1,k-1)]; 
+                        W[IDXW(i,j,k)] = - W[IDXW(i,j+1,k)];
+                    }
+                    else if(B_D(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        W[IDXW(i,j,k-1)] = - W[IDXW(i,j-1,k-1)]; 
+                        W[IDXW(i,j,k)] = - W[IDXW(i,j-1,k)];
+                    }
+                    else if(B_B(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        W[IDXW(i,j,k-1)] = Real(0);
+                    }
+                    else if(B_F(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        W[IDXW(i,j,k)] = Real(0);
+                    }
+                    /**else if(B_RU(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        //W[IDXW(i,j,k-1)] = - W[IDXW(i+1,j,k-1)]; 
+                        //W[IDXW(i,j,k)] = - W[IDXW(i+1,j,k)];
+                        //W[IDXW(i,j,k-1)] = - W[IDXW(i,j+1,k-1)]; 
+                        //W[IDXW(i,j,k)] = - W[IDXW(i,j+1,k)];                         
+                    }
+                    else if(B_RD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LU(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_UF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_UB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }   */                                                                                   
+                }
+            }     
+        }
+    }      
+        
+}
+
+void setInternalTBoundaries(
+        int imax, int jmax, int kmax,
+        Real *T,
+        FlagType *Flag) {
+
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+
+                if(!isFluid(Flag[IDXFLAG(i,j,k)]))
+                {
+                    if (B_R(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        T[IDXT(i,j,k)] = T[IDXT(i+1,j,k)]; 
+                                      
+                    }
+                    else if(B_L(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        T[IDXT(i,j,k)] = T[IDXT(i-1,j,k)];
+                    }
+                    else if(B_U(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        T[IDXT(i,j,k)] = T[IDXT(i,j+1,k)];
+                    }
+                    else if(B_D(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        T[IDXT(i,j,k)] = T[IDXT(i,j-1,k)];
+                    }
+                    else if(B_B(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        T[IDXT(i,j,k)] = T[IDXT(i,j,k-1)];
+                    }
+                    else if(B_F(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        T[IDXT(i,j,k)] = T[IDXT(i,j,k+1)];
+                    }
+                    /**else if(B_RU(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        //W[IDXW(i,j,k-1)] = - W[IDXW(i+1,j,k-1)]; 
+                        //W[IDXW(i,j,k)] = - W[IDXW(i+1,j,k)];
+                        //W[IDXW(i,j,k-1)] = - W[IDXW(i,j+1,k-1)]; 
+                        //W[IDXW(i,j,k)] = - W[IDXW(i,j+1,k)];                         
+                    }
+                    else if(B_RD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LU(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LD(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_UF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DF(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_UB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_DB(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_RDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_RDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LUF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LUB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }
+                    else if(B_LDF(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        
+                    }
+                    else if(B_LDB(Flag[IDXFLAG(i,j,k)]))
+                    {
+
+                    }   */                                                                                   
+                }
+            }     
+        }
+    }      
+        
+}
+
+void setBoundaryValuesCpp(
+        Real T_h, Real T_c,
+        int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *T,
+        FlagType *Flag) {
+    setLeftRightBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setDownUpBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setFrontBackBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setInternalUBoundaries(imax, jmax, kmax, U,Flag);
+    setInternalVBoundaries(imax, jmax, kmax, V,Flag);
+    setInternalWBoundaries(imax, jmax, kmax, W,Flag);
+    setInternalTBoundaries(imax, jmax, kmax, T,Flag);
+    
 }
