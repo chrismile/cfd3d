@@ -36,18 +36,18 @@ __global__ void calculateFghCuda(
     int i = blockIdx.x + 1;
     int j = blockIdx.y + threadIdx.y + 1;
     int k = blockIdx.z + threadIdx.x + 1;
-    
-    if (i <= imax -1 && j <= jmax && k <= kmax){
 
-        Real d2u_dx2,d2u_dy2,d2u_dz2,
+    Real d2u_dx2,d2u_dy2,d2u_dz2,
             d2v_dx2,d2v_dy2,d2v_dz2,
             d2w_dx2,d2w_dy2,d2w_dz2;
         
-        Real du2_dx,duv_dy,duw_dz,
+    Real du2_dx,duv_dy,duw_dz,
             duv_dx,dv2_dy,dvw_dz,
             duw_dx,dvw_dy,dw2_dz;
         
-        Real Dx = 1/dx, Dy = 1/dy, Dz = 1/dz;
+    Real Dx = 1/dx, Dy = 1/dy, Dz = 1/dz;
+    
+    if (i <= imax -1 && j <= jmax && k <= kmax){        
 
         d2u_dx2 = (U[IDXU(i+1,j,k)] - 2*U[IDXU(i,j,k)] + U[IDXU(i-1,j,k)])/(dx*dx);
         d2u_dy2 = (U[IDXU(i,j+1,k)] - 2*U[IDXU(i,j,k)] + U[IDXU(i,j-1,k)])/(dy*dy);
