@@ -34,7 +34,7 @@
 /*
  * Determines the value of F, H and H for computing RS.
  */
-void calculateFghCuda(
+__global__ void calculateFghCuda(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag);
@@ -42,14 +42,14 @@ void calculateFghCuda(
 /*
  * Computes the right hand side of the Pressure Poisson Equation (PPE).
  */
-void calculateRsCuda(
+__global__ void calculateRsCuda(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *F, Real *G, Real *H, Real *RS);
 
 /*
  * Determines the maximum time step size. The time step size is restricted according to the CFL theorem.
  */
-void calculateDtCuda(
+__global__ void calculateDtCuda(
         Real Re, Real Pr, Real tau,
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
@@ -58,14 +58,14 @@ void calculateDtCuda(
 /*
  * Calculates the new velocity values.
  */
-void calculateUvwCuda(
+__global__ void calculateUvwCuda(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag);
 
 /*
  * Calculates the new temperature values.
  */
-void calculateTemperatureCuda(
+__global__ void calculateTemperatureCuda(
         Real Re, Real Pr, Real alpha,
         Real dt, Real dx, Real dy, Real dz,
         int imax, int jmax, int kmax,

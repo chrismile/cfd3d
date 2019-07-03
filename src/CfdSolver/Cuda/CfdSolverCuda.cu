@@ -35,6 +35,7 @@
 #include "../Cpp/BoundaryValuesCpp.hpp"
 #include "../Cpp/UvwCpp.hpp"
 
+
 void CfdSolverCuda::initialize(const std::string &scenarioName,
         Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
         Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
@@ -64,18 +65,18 @@ void CfdSolverCuda::initialize(const std::string &scenarioName,
     this->dz = dz;
 
     // Create all arrays for the simulation.
-    cudaMallocManaged(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real)); 
-    cudaMallocManaged(&this->V, (imax+2)*(jmax+1)*(kmax+2)*sizeof(Real)); 
-    cudaMallocManaged(&this->W, (imax+2)*(jmax+2)*(kmax+1)*sizeof(Real));
-    cudaMallocManaged(&this->P, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
-    cudaMallocManaged(&this->P_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
-    cudaMallocManaged(&this->T, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
-    cudaMallocManaged(&this->T_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
-    cudaMallocManaged(&this->F, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMallocManaged(&this->G, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMallocManaged(&this->H, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMallocManaged(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMallocManaged(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int)); 
+    cudaMalloc(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real)); 
+    cudaMalloc(&this->V, (imax+2)*(jmax+1)*(kmax+2)*sizeof(Real)); 
+    cudaMalloc(&this->W, (imax+2)*(jmax+2)*(kmax+1)*sizeof(Real));
+    cudaMalloc(&this->P, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMalloc(&this->P_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMalloc(&this->T, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMalloc(&this->T_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
+    cudaMalloc(&this->F, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMalloc(&this->G, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMalloc(&this->H, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMalloc(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMalloc(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int)); 
 
     // Copy the content of U, V, W, P, T and Flag to the internal representation.
     cudaMemcpy(this->U, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), cudaMemcpyHostToDevice);
@@ -123,13 +124,11 @@ void CfdSolverCuda::calculateTemperature() {
 }
 
 void CfdSolverCuda::calculateFgh() {
-    dim3 dimBlock(32,32);
-    dim3 dimGrid(imax/dimBlock.z,jmax/dimBlock.y,kmax/dimBlock.x);
     calculateFghCuda<<<dimGrid,dimBlock>>>(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag)
 }
 
 void CfdSolverCuda::calculateRs() {
-    calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+    calculateRsCpp<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
 
 
