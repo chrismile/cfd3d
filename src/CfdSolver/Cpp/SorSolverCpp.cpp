@@ -120,13 +120,27 @@ void sorSolverIterationCpp(
 
 
 
+#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
+    //memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    // Using multiple threads for the copy is faster for large amounts of data.
+    #pragma omp parallel for
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                P_temp[IDXP(i,j,k)] = P[IDXP(i,j,k)];
+            }
+        }
+    }
+#endif
+
+
     // Now start with the actual SOR iteration.
 #ifdef SOR_GAUSS_SEIDL
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])){
-                    P[IDXP(i,j,k)] = (1.0-omg)*P[IDXP(i,j,k)] + coeff *
+                    P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
                             ((P[IDXP(i+1,j,k)]+P[IDXP(i-1,j,k)])/(dx*dx)
                             + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
                             + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
@@ -137,11 +151,11 @@ void sorSolverIterationCpp(
     }
 #endif
 #ifdef SOR_JACOBI
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
-                P[IDXP(i,j,k)] = (1.0-omg)*P_temp[IDXP(i,j,k)] + coeff *
+                P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
                         ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
                          + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
                          + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
@@ -156,7 +170,7 @@ void sorSolverIterationCpp(
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
                 // Just use Jacobi scheme in i direction, as we have only parallelized the outer loop.
-                P[IDXP(i,j,k)] = (1.0-omg)*P[IDXP(i,j,k)] + coeff *
+                P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
                         ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
                          + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
                          + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
@@ -175,9 +189,9 @@ void sorSolverIterationCpp(
             for (int k = 1; k <= kmax; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])){
                     residual += SQR(
-                               (P[IDXP(i+1,j,k)] - 2.0*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
-                             + (P[IDXP(i,j+1,k)] - 2.0*P[IDXP(i,j,k)] + P[IDXP(i,j-1,k)])/(dy*dy)
-                             + (P[IDXP(i,j,k+1)] - 2.0*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
+                               (P[IDXP(i+1,j,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
+                             + (P[IDXP(i,j+1,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j-1,k)])/(dy*dy)
+                             + (P[IDXP(i,j,k+1)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
                              - RS[IDXRS(i,j,k)]
                     );
                     numFluidCells++;
@@ -194,23 +208,22 @@ void sorSolverCpp(
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
-    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
-    Real residual = 1e9;
-    int it = 0;
-    while (it < itermax && residual > eps) {
-#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
-        //memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
-        // Using multiple threads for the copy is faster for large amounts of data.
-        #pragma omp parallel for
-        for (int i = 1; i <= imax; i++) {
-            for (int j = 1; j <= jmax; j++) {
-                for (int k = 1; k <= kmax; k++) {
-                    P_temp[IDXP(i,j,k)] = P[IDXP(i,j,k)];
-                }
-            }
-        }
-
+#if defined(SOR_JACOBI)
+    omg = 1.0;
 #endif
+#if defined(SOR_HYBRID)
+    omg = 1.0;
+#endif
+
+    const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
+    Real residual = Real(1e9);
+    int it = 0;
+
+#ifdef REAL_FLOAT
+    eps = 0.00005f;
+#endif
+
+    while (it < itermax && residual > eps) {
         sorSolverIterationCpp(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
     }

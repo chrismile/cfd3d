@@ -62,7 +62,7 @@ void PathlineTracer::timeStep(
             // Clamp the position to the boundary.
             rvec3 rayOrigin = particlePosition;
             rvec3 rayDirection = newParticlePosition - rayOrigin;
-            float tNear, tFar;
+            Real tNear, tFar;
             rayBoxIntersection(rayOrigin, rayDirection, gridOrigin, gridOrigin + gridSize, tNear, tFar);
 
             rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;

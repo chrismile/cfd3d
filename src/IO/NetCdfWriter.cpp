@@ -104,7 +104,7 @@ bool NetCdfWriter::openFile(const std::string &filename,
     nc_def_var(ncid, "T", NC_REAL, 4, dimsTimeDependent3D, &TVar);
 
     // Write the grid cell centers to the x, y and z variables.
-    float gridPosition = xOrigin + Real(0.5) * dx;
+    Real gridPosition = xOrigin + Real(0.5) * dx;
     for (size_t i = 0; i < (size_t)imax; i++) {
         nc_put_var1_real(ncid, xVar, &i, &gridPosition);
         gridPosition += dx;

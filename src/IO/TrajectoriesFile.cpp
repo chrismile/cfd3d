@@ -101,11 +101,31 @@ bool writeTrajectoriesToBinLinesFile(const std::string &filename, const Trajecto
     for (uint32_t trajectoryIndex = 0; trajectoryIndex < numTrajectories; trajectoryIndex++) {
         const Trajectory &currentTrajectory = trajectories.at(trajectoryIndex);
         size_t trajectoryNumPoints = currentTrajectory.positions.size();
+        stream.write(uint32_t(trajectoryNumPoints));
+#ifdef REAL_FLOAT
         stream.write((void*)&currentTrajectory.positions.front(), sizeof(glm::vec3)*trajectoryNumPoints);
-
+#endif
+#ifdef REAL_DOUBLE
+        std::vector<glm::vec3> floatVectorArray;
+        floatVectorArray.resize(currentTrajectory.positions.size());
+        for (size_t i = 0; i < currentTrajectory.positions.size(); i++) {
+            floatVectorArray[i] = glm::vec3(currentTrajectory.positions[i]);
+        }
+        stream.write((void*)&floatVectorArray.front(), sizeof(glm::vec3)*trajectoryNumPoints);
+#endif
         assert(numAttributes == currentTrajectory.attributes.size());
         for (uint32_t attributeIndex = 0; attributeIndex < numAttributes; attributeIndex++) {
+#ifdef REAL_FLOAT
             const std::vector<float> &currentAttribute = currentTrajectory.attributes.at(attributeIndex);
+#endif
+#ifdef REAL_DOUBLE
+            const std::vector<double> &currentAttributeDouble = currentTrajectory.attributes.at(attributeIndex);
+            std::vector<float> currentAttribute;
+            currentAttribute.resize(currentAttributeDouble.size());
+            for (size_t i = 0; i < currentAttributeDouble.size(); i++) {
+                currentAttribute[i] = static_cast<float>(currentAttributeDouble[i]);
+            }
+#endif
             assert(trajectoryNumPoints == currentAttribute.size());
             stream.write((void*)&currentAttribute.front(), sizeof(float)*trajectoryNumPoints);
         }

@@ -61,7 +61,7 @@ void nearestNeighborUpsampling(
     }
 
     // Upscale borders in the two xy planes.
-    for (int x = 1; x < heightOut - 1; x++) {
+    for (int x = 1; x < widthOut - 1; x++) {
         for (int y = 1; y < heightOut - 1; y++) {
             int readX = (x - 1) * (widthIn - 2) / (widthOut - 2) + 1;
             int readY = (y - 1) * (heightIn - 2) / (heightOut - 2) + 1;
@@ -73,7 +73,7 @@ void nearestNeighborUpsampling(
     }
 
     // Upscale borders in the two xz planes.
-    for (int x = 1; x < heightOut - 1; x++) {
+    for (int x = 1; x < widthOut - 1; x++) {
         for (int z = 1; z < depthOut - 1; z++) {
             int readX = (x - 1) * (widthIn - 2) / (widthOut - 2) + 1;
             int readZ = (z - 1) * (depthIn - 2) / (depthOut - 2) + 1;

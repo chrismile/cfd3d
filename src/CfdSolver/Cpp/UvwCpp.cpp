@@ -243,18 +243,19 @@ void calculateDtCpp(
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax; k++) {
-                wMaxAbs = std::max(wMaxAbs, std::abs(V[IDXW(i,j,k)]));
+                wMaxAbs = std::max(wMaxAbs, std::abs(W[IDXW(i,j,k)]));
             }
         }
     }
 
     if (tau < Real(0.0)) {
         // Constant time step manually specified in configuration file. Check for stability.
-        assert(2 / Re * dt < dx * dx * dy * dy / (dx * dx + dy * dy));
+        assert(2 / Re * dt < dx * dx * dy * dy * dz * dz / (dx * dx + dy * dy + dz * dz));
         assert(uMaxAbs * dt < dx);
         assert(vMaxAbs * dt < dy);
+        assert(wMaxAbs * dt < dz);
         if (useTemperature){
-            assert(dt < (Re*Pr/2)*(1/((1/(dx*dx))+1/(dy*dy))));
+            assert(dt < (Re*Pr/2)*(1/((1/(dx*dx))+1/(dy*dy)+1/(dz*dz))));
         }
         return;
     }
@@ -269,7 +270,6 @@ void calculateDtCpp(
                 + Real(1.0) / (dz*dz))));
     }
     dt = tau * dt;
-
 }
 
 void calculateUvwCpp(

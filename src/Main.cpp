@@ -211,16 +211,21 @@ int main(int argc, char *argv[]) {
         }
         Trajectories streamlines = streamlineTracer.trace(
                 particleSeedingLocations, gridOrigin, gridSize, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
-        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
+        //writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
+        writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streamlines.binlines", streamlines);
     }
 
     if (traceStreaklines) {
-        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streaklines.obj", streaklineTracer.getTrajectories(
-                imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
+        //writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streaklines.obj",
+        //        streaklineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
+        writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streaklines.binlines",
+                streaklineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
     }
     if (tracePathlines) {
-        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-pathlines.obj", pathlineTracer.getTrajectories(
-                imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
+        //writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-pathlines.obj",
+        //        pathlineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
+        writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-pathlines.binlines",
+                pathlineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
     }
 
     auto endTime = std::chrono::system_clock::now();

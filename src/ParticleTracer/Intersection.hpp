@@ -43,6 +43,6 @@
  */
 bool rayBoxIntersection(
         const rvec3 &rayOrigin, const rvec3 &rayDirection, const rvec3 &lower, const rvec3 &upper,
-        float &tNear, float &tFar);
+        Real &tNear, Real &tFar);
 
 #endif //CFD3D_INTERSECTION_HPP

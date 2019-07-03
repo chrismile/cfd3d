@@ -42,10 +42,12 @@ enum GeometryValues {
     G_COUPLING
 };
 
-GeometryCreator::GeometryCreator(int imax, int kmax, int jmax, unsigned int boundaryType)
+GeometryCreator::GeometryCreator(int imax, int jmax, int kmax, unsigned int boundaryType)
         : imax(imax), jmax(jmax), kmax(kmax) {
     // Initialize the domain with fluid cells in the interior, and no-slip cells on the boundary.
     geometryValues.resize((imax+2)*(jmax+2)*(kmax+2), boundaryType);
+
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -65,6 +67,7 @@ void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerSt
     std::vector<unsigned int> pgmValues;
     nearestNeighborUpsamplingPgm2D(pgmValuesRead, pgmWidth, pgmHeight, pgmValues, imax+2, jmax+2);
 
+    #pragma omp parallel for
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = layerStart; k <= layerEnd; k++) {
@@ -75,6 +78,7 @@ void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerSt
 }
 
 void GeometryCreator::setLayersConstant(FlagType value, int layerStart, int layerEnd) {
+    #pragma omp parallel for
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = layerStart; k <= layerEnd; k++) {
@@ -86,6 +90,7 @@ void GeometryCreator::setLayersConstant(FlagType value, int layerStart, int laye
 
 void GeometryCreator::setLayersInObject(
         FlagType value, int layerStart, int layerEnd, std::function<bool(int,int,int)> membershipFunctor) {
+    #pragma omp parallel for
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = layerStart; k <= layerEnd; k++) {

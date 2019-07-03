@@ -48,7 +48,7 @@ void traceStreamlineParticle(
                 // Clamp the position to the boundary.
                 rvec3 rayOrigin = currentTrajectory.positions.back();
                 rvec3 rayDirection = particlePosition - rayOrigin;
-                float tNear, tFar;
+                Real tNear, tFar;
                 rayBoxIntersection(rayOrigin, rayDirection, gridOrigin, gridOrigin + gridSize, tNear, tFar);
 
                 rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;

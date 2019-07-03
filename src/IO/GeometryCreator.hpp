@@ -51,7 +51,7 @@ public:
      * @param kmax Number of cells in z direction inside of the domain.
      * @param boundaryType The type of boundary to use for initialization (usually no-slip or free-slip).
      */
-    GeometryCreator(int imax, int kmax, int jmax, unsigned int boundaryType);
+    GeometryCreator(int imax, int jmax, int kmax, unsigned int boundaryType);
 
     /**
      * Writes the geometry values to a binary geometry file (.bingeo). For more details @see storeValuesInGeometryFile.
