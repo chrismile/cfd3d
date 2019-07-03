@@ -31,6 +31,9 @@
 #include "UvwCuda.hpp"
 #include "SorSolverCuda.hpp"
 #include "CfdSolverCuda.hpp"
+#include "../Cpp/SorSolverCpp.hpp"
+#include "../Cpp/BoundaryValuesCpp.hpp"
+#include "../Cpp/UvwCpp.hpp"
 
 void CfdSolverCuda::initialize(const std::string &scenarioName,
         Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
