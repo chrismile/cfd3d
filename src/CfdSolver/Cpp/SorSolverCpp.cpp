@@ -81,31 +81,37 @@ void sorSolverIterationCpp(
                         P_temp += P[IDXP(i+1,j,k)];
                         numDirectFlag++;                                                                                       
                     }
-                    else if(B_L(Flag[IDXFLAG(i,j,k)]))
+                    
+                    if(B_L(Flag[IDXFLAG(i,j,k)]))
                     {
                         P_temp += P[IDXP(i-1,j,k)];
                         numDirectFlag++;
                     }
-                    else if(B_U(Flag[IDXFLAG(i,j,k)]))
+                    
+                    if(B_U(Flag[IDXFLAG(i,j,k)]))
                     {
                         P_temp += P[IDXP(i,j+1,k)];
                         numDirectFlag++;
                     }
-                    else if(B_D(Flag[IDXFLAG(i,j,k)]))
+                    
+                    if(B_D(Flag[IDXFLAG(i,j,k)]))
                     {
                         P_temp += P[IDXP(i,j-1,k)];
                         numDirectFlag++;
                     }
-                    else if(B_B(Flag[IDXFLAG(i,j,k)]))
+                    
+                    if(B_B(Flag[IDXFLAG(i,j,k)]))
                     {
                         P_temp += P[IDXP(i,j,k-1)];
                         numDirectFlag++;
                     }
-                    else if(B_F(Flag[IDXFLAG(i,j,k)]))
+                    
+                    if(B_F(Flag[IDXFLAG(i,j,k)]))
                     {
                         P_temp += P[IDXP(i,j,k+1)];
                         numDirectFlag++;
                     }
+                    
                     P[IDXP(i,j,k)] =  P_temp/Real(numDirectFlag);                                                                 
                 }
             }     
