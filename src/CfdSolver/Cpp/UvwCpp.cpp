@@ -88,13 +88,9 @@ void calculateFghCpp(
                             du2_dx-duv_dy-duw_dz+
                             GX-(beta/2)*(T[IDXT(i,j,k)]+T[IDXT(i+1,j,k)])*GX
                     );
-                }
-                else if (B_L(Flag[IDXFLAG(i,j,k)]))
-                {
+                } else if (B_L(Flag[IDXFLAG(i,j,k)])) {
                     F[IDXF(i-1,j,k)] = U[IDXU(i-1,j,k)];
-                }
-                else if (B_R(Flag[IDXFLAG(i,j,k)]))
-                {
+                } else if (B_R(Flag[IDXFLAG(i,j,k)])) {
                     F[IDXF(i,j,k)] = U[IDXU(i,j,k)];
                 }
             }
@@ -142,13 +138,9 @@ void calculateFghCpp(
                             duv_dx-dv2_dy-dvw_dz+
                             GY-(beta/2)*(T[IDXT(i,j,k)]+T[IDXT(i,j+1,k)])*GY
                     );
-                }
-                else if (B_D(Flag[IDXFLAG(i,j,k)]))
-                {
+                } else if (B_D(Flag[IDXFLAG(i,j,k)])) {
                     G[IDXG(i,j-1,k)] = V[IDXV(i,j-1,k)];
-                }
-                else if (B_U(Flag[IDXFLAG(i,j,k)]))
-                {
+                } else if (B_U(Flag[IDXFLAG(i,j,k)])) {
                     G[IDXG(i,j,k)] = V[IDXV(i,j,k)];
                 }                
             }
@@ -196,13 +188,9 @@ void calculateFghCpp(
                             duw_dx-dvw_dy-dw2_dz+
                             GZ-(beta/2)*(T[IDXT(i,j,k)]+T[IDXT(i,j,k+1)])*GZ
                     );
-                }
-                else if (B_B(Flag[IDXFLAG(i,j,k)]))
-                {
+                } else if (B_B(Flag[IDXFLAG(i,j,k)])) {
                     H[IDXH(i,j,k-1)] = W[IDXW(i,j,k-1)];
-                }
-                else if (B_F(Flag[IDXFLAG(i,j,k)]))
-                {
+                } else if (B_F(Flag[IDXFLAG(i,j,k)])) {
                     H[IDXH(i,j,k)] = W[IDXW(i,j,k)];
                 }    
             }

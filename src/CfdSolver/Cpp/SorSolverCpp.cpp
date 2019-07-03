@@ -168,7 +168,8 @@ void sorSolverIterationCpp(
 
     // Compute the residual.
     residual = 0;
-    #pragma omp parallel for reduction(+: residual)
+    int numFluidCells = 0;
+    #pragma omp parallel for reduction(+: residual) reduction(+: numFluidCells)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -179,13 +180,14 @@ void sorSolverIterationCpp(
                              + (P[IDXP(i,j,k+1)] - 2.0*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
                              - RS[IDXRS(i,j,k)]
                     );
+                    numFluidCells++;
                 }
             }
         }
     }
 
     // The residual is normalized by dividing by the total number of fluid cells.
-    residual = std::sqrt(residual/(imax*jmax*kmax));
+    residual = std::sqrt(residual/numFluidCells);
 }
 
 void sorSolverCpp(
