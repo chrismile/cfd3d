@@ -203,17 +203,17 @@ void setFrontBackBoundaries(
             else{
                 T[IDXT(i,j,0)] = T[IDXT(i,j,1)];
             }
-            
+
             // Back boundary T
             if (isHot(Flag[IDXFLAG(i,j,kmax+1)])) {
                 T[IDXT(i,j,kmax+1)] = 2 * T_h - T[IDXT(i,j,kmax)];
-            } 
+            }
             else if (isCold(Flag[IDXFLAG(i,j,kmax+1)])) {
                 T[IDXT(i,j,kmax+1)] = 2 * T_c - T[IDXT(i,j,kmax)];
             }
             else{
                 T[IDXT(i,j,kmax+1)] = T[IDXT(i,j,kmax)];
-            }            
+            }
         }
     }
 }
@@ -231,6 +231,30 @@ void setBoundaryValuesScenarioSpecificCpp(
             for (int k = 1; k <= kmax; k++) {
                 // Upper wall
                 U[IDXU(i,jmax+1,k)] = 2.0-U[IDXU(i,jmax,k)];
+            }
+        }
+    } else if (scenarioName == "flow_over_step") {
+        #pragma omp parallel for
+        for (int j = jmax/2+1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Left wall
+                U[IDXU(0,j,k)] = 1.0;
+            }
+        }
+    } else if (scenarioName == "single_tower") {
+        #pragma omp parallel for
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Left wall
+                U[IDXU(0,j,k)] = 1.0;
+            }
+        }
+    } else if (scenarioName == "terrain_1") {
+        #pragma omp parallel for
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Left wall
+                U[IDXU(0,j,k)] = 1.0;
             }
         }
     }

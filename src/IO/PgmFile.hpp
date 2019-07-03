@@ -50,6 +50,24 @@ std::vector<unsigned int> loadPgmFile(const std::string &filename, int *width, i
  * @param widthOut The width of the resulting bitmap.
  * @param heightOut The height of the resulting bitmap.
  */
+void nearestNeighborUpsamplingPgm2D(
+        const std::vector<unsigned int> bitmapIn,
+        int widthIn,
+        int heightIn,
+        std::vector<unsigned int> &bitmapOut,
+        int widthOut,
+        int heightOut
+);
+
+/**
+ * Upsamples (or downsamples if necessary) a passed bitmap to match a certain resolution.
+ * @param bitmapIn The bitmap to upscale.
+ * @param widthIn The width of the bitmap to upscale.
+ * @param heightIn The height of the bitmap to upscale.
+ * @param bitmapOut The result.
+ * @param widthOut The width of the resulting bitmap.
+ * @param heightOut The height of the resulting bitmap.
+ */
 void nearestNeighborUpsampling2D(
         const std::vector<unsigned int> bitmapIn,
         int widthIn,
