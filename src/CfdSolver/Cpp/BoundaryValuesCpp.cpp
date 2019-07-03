@@ -654,117 +654,44 @@ void setInternalTBoundaries(
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
+                
+                int numDirectFlag = 0;                
+                Real T_temp = Real(0);                
 
                 if(!isFluid(Flag[IDXFLAG(i,j,k)]))
                 {
                     if (B_R(Flag[IDXFLAG(i,j,k)]))
                     {
-                        T[IDXT(i,j,k)] = T[IDXT(i+1,j,k)]; 
-                                      
+                        T_temp = T[IDXT(i+1,j,k)]; 
+                        numDirectFlag++;                                      
                     }
                     else if(B_L(Flag[IDXFLAG(i,j,k)]))
                     {
-                        T[IDXT(i,j,k)] = T[IDXT(i-1,j,k)];
+                        T_temp = T[IDXT(i-1,j,k)];
+                        numDirectFlag++;
                     }
                     else if(B_U(Flag[IDXFLAG(i,j,k)]))
                     {
-                        T[IDXT(i,j,k)] = T[IDXT(i,j+1,k)];
+                        T_temp = T[IDXT(i,j+1,k)];
+                        numDirectFlag++;
                     }
                     else if(B_D(Flag[IDXFLAG(i,j,k)]))
                     {
-                        T[IDXT(i,j,k)] = T[IDXT(i,j-1,k)];
+                        T_temp = T[IDXT(i,j-1,k)];
+                        numDirectFlag++;
                     }
                     else if(B_B(Flag[IDXFLAG(i,j,k)]))
                     {
-                        T[IDXT(i,j,k)] = T[IDXT(i,j,k-1)];
+                        T_temp = T[IDXT(i,j,k-1)];
+                        numDirectFlag++;
                     }
                     else if(B_F(Flag[IDXFLAG(i,j,k)]))
                     {
-                        T[IDXT(i,j,k)] = T[IDXT(i,j,k+1)];
+                        T_temp = T[IDXT(i,j,k+1)];
+                        numDirectFlag++;
                     }
-                    /**else if(B_RU(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        //W[IDXW(i,j,k-1)] = - W[IDXW(i+1,j,k-1)]; 
-                        //W[IDXW(i,j,k)] = - W[IDXW(i+1,j,k)];
-                        //W[IDXW(i,j,k-1)] = - W[IDXW(i,j+1,k-1)]; 
-                        //W[IDXW(i,j,k)] = - W[IDXW(i,j+1,k)];                         
-                    }
-                    else if(B_RD(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_RF(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_RB(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_LU(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_LD(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_LF(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_LB(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        
-                    }
-                    else if(B_UF(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_DF(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_UB(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_DB(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        
-                    }
-                    else if(B_RUF(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        
-                    }
-                    else if(B_RUB(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_RDF(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        
-                    }
-                    else if(B_RDB(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_LUF(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        
-                    }
-                    else if(B_LUB(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }
-                    else if(B_LDF(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        
-                    }
-                    else if(B_LDB(Flag[IDXFLAG(i,j,k)]))
-                    {
-
-                    }   */                                                                                   
+                    T[IDXT(i,j,k)] = T_temp/Real(numDirectFlag);
+                                                                      
                 }
             }     
         }

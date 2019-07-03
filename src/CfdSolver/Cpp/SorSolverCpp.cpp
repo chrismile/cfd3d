@@ -66,6 +66,53 @@ void sorSolverIterationCpp(
         }
     }
 
+    #pragma omp parallel for
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                
+                int numDirectFlag = 0;                
+                Real P_temp = Real(0);
+
+                if(!isFluid(Flag[IDXFLAG(i,j,k)]))
+                {
+                    if (B_R(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        P_temp += P[IDXP(i+1,j,k)];
+                        numDirectFlag++;                                                                                       
+                    }
+                    else if(B_L(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        P_temp += P[IDXP(i-1,j,k)];
+                        numDirectFlag++;
+                    }
+                    else if(B_U(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        P_temp += P[IDXP(i,j+1,k)];
+                        numDirectFlag++;
+                    }
+                    else if(B_D(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        P_temp += P[IDXP(i,j-1,k)];
+                        numDirectFlag++;
+                    }
+                    else if(B_B(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        P_temp += P[IDXP(i,j,k-1)];
+                        numDirectFlag++;
+                    }
+                    else if(B_F(Flag[IDXFLAG(i,j,k)]))
+                    {
+                        P_temp += P[IDXP(i,j,k+1)];
+                        numDirectFlag++;
+                    }
+                    P[IDXP(i,j,k)] =  P_temp/Real(numDirectFlag);                                                                 
+                }
+            }     
+        }
+    }
+
+
 
     // Now start with the actual SOR iteration.
 #ifdef SOR_GAUSS_SEIDL
