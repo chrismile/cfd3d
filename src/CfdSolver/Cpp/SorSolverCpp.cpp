@@ -32,8 +32,8 @@
 #include "SorSolverCpp.hpp"
 
 // Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
-#define SOR_GAUSS_SEIDL
-//#define SOR_JACOBI
+//#define SOR_GAUSS_SEIDL
+#define SOR_JACOBI
 //#define SOR_HYBRID
 
 void sorSolverIterationCpp(
@@ -98,15 +98,17 @@ void sorSolverIterationCpp(
     }
 #endif
 #ifdef SOR_JACOBI
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
-                P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
-                        ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
-                         + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
-                         + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
-                         - RS[IDXRS(i,j,k)]);
+                if (isFluid(Flag[IDXFLAG(i,j,k)])){
+                    P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
+                            ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
+                            + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
+                            + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
+                            - RS[IDXRS(i,j,k)]);
+                }
             }
         }
     }
@@ -154,26 +156,22 @@ void sorSolverCpp(
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
 #if defined(SOR_JACOBI)
-    omg = 1.0;
+    omg = 1.7;
 #endif
 #if defined(SOR_HYBRID)
     omg = 1.0;
 #endif
-
     const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
+
     Real residual = Real(1e9);
     int it = 0;
-
-#ifdef REAL_FLOAT
-    eps = 0.00005f;
-#endif
 
     while (it < itermax && residual > eps) {
         sorSolverIterationCpp(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
     }
 
-    if (residual > eps && it == itermax) {
+    if ((residual > eps && it == itermax) || isnan(residual)) {
         std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
                 << residual << ")." << std::endl;
     }
