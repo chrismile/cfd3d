@@ -61,18 +61,18 @@ void CfdSolverCuda::initialize(const std::string &scenarioName,
     this->dz = dz;
 
     // Create all arrays for the simulation.
-    cudaMalloc(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real)); 
-    cudaMalloc(&this->V, (imax+2)*(jmax+1)*(kmax+2)*sizeof(Real)); 
-    cudaMalloc(&this->W, (imax+2)*(jmax+2)*(kmax+1)*sizeof(Real));
-    cudaMalloc(&this->P, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
-    cudaMalloc(&this->P_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
-    cudaMalloc(&this->T, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
-    cudaMalloc(&this->T_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
-    cudaMalloc(&this->F, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->G, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->H, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int)); 
+    cudaMallocManaged(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real)); 
+    cudaMallocManaged(&this->V, (imax+2)*(jmax+1)*(kmax+2)*sizeof(Real)); 
+    cudaMallocManaged(&this->W, (imax+2)*(jmax+2)*(kmax+1)*sizeof(Real));
+    cudaMallocManaged(&this->P, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMallocManaged(&this->P_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMallocManaged(&this->T, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMallocManaged(&this->T_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
+    cudaMallocManaged(&this->F, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMallocManaged(&this->G, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMallocManaged(&this->H, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMallocManaged(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
+    cudaMallocManaged(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int)); 
 
     // Copy the content of U, V, W, P, T and Flag to the internal representation.
     cudaMemcpy(this->U, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), cudaMemcpyHostToDevice);
@@ -99,15 +99,15 @@ CfdSolverCuda::~CfdSolverCuda() {
 }
 
 void CfdSolverCuda::setBoundaryValues() {
-    setBoundaryValuesCuda(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setBoundaryValuesCpp(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 }
 
 void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
-    setBoundaryValuesScenarioSpecificCuda(scenarioName, imax, jmax, kmax, U, V, W, Flag);
+    setBoundaryValuesScenarioSpecificCpp(scenarioName, imax, jmax, kmax, U, V, W, Flag);
 }
 
 Real CfdSolverCuda::calculateDt() {
-    calculateDtCuda(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
+    calculateDtCpp(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
     return dt;
 }
 
@@ -116,24 +116,26 @@ void CfdSolverCuda::calculateTemperature() {
     Real *temp = T;
     T = T_temp;
     T_temp = temp;
-    calculateTemperatureCuda(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
+    calculateTemperatureCpp(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
 void CfdSolverCuda::calculateFgh() {
-    calculateFghCuda(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
+    dim3 dimBlock(32,32);
+    dim3 dimGrid(imax/dimBlock.z,jmax/dimBlock.y,kmax/dimBlock.x);
+    calculateFghCuda<<<dimGrid,dimBlock>>>(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag)
 }
 
 void CfdSolverCuda::calculateRs() {
-    calculateRsCuda(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+    calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
 
 
 void CfdSolverCuda::executeSorSolver() {
-    sorSolverCuda(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
+    sorSolverCpp(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
 }
 
 void CfdSolverCuda::calculateUvw() {
-    calculateUvwCuda(dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
+    calculateUvwCpp(dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
 }
 
 void CfdSolverCuda::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T) {

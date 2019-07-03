@@ -78,4 +78,7 @@ typedef glm::vec<3, Real, glm::defaultp> rvec3;
 #define IDXRS(i,j,k) ((i)*(jmax+1)*(kmax+1) + (j)*(kmax+1) + (k))
 #define IDXFLAG(i,j,k) ((i)*(jmax+2)*(kmax+2) + (j)*(kmax+2) + (k))
 
+
+inline int iceil(int x, int y) { return (x - 1) / y + 1; }
+
 #endif //CFD3D_DEFINES_HPP
