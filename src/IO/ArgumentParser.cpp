@@ -75,6 +75,6 @@ void parseArguments(
     }
 
     if (outputFileWriter == nullptr) {
-        outputFileWriter = new VtkWriter();
+        outputFileWriter = new NetCdfWriter();
     }
 }

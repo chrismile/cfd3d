@@ -245,6 +245,7 @@ void setBoundaryValuesScenarioSpecificCpp(
                 // Left wall
                 U[IDXU(0,j,k)] = 1.0;
                 V[IDXV(0,j,k)] = 0.0;
+                W[IDXW(0,j,k)] = 0.0;
             }
         }
     } else if (scenarioName == "single_tower") {
