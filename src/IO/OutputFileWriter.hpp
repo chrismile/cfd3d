@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2019, Christoph Neuhauser, Stefan Haas, Paul Ng
+ * Copyright (c) 2019, Christoph Neuhauser
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_NETCDFWRITER_HPP
-#define CFD3D_NETCDFWRITER_HPP
+#ifndef CFD3D_OUTPUTFILEWRITER_HPP
+#define CFD3D_OUTPUTFILEWRITER_HPP
 
-#include "OutputFileWriter.hpp"
+#include <string>
+#include "CfdSolver/Flag.hpp"
 
-class NetCdfWriter : public OutputFileWriter {
+/**
+ * This class is the super class of @see VtkWriter and @see NetCdfWriter.
+ */
+class OutputFileWriter {
 public:
-    virtual ~NetCdfWriter();
+    virtual ~OutputFileWriter() {}
 
     /**
-     * Opens a NetCDF file for writing.
-     * @param filename The file name of the NetCDF file to write to.
+     * Intializes the file(s) for writing.
+     * @param filename The file name of the file to write to.
      * @param imax Number of cells in x direction inside of the domain.
      * @param jmax Number of cells in y direction inside of the domain.
      * @param kmax Number of cells in z direction inside of the domain.
@@ -50,9 +54,9 @@ public:
      * @return true if the file could be opened for writing successfully.
      */
     virtual bool initializeWriter(const std::string &filename,
-            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
+            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin) = 0;
     /**
-     * Writes the data of the current time step to the file.
+     * Writes the data of the current time step to a file.
      * @param timeStepNumber The time step number (i.e., 0 for the initial state, 1 after the first iteration of the
      * simulation, etc.).
      * @param time The current time of the simulation.
@@ -64,26 +68,8 @@ public:
      * @param Flag The flag values (@see Flag.hpp for more information).
      */
     virtual void writeTimestep(
-            int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
-
-private:
-    void writeTimeDependentVariable3D_Staggered(int ncVar, int jsize, int ksize, Real *values);
-    void writeTimeDependentVariable3D_Normal(int ncVar, int jsize, int ksize, Real *values);
-    void ncPutAttributeText(int varid, const std::string &name, const std::string &value);
-
-    int imax, jmax, kmax;
-    Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
-    Real *centerCellU;
-    Real *centerCellV;
-    Real *centerCellW;
-
-    bool isFileOpen = false;
-    int ncid;
-    size_t writeIndex;
-
-    // NetCDF variables
-    int timeVar, xVar, yVar, zVar, geometryVar, UVar, VVar, WVar, PVar, TVar;
+            int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) = 0;
 };
 
 
-#endif //CFD3D_NETCDFWRITER_HPP
+#endif //CFD3D_OUTPUTFILEWRITER_HPP
