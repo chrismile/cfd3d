@@ -161,8 +161,8 @@ Real getdUdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, i
 Real getdVdxAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, Real dx) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
            && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,jmax+2))));
-    return (V[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
-            - V[IDXU(staggeredGridPosition.x+1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
+    return (V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
+            - V[IDXV(staggeredGridPosition.x+1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
 }
 Real getdVdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, Real dz) {
     assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
