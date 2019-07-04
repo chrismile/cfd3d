@@ -47,8 +47,9 @@ CXX=syclcc-clang CXXFLAGS="--hipsycl-platform=cuda" cmake .. -DUSE_SYCL=ON
 To start the program, the command below can be used.
 
 ```
-./cfd3d --scenario <scenario-name> --solver <solver-name> --tracestreamlines <true-or-false> \
---tracestreaklines <true-or-false> --tracepathlines <true-or-false> --numparticles <numparticles>
+./cfd3d --scenario <scenario-name> --solver <solver-name> --outputformat <outputformat> \
+--tracestreamlines <true-or-false> --tracestreaklines <true-or-false> --tracepathlines <true-or-false> \
+--numparticles <numparticles>
 ```
 
 The scenario name is the name of one of the scenario files in the 'scenario/' folder (without the file ending).
@@ -68,7 +69,19 @@ necessary flags.
 The standard values for the arguments are:
 * scenario: driven_cavity
 * solver: cpp
+* outputformat: vtk
 * tracestreamlines: false
 * tracestreaklines: false
 * tracepathlines: false
 * numparticles: 1000
+
+The valid values for the arguments are:
+* scenario: driven_cavity, flow_over_step, natural_convection, rayleigh_benard_convection_8-2-1,
+rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4, rayleigh_benard_convection_2d,
+single_tower, terrain_1
+* solver: cpp, cuda, sycl
+* outputformat: netcdf, vtk (= vtk-binary), vtk-binary, vtk-ascii
+* tracestreamlines: false, true
+* tracestreaklines: false, true
+* tracepathlines: false, true
+* numparticles: any positive integer number
