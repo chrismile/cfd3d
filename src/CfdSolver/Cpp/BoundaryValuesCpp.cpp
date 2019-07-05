@@ -34,7 +34,7 @@ void setLeftRightBoundaries(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int j = 1; j <= jmax; j++) {
         for (int k = 1; k <= kmax; k++) {
             // Left wall
@@ -250,6 +250,9 @@ void setBoundaryValuesScenarioSpecificCpp(
                 U[IDXU(0,j,k)] = 1;
                 V[IDXV(0,j,k)] = 0;
                 W[IDXW(0,j,k)] = 0;
+                U[IDXU(imax,j,k)] = U[IDXU(imax-1,j,k)];
+                V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
+                W[IDXW(imax+1,j,k)] = W[IDXW(imax,j,k)];
             }
         }
         /*#pragma omp parallel for
