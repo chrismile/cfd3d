@@ -212,7 +212,7 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
 
                 // Cells in the interior of the domain may only be fluid or no-slip.
                 // interior cell => cell is fluid or no-slip
-                assert(!(i > 0 && j > 0 && i <= imax && j <= jmax)
+                assert(!(i > 0 && j > 0 && k > 0 && i <= imax && j <= jmax && k <= kmax)
                         || ((Flag[IDXFLAG(i,j,k)] & 0x1) == 1 || boundaryNum == 1));
                 //#endif
             }
