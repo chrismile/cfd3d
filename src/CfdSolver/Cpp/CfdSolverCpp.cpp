@@ -27,6 +27,7 @@
  */
 
 #include <cstring>
+#include <iostream>
 #include "BoundaryValuesCpp.hpp"
 #include "UvwCpp.hpp"
 #include "SorSolverCpp.hpp"
@@ -104,6 +105,16 @@ void CfdSolverCpp::setBoundaryValues() {
 
 void CfdSolverCpp::setBoundaryValuesScenarioSpecific() {
     setBoundaryValuesScenarioSpecificCpp(scenarioName, imax, jmax, kmax, U, V, W, Flag);
+
+    /*std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 0; i <= imax; i++) {
+            std::cout << U[IDXU(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;*/
+
 }
 
 Real CfdSolverCpp::calculateDt() {
@@ -121,15 +132,42 @@ void CfdSolverCpp::calculateTemperature() {
 
 void CfdSolverCpp::calculateFgh() {
     calculateFghCpp(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
+
+    /*std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 0; i <= imax; i++) {
+            std::cout << F[IDXF(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;*/
 }
 
 void CfdSolverCpp::calculateRs() {
     calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+
+    /*std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 0; i <= imax; i++) {
+            std::cout << RS[IDXRS(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;*/
 }
 
 
 void CfdSolverCpp::executeSorSolver() {
     sorSolverCpp(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
+
+    std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 0; i <= imax; i++) {
+            std::cout << P[IDXP(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 void CfdSolverCpp::calculateUvw() {
