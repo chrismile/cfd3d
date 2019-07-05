@@ -111,7 +111,7 @@ Real CfdSolverCuda::calculateDt() {
     dim3 dimBlock(32,32);
     dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
     calculateDtCuda<<<dimGrid,dimBlock>>>(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
-    return dt;
+    return 0.008;
 }
 
 

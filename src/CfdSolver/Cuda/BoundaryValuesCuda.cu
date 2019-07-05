@@ -247,10 +247,32 @@ void setBoundaryValuesCuda(
     setLeftRightBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 }
 
+__global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W,
+        FlagType *Flag){
+    
+    int i = blockIdx.x + threadIdx.y + 1;
+    int k = blockIdx.y + threadIdx.x + 1;
+
+    if (i <= imax && k<= jmax){
+        for (int i = 1; i <= imax; i++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Upper wall
+                U[IDXU(i,jmax+1,k)] = 2.0-U[IDXU(i,jmax,k)];
+            }
+        }
+    }
+}
+
 void setBoundaryValuesScenarioSpecificCuda(
         const std::string &scenarioName,
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
         FlagType *Flag) {
-    // TODO: Implement.
+
+    dim3 dimBlock(32,32);
+    if (scenarioName == "driven_cavity") {
+        dim3 dimGrid_x_z(iceil(imax,dimBlock.y),iceil(kmax,dimBlock.x));
+        setDrivenCavityBoundariesCuda<<<dimBlock, dimGrid_x_z>>>(imax, jmax, kmax, U, V, W, Flag);
+    }   
 }

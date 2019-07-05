@@ -29,6 +29,11 @@
 #include <iostream>
 #include "SorSolverCuda.hpp"
 
+// Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
+//#define SOR_GAUSS_SEIDL
+#define SOR_JACOBI
+//#define SOR_HYBRID
+
 __global__ void set_x_y_planes_pressure_boundaries(
     int imax, int jmax, int kmax, Real *P){
 
@@ -135,6 +140,12 @@ void sorSolverCuda(Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
     const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
+#if defined(SOR_JACOBI)
+    omg = 1.0;
+#endif
+#if defined(SOR_HYBRID)
+    omg = 1.0;
+#endif
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
