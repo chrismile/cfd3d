@@ -28,7 +28,22 @@
 
 #include "BoundaryValuesCuda.hpp"
 
-__global__ void setLeftRightBoundaries(
+__device__ inline bool isFluid(unsigned int flag) { return (flag >> 0) & 1; }
+__device__ inline bool isNoSlip(unsigned int flag) { return (flag >> 1) & 1; }
+__device__ inline bool isFreeSlip(unsigned int flag) { return (flag >> 2) & 1; }
+__device__ inline bool isOutflow(unsigned int flag) { return (flag >> 3) & 1; }
+__device__ inline bool isInflow(unsigned int flag) { return (flag >> 4) & 1; }
+__device__ inline bool B_L(unsigned int flag) { return (flag >> 5) & 1; }
+__device__ inline bool B_R(unsigned int flag) { return (flag >> 6) & 1; }
+__device__ inline bool B_D(unsigned int flag) { return (flag >> 7) & 1; }
+__device__ inline bool B_U(unsigned int flag) { return (flag >> 8) & 1; }
+__device__ inline bool B_B(unsigned int flag) { return (flag >> 9) & 1; }
+__device__ inline bool B_F(unsigned int flag) { return (flag >> 10) & 1; }
+__device__ inline bool isHot(unsigned int flag) { return (flag >> 11) & 1; }
+__device__ inline bool isCold(unsigned int flag) { return (flag >> 12) & 1; }
+__device__ inline bool isCoupling(unsigned int flag) { return (flag >> 13) & 1; }
+
+__global__ void setLeftRightBoundariesCuda(
     Real T_h, Real T_c,
     int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W, Real *T,
@@ -91,7 +106,7 @@ __global__ void setLeftRightBoundaries(
     }
 }
 
-__global__ void setDownUpBoundaries(
+__global__ void setDownUpBoundariesCuda(
     Real T_h, Real T_c,
     int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W, Real *T,
@@ -149,7 +164,7 @@ __global__ void setDownUpBoundaries(
     }
 }
 
-__global__ void setFrontBackBoundaries(
+__global__ void setFrontBackBoundariesCuda(
     Real T_h, Real T_c,
     int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W, Real *T,
@@ -223,13 +238,13 @@ void setBoundaryValuesCuda(
         FlagType *Flag) {
     dim3 dimBlock(32,32);
     dim3 dimGrid_x_y(iceil(imax,dimBlock.y),iceil(jmax,dimBlock.x));
-    setFrontBackBoundaries<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Fla);
+    setFrontBackBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     dim3 dimGrid_x_z(iceil(imax,dimBlock.y),iceil(kmax,dimBlock.x));
-    setDownUpBoundaries<<<dimGrid_x_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Fla);
+    setDownUpBoundariesCuda<<<dimGrid_x_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     dim3 dimGrid_y_z(iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
-    setLeftRightBoundaries<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setLeftRightBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 }
 
 void setBoundaryValuesScenarioSpecificCuda(
