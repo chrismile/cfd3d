@@ -37,6 +37,11 @@ public:
     virtual ~VtkWriter();
 
     /**
+     * @return The file ending of the format.
+     */
+    virtual std::string getOutputFormatEnding() { return ".vtk"; }
+
+    /**
      * Intializes the file writer.
      * @param filename The file name of the file to write to.
      * @param imax Number of cells in x direction inside of the domain.

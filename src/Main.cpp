@@ -107,7 +107,9 @@ int main(int argc, char *argv[]) {
     std::cout << "Geometry file: " << geometryFilename << std::endl;
     std::cout << "Output file: " << geometryFilename << std::endl;
 
-    prepareOutputDirectory(outputDirectory, lineDirectory, geometryDirectory);
+    std::string outputFormatEnding = outputFileWriter->getOutputFormatEnding();
+
+    prepareOutputDirectory(outputDirectory, outputFilename, outputFormatEnding, lineDirectory, geometryDirectory);
 
     Real n = 0;
     Real t = 0;

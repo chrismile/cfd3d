@@ -36,6 +36,11 @@ public:
     virtual ~NetCdfWriter();
 
     /**
+     * @return The file ending of the format.
+     */
+    virtual std::string getOutputFormatEnding() { return ".nc"; }
+
+    /**
      * Opens a NetCDF file for writing.
      * @param filename The file name of the NetCDF file to write to.
      * @param imax Number of cells in x direction inside of the domain.
