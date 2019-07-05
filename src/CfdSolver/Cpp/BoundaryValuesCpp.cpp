@@ -239,7 +239,7 @@ void setBoundaryValuesScenarioSpecificCpp(
             }
         }
     } else if (scenarioName == "inflow_test") {
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
                 // Left wall

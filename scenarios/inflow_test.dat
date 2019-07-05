@@ -2,7 +2,7 @@
 #     Scenario name and geometry file             
 #--------------------------------------------
 scenario	inflow_test
-geometry	none
+geometry	inflow_test.bingeo
 
 #--------------------------------------------
 #            Size of the domain             

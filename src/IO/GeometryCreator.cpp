@@ -166,6 +166,18 @@ void createFlowOverStepGeometry(
     geometryCreator.setLayersInObject(G_NO_SLIP, 0, kmax+1, [&](int i, int j, int k) {
         return i <= jmax/2 && j <= jmax/2;
     });
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
+    geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
+void createInflowTestGeometry(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
@@ -224,5 +236,7 @@ void generateScenario(
         createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "single_tower")) {
         createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "inflow_test")) {
+        createInflowTestGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     }
 }

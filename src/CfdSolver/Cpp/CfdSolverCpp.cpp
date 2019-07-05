@@ -98,12 +98,23 @@ CfdSolverCpp::~CfdSolverCpp() {
     delete[] Flag;
 }
 
+#include <iostream>
+
 void CfdSolverCpp::setBoundaryValues() {
     setBoundaryValuesCpp(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 }
 
 void CfdSolverCpp::setBoundaryValuesScenarioSpecific() {
     setBoundaryValuesScenarioSpecificCpp(scenarioName, imax, jmax, kmax, U, V, W, Flag);
+
+    /*std::cout << std::endl;
+    for (int j = jmax+1; j >= 0; j--) {
+        for (int i = 0; i <= imax+1; i++) {
+            std::cout << U[IDXU(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;*/
 }
 
 Real CfdSolverCpp::calculateDt() {

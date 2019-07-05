@@ -32,7 +32,8 @@
 #include "IOUtils.hpp"
 
 void prepareOutputDirectory(
-        const std::string &outputDirectory, const std::string &lineDirectory, const std::string &geometryDirectory) {
+        const std::string &outputDirectory, const std::string &outputFilename,
+        const std::string &lineDirectory, const std::string &geometryDirectory) {
     // Create the directories.
     if (!boost::filesystem::exists(outputDirectory)) {
         if (!boost::filesystem::create_directory(outputDirectory)) {

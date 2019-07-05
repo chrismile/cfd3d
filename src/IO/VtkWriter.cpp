@@ -94,7 +94,7 @@ void VtkWriter::writeVtkHeader(FILE *file, int imax, int jmax, int kmax) {
 
 
 #define IDXPT(i,j,k,l) (((k)*(jmax+1)*(imax+1) + (j)*(imax+1) + (i))*3 + (l))
-#define IDXCELL(i,j,k) ((k)*(jmax+1)*(imax+1) + (j)*(imax+1) + (i))
+#define IDXCELL(i,j,k) (((k)-1)*jmax*imax + ((j)-1)*imax + ((i)-1))
 
 template <typename T>
 void swapEndianness(T *values, int n) {
