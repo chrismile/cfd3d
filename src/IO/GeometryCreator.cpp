@@ -130,11 +130,25 @@ void createRayleighBenardGeometry(
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
+void createInflowTest(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == 0 && j >= 1 && k >= 1 && j <= jmax && k <= kmax;
+    });
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && k >= 1 && j <= jmax && k <= kmax;
+    });
+    geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
 void generateScenario(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     if (scenarioName == "natural_convection") {
         createNaturalConvectionGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
         createRayleighBenardGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "inflow_test")) {
+        createInflowTest(scenarioName, geometryFilename, imax, jmax, kmax);
     }
 }
