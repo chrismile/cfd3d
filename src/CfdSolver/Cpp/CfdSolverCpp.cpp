@@ -160,14 +160,14 @@ void CfdSolverCpp::calculateRs() {
 void CfdSolverCpp::executeSorSolver() {
     sorSolverCpp(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
 
-    std::cout << std::endl;
+    /*std::cout << std::endl;
     for (int j = jmax; j >= 1; j--) {
         for (int i = 0; i <= imax; i++) {
             std::cout << P[IDXP(i,j,kmax/2)] << " ";
         }
         std::cout << std::endl;
     }
-    std::cout << std::endl;
+    std::cout << std::endl;*/
 }
 
 void CfdSolverCpp::calculateUvw() {
