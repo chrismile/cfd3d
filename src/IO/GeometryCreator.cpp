@@ -133,9 +133,9 @@ void createRayleighBenardGeometry(
 void createInflowTest(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
-    geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
+    /*geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
         return i == 0 && j >= 1 && k >= 1 && j <= jmax && k <= kmax;
-    });
+    });*/
     geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
         return i == imax+1 && j >= 1 && k >= 1 && j <= jmax && k <= kmax;
     });
