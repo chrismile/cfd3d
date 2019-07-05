@@ -164,9 +164,9 @@ void sorSolverCpp(
     Real residual = Real(1e9);
     int it = 0;
 
-#ifdef REAL_FLOAT
-    eps = 0.00005f;
-#endif
+//#ifdef REAL_FLOAT
+//    eps = 0.00005f;
+//#endif
 
     while (it < itermax && residual > eps) {
         sorSolverIterationCpp(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
