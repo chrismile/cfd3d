@@ -31,6 +31,7 @@
 #include "UvwCuda.hpp"
 #include "SorSolverCuda.hpp"
 #include "CfdSolverCuda.hpp"
+#include "../../Defines.hpp"
 
 
 void CfdSolverCuda::initialize(const std::string &scenarioName,
@@ -108,10 +109,10 @@ void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
 }
 
 Real CfdSolverCuda::calculateDt() {
-    dim3 dimBlock(32,32);
+    dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
     calculateDtCuda<<<dimGrid,dimBlock>>>(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
-    return 0.008;
+    return 0.003;
 }
 
 
@@ -119,19 +120,19 @@ void CfdSolverCuda::calculateTemperature() {
     Real *temp = T;
     T = T_temp;
     T_temp = temp;
-    dim3 dimBlock(32,32);
+    dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
     calculateTemperatureCuda<<<dimGrid,dimBlock>>>(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
 void CfdSolverCuda::calculateFgh() {
-    dim3 dimBlock(32,32);
+    dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
     calculateFghCuda<<<dimGrid,dimBlock>>>(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 }
 
 void CfdSolverCuda::calculateRs() {
-    dim3 dimBlock(32,32);
+    dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
     calculateRsCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
@@ -142,7 +143,7 @@ void CfdSolverCuda::executeSorSolver() {
 }
 
 void CfdSolverCuda::calculateUvw() {
-    dim3 dimBlock(32,32);
+    dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
     calculateUvwCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
 }

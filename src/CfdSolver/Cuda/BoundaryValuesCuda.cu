@@ -27,6 +27,7 @@
  */
 
 #include "BoundaryValuesCuda.hpp"
+#include "../../Defines.hpp"
 
 __device__ inline bool isFluid(unsigned int flag) { return (flag >> 0) & 1; }
 __device__ inline bool isNoSlip(unsigned int flag) { return (flag >> 1) & 1; }
@@ -236,7 +237,7 @@ void setBoundaryValuesCuda(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-    dim3 dimBlock(32,32);
+    dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid_x_y(iceil(imax,dimBlock.y),iceil(jmax,dimBlock.x));
     setFrontBackBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
@@ -270,7 +271,7 @@ void setBoundaryValuesScenarioSpecificCuda(
         Real *U, Real *V, Real *W,
         FlagType *Flag) {
 
-    dim3 dimBlock(32,32);
+    dim3 dimBlock(blockSize,blockSize);
     if (scenarioName == "driven_cavity") {
         dim3 dimGrid_x_z(iceil(imax,dimBlock.y),iceil(kmax,dimBlock.x));
         setDrivenCavityBoundariesCuda<<<dimBlock, dimGrid_x_z>>>(imax, jmax, kmax, U, V, W, Flag);

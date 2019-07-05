@@ -149,7 +149,7 @@ void sorSolverCuda(Real omg, Real eps, int itermax,
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
-        dim3 dimBlock(32,32);
+        dim3 dimBlock(blockSize,blockSize);
         dim3 dimGrid_x_y(iceil(imax,dimBlock.y),iceil(jmax,dimBlock.x));
         set_x_y_planes_pressure_boundaries<<<dimGrid_x_y,dimBlock>>>(imax, jmax, kmax, P);
 
