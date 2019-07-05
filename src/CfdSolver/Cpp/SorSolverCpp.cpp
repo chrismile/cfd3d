@@ -171,7 +171,7 @@ void sorSolverCpp(
         it++;
     }
 
-    if ((residual > eps && it == itermax) || isnan(residual)) {
+    if ((residual > eps && it == itermax) || std::isnan(residual)) {
         std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
                 << residual << ")." << std::endl;
     }

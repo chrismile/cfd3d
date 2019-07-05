@@ -30,6 +30,7 @@
 #define CFD3D_CFDSOLVERCUDA_HPP
 
 #include "CfdSolver/CfdSolver.hpp"
+#include <math.h>
 
 class CfdSolverCuda : public CfdSolver {
 public:
@@ -141,8 +142,6 @@ private:
     Real dx, dy, dz;
     Real *U, *V, *W , *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
     FlagType *Flag;
-    dim3 dimBlock(32,32);
-    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
 };
 
 

@@ -188,7 +188,7 @@ __global__ void calculateDtCuda(
         Real *U, Real *V, Real *W,
         bool useTemperature) {
     // TODO
-    return 2;
+    dt = 0.5;
 }
 
 __global__ void calculateUvwCuda(

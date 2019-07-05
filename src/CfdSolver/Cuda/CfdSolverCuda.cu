@@ -31,9 +31,6 @@
 #include "UvwCuda.hpp"
 #include "SorSolverCuda.hpp"
 #include "CfdSolverCuda.hpp"
-#include "../Cpp/SorSolverCpp.hpp"
-#include "../Cpp/BoundaryValuesCpp.hpp"
-#include "../Cpp/UvwCpp.hpp"
 
 
 void CfdSolverCuda::initialize(const std::string &scenarioName,
@@ -103,15 +100,17 @@ CfdSolverCuda::~CfdSolverCuda() {
 }
 
 void CfdSolverCuda::setBoundaryValues() {
-    setBoundaryValuesCpp(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setBoundaryValuesCuda(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 }
 
 void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
-    setBoundaryValuesScenarioSpecificCpp(scenarioName, imax, jmax, kmax, U, V, W, Flag);
+    setBoundaryValuesScenarioSpecificCuda(scenarioName, imax, jmax, kmax, U, V, W, Flag);
 }
 
 Real CfdSolverCuda::calculateDt() {
-    calculateDtCpp(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
+    dim3 dimBlock(32,32);
+    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    calculateDtCuda<<<dimGrid,dimBlock>>>(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
     return dt;
 }
 
@@ -120,24 +119,32 @@ void CfdSolverCuda::calculateTemperature() {
     Real *temp = T;
     T = T_temp;
     T_temp = temp;
-    calculateTemperatureCpp(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
+    dim3 dimBlock(32,32);
+    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    calculateTemperatureCuda<<<dimGrid,dimBlock>>>(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
 void CfdSolverCuda::calculateFgh() {
-    calculateFghCuda<<<dimGrid,dimBlock>>>(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag)
+    dim3 dimBlock(32,32);
+    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    calculateFghCuda<<<dimGrid,dimBlock>>>(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 }
 
 void CfdSolverCuda::calculateRs() {
-    calculateRsCpp<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+    dim3 dimBlock(32,32);
+    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    calculateRsCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
 
 
 void CfdSolverCuda::executeSorSolver() {
-    sorSolverCpp(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
+    sorSolverCuda(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
 }
 
 void CfdSolverCuda::calculateUvw() {
-    calculateUvwCpp(dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
+    dim3 dimBlock(32,32);
+    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    calculateUvwCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
 }
 
 void CfdSolverCuda::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T) {

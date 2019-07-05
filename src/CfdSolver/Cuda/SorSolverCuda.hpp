@@ -31,6 +31,21 @@
 
 #include "Defines.hpp"
 
+/*
+* Sets the x_y plane boundary values for the pressure
+*/
+__global__ void set_x_y_planes_pressure_boundaries(
+    int imax, int jmax, int kmax, Real *P);
+
+__global__ void set_x_z_planes_pressure_boundaries(
+    int imax, int jmax, int kmax, Real *P);
+
+__global__ void set_y_z_planes_pressure_boundaries(
+    int imax, int jmax, int kmax, Real *P);
+
+__global__ void copy_pressure(
+    int imax, int jmax, int kmax,Real *P, Real *P_temp);
+
 /**
  * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
  */
