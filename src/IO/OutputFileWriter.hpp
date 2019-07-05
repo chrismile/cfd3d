@@ -40,6 +40,11 @@ public:
     virtual ~OutputFileWriter() {}
 
     /**
+     * @return The file ending of the format.
+     */
+    virtual std::string getOutputFormatEnding() = 0;
+
+    /**
      * Intializes the file(s) for writing.
      * @param filename The file name of the file to write to.
      * @param imax Number of cells in x direction inside of the domain.

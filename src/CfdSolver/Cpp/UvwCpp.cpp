@@ -197,6 +197,27 @@ void calculateFghCpp(
         }
     }
 
+    for (int j = 1; j <= jmax; j++) {
+        for (int k = 1; k <= kmax; k++) {
+            F[IDXF(0,j,k)] = U[IDXU(0,j,k)];         
+            F[IDXF(imax,j,k)] = U[IDXU(imax,j,k)];   
+        }
+    }
+    
+    for (int i = 1; i <= imax; i++) {
+        for (int k = 1; k <= kmax; k++) {
+            G[IDXG(i,0,k)] = V[IDXV(i,0,k)];         
+            G[IDXG(i,jmax,k)] = V[IDXV(i,jmax,k)];               
+        }
+    }
+
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            H[IDXH(i,j,0)] = W[IDXW(i,j,0)];         
+            H[IDXH(i,j,kmax)] = W[IDXW(i,j,kmax)];               
+        }
+    }            
+
 }
 
 void calculateRsCpp(

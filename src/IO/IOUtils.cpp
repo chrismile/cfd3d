@@ -29,10 +29,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include "IOUtils.hpp"
 
 void prepareOutputDirectory(
-        const std::string &outputDirectory, const std::string &outputFilename,
+        const std::string &outputDirectory, const std::string &outputFilename, const std::string &outputFormatEnding,
         const std::string &lineDirectory, const std::string &geometryDirectory) {
     // Create the directories.
     if (!boost::filesystem::exists(outputDirectory)) {
@@ -51,6 +52,21 @@ void prepareOutputDirectory(
         if (!boost::filesystem::create_directory(geometryDirectory)) {
             std::cerr << "Geometry directory could not be created." << std::endl;
             exit(1);
+        }
+    }
+
+    // Delete all previous output files for the selected scenario.
+    boost::filesystem::path dir(outputDirectory);
+    boost::filesystem::directory_iterator end;
+    for (boost::filesystem::directory_iterator it(dir); it != end; ++it) {
+        std::string filename = it->path().string();
+#ifdef WIN32
+        for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
+            if (*it == '\\') *it = '/';
+        }
+#endif
+        if (boost::ends_with(filename, outputFormatEnding) && boost::starts_with(filename, outputFilename)) {
+            boost::filesystem::remove(it->path());
         }
     }
 }
