@@ -27,6 +27,7 @@
  */
 
 #include <cstring>
+#include <iostream>
 #include "BoundaryValuesCpp.hpp"
 #include "UvwCpp.hpp"
 #include "SorSolverCpp.hpp"
@@ -125,6 +126,15 @@ void CfdSolverCpp::calculateFgh() {
 
 void CfdSolverCpp::calculateRs() {
     calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+
+    /*std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 1; i <= imax; i++) {
+            std::cout << RS[IDXRS(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;*/
 }
 
 

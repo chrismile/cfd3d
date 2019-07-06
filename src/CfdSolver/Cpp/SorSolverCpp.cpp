@@ -70,49 +70,41 @@ void sorSolverIterationCpp(
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
-                
-                int numDirectFlag = 0;                
+                int numDirectFlag = 0;
                 Real P_temp = Real(0);
 
-                if(!isFluid(Flag[IDXFLAG(i,j,k)]))
-                {
-                    if (B_R(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        P_temp += P[IDXP(i+1,j,k)];
-                        numDirectFlag++;                                                                                       
-                    }
-                    
-                    if(B_L(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        P_temp += P[IDXP(i-1,j,k)];
+                if (!isFluid(Flag[IDXFLAG(i, j, k)])) {
+                    if (B_R(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i + 1, j, k)];
                         numDirectFlag++;
                     }
-                    
-                    if(B_U(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        P_temp += P[IDXP(i,j+1,k)];
+
+                    if (B_L(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i - 1, j, k)];
                         numDirectFlag++;
                     }
-                    
-                    if(B_D(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        P_temp += P[IDXP(i,j-1,k)];
+
+                    if (B_U(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j + 1, k)];
                         numDirectFlag++;
                     }
-                    
-                    if(B_B(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        P_temp += P[IDXP(i,j,k-1)];
+
+                    if (B_D(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j - 1, k)];
                         numDirectFlag++;
                     }
-                    
-                    if(B_F(Flag[IDXFLAG(i,j,k)]))
-                    {
-                        P_temp += P[IDXP(i,j,k+1)];
+
+                    if (B_B(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j, k - 1)];
                         numDirectFlag++;
                     }
-                    
-                    P[IDXP(i,j,k)] =  P_temp/Real(numDirectFlag);                                                                 
+
+                    if (B_F(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j, k + 1)];
+                        numDirectFlag++;
+                    }
+
+                    P[IDXP(i, j, k)] = P_temp / Real(numDirectFlag);
                 }
             }     
         }
@@ -180,6 +172,8 @@ void sorSolverIterationCpp(
     }
 #endif
 
+    Real *testArray = new Real[imax*jmax];
+
     // Compute the residual.
     residual = 0;
     int numFluidCells = 0;
@@ -195,10 +189,30 @@ void sorSolverIterationCpp(
                              - RS[IDXRS(i,j,k)]
                     );
                     numFluidCells++;
+
+                    if (k == kmax/2) {
+                        testArray[(i-1)+(j-1)*imax] = SQR(
+                                (P[IDXP(i+1,j,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
+                                + (P[IDXP(i,j+1,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j-1,k)])/(dy*dy)
+                                + (P[IDXP(i,j,k+1)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
+                                - RS[IDXRS(i,j,k)]
+                        );
+                    }
                 }
             }
         }
     }
+
+    std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 1; i <= imax; i++) {
+            std::cout << testArray[(i-1)+(j-1)*imax] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    delete[] testArray;
+
 
     // The residual is normalized by dividing by the total number of fluid cells.
     residual = std::sqrt(residual/numFluidCells);

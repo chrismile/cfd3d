@@ -162,10 +162,22 @@ void createRayleighBenardGeometry(
 void createFlowOverStepGeometry(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+
     // Step box.
     geometryCreator.setLayersInObject(G_NO_SLIP, 0, kmax+1, [&](int i, int j, int k) {
         return i <= jmax/2 && j <= jmax/2;
     });
+
+    // Outflow and inflow.
+    geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == 0 && j >= 1 && j <= jmax && k >= 1 && k <= kmax
+               && geometryCreator.getCellType(i+1,j,k) == G_FLUID;
+    });
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax
+               && geometryCreator.getCellType(i-1,j,k) == G_FLUID;
+    });
+
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
@@ -179,10 +191,21 @@ void createTowerGeometry(
     glm::ivec3 towerMax = towerCenter + glm::ivec3(width/2, height, width/2);
 
     GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+
+    // Tower geometry.
     geometryCreator.setLayersInObject(G_NO_SLIP, 0, kmax+1, [&](int i, int j, int k) {
         glm::ivec3 coords(i, j, k);
         return glm::all(glm::greaterThanEqual(coords, towerMin)) && glm::all(glm::lessThanEqual(coords, towerMax));
     });
+
+    // Outflow and inflow.
+    geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == 0 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
+
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
@@ -211,6 +234,17 @@ void createTerrainGeometry(
         return j <= integerHeight;
     });
     geometryCreator.removeInvalidCells();
+
+    // Outflow and inflow.
+    geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == 0 && j >= 1 && j <= jmax && k >= 1 && k <= kmax
+                && geometryCreator.getCellType(i+1,j,k) == G_FLUID;
+    });
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax
+                && geometryCreator.getCellType(i-1,j,k) == G_FLUID;
+    });
+
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
@@ -224,5 +258,7 @@ void generateScenario(
         createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "single_tower")) {
         createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "terrain_1")) {
+        createTerrainGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     }
 }

@@ -36,7 +36,6 @@ void calculateFghCpp(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
-    
     Real d2u_dx2,d2u_dy2,d2u_dz2,
          d2v_dx2,d2v_dy2,d2v_dz2,
          d2w_dx2,d2w_dy2,d2w_dz2;
@@ -197,13 +196,15 @@ void calculateFghCpp(
         }
     }
 
+    #pragma omp parallel for
     for (int j = 1; j <= jmax; j++) {
         for (int k = 1; k <= kmax; k++) {
             F[IDXF(0,j,k)] = U[IDXU(0,j,k)];         
             F[IDXF(imax,j,k)] = U[IDXU(imax,j,k)];   
         }
     }
-    
+
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int k = 1; k <= kmax; k++) {
             G[IDXG(i,0,k)] = V[IDXV(i,0,k)];         
@@ -211,6 +212,7 @@ void calculateFghCpp(
         }
     }
 
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             H[IDXH(i,j,0)] = W[IDXW(i,j,0)];         
