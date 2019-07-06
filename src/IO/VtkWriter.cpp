@@ -142,7 +142,7 @@ void VtkWriter::writePointData(FILE *file, int imax, int jmax, int kmax, Real *U
     fprintf(file, "VECTORS velocity float\n");
 
     if (isBinaryVtk) {
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int k = 0; k <= kmax; k++) {
             for (int j = 0; j <= jmax; j++) {
                 for (int i = 0; i <= imax; i++) {

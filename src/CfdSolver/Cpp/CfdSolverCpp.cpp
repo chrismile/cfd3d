@@ -75,6 +75,19 @@ void CfdSolverCpp::initialize(const std::string &scenarioName,
     this->RS = new Real[(imax+1)*(jmax+1)*(kmax+1)];
     this->Flag = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
 
+    memset(this->U, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2));
+    memset(this->V, 0, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2));
+    memset(this->W, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+1));
+    memset(this->P, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->P_temp, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->T, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->T_temp, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->F, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->G, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->H, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->RS, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->Flag, 0, sizeof(FlagType)*(imax+2)*(jmax+2)*(kmax+2));
+
     // Copy the content of U, V, W, P, T and Flag to the internal representation.
     memcpy(this->U, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2));
     memcpy(this->V, V, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2));

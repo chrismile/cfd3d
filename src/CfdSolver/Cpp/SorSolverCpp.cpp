@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <cstring>
 #include "../Flag.hpp"
 #include "SorSolverCpp.hpp"
 
@@ -172,7 +173,8 @@ void sorSolverIterationCpp(
     }
 #endif
 
-   // Real *testArray = new Real[imax*jmax];
+    //Real *testArray = new Real[imax*jmax];
+    //memset(testArray, 0, sizeof(FlagType)*imax*jmax);
 
     // Compute the residual.
     residual = 0;
@@ -203,14 +205,18 @@ void sorSolverIterationCpp(
         }
     }
 
-    /*std::cout << std::endl;
-    for (int j = jmax; j >= 1; j--) {
-        for (int i = 1; i <= imax; i++) {
-            std::cout << testArray[(i-1)+(j-1)*imax] << " ";
+    /*static int ctr = 0;
+    ctr++;
+    if (ctr > 500*800) {
+        std::cout << std::endl;
+        for (int j = jmax; j >= 1; j--) {
+            for (int i = 1; i <= imax; i++) {
+                std::cout << testArray[(i-1)+(j-1)*imax] << " ";
+            }
+            std::cout << std::endl;
         }
         std::cout << std::endl;
     }
-    std::cout << std::endl;
     delete[] testArray;*/
 
 
@@ -233,9 +239,9 @@ void sorSolverCpp(
     Real residual = Real(1e9);
     int it = 0;
 
-#ifdef REAL_FLOAT
+/*#ifdef REAL_FLOAT
     eps = 0.00005f;
-#endif
+#endif*/
 
     while (it < itermax && residual > eps) {
         sorSolverIterationCpp(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
