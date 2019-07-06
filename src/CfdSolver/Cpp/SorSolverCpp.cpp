@@ -172,7 +172,7 @@ void sorSolverIterationCpp(
     }
 #endif
 
-    Real *testArray = new Real[imax*jmax];
+   // Real *testArray = new Real[imax*jmax];
 
     // Compute the residual.
     residual = 0;
@@ -190,20 +190,20 @@ void sorSolverIterationCpp(
                     );
                     numFluidCells++;
 
-                    if (k == kmax/2) {
+                    /*if (k == kmax/2) {
                         testArray[(i-1)+(j-1)*imax] = SQR(
                                 (P[IDXP(i+1,j,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
                                 + (P[IDXP(i,j+1,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j-1,k)])/(dy*dy)
                                 + (P[IDXP(i,j,k+1)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
                                 - RS[IDXRS(i,j,k)]
                         );
-                    }
+                    }*/
                 }
             }
         }
     }
 
-    std::cout << std::endl;
+    /*std::cout << std::endl;
     for (int j = jmax; j >= 1; j--) {
         for (int i = 1; i <= imax; i++) {
             std::cout << testArray[(i-1)+(j-1)*imax] << " ";
@@ -211,7 +211,7 @@ void sorSolverIterationCpp(
         std::cout << std::endl;
     }
     std::cout << std::endl;
-    delete[] testArray;
+    delete[] testArray;*/
 
 
     // The residual is normalized by dividing by the total number of fluid cells.
