@@ -216,12 +216,14 @@ void createTowerGeometry(
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
-void createTerrainGeometry(
-        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+void createHeightMapGeometry(
+        const std::string &scenarioName, const std::string &geometryFilename,
+        const std::string &heightmapFilename,
+        int imax, int jmax, int kmax) {
     // Load the height map from the specified .pgm image file.
     int pgmWidth = 0;
     int pgmHeight = 0;
-    std::vector<unsigned int> heightMapPgmData = loadPgmFile("../geometry-pgm/heightmap1.pgm", &pgmWidth, &pgmHeight);
+    std::vector<unsigned int> heightMapPgmData = loadPgmFile(heightmapFilename, &pgmWidth, &pgmHeight);
     std::vector<unsigned int> heightMapInt;
     nearestNeighborUpsampling2D(heightMapPgmData, pgmWidth, pgmHeight, heightMapPgmData, imax, kmax);
     std::vector<float> heightMapFloat;
@@ -245,14 +247,19 @@ void createTerrainGeometry(
     // Outflow and inflow.
     geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
         return i == 0 && j >= 1 && j <= jmax && k >= 1 && k <= kmax
-                && geometryCreator.getCellType(i+1,j,k) == G_FLUID;
+               && geometryCreator.getCellType(i+1,j,k) == G_FLUID;
     });
     geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
         return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax
-                && geometryCreator.getCellType(i-1,j,k) == G_FLUID;
+               && geometryCreator.getCellType(i-1,j,k) == G_FLUID;
     });
 
     geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
+void createTerrainGeometry(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/heightmap1.pgm", imax, jmax, kmax);
 }
 
 void generateScenario(
