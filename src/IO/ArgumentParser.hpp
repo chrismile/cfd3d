@@ -41,9 +41,25 @@ class OutputFileWriter;
  * @param numParticles The number of particles to seed when using a particle tracer.
  * @param solverName The passed solver name to use.
  */
+/**
+ * Parses the command line arguments passed to the program. For more information on the format, please see README.md.
+ * @param argc The number of arguments.
+ * @param argv The arguments.
+ * @param outputFileWriter The type of the output file writer to use.
+ * @param scenarioName The name of the scenario to use.
+ * @param solverName The name of the solver to use.
+ * @param numParticles The number of particles to seed when using a particle tracer.
+ * @param traceStreamlines Whether to trace streamlines in the fluid flow.
+ * @param traceStreaklines Whether to trace streaklines in the fluid flow.
+ * @param tracePathlines Whether to trace pathlines in the fluid flow.
+ * @param iproc The number of processes in x direction (MPI solver only).
+ * @param jproc The number of processes in y direction (MPI solver only).
+ * @param kproc The number of processes in z direction (MPI solver only).
+ */
 void parseArguments(
-        int argc, char *argv[], OutputFileWriter *&outputFileWriter,
+        int argc, char *argv[], std::string &outputFileWriterType,
         std::string &scenarioName, std::string &solverName, int &numParticles,
-        bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines);
+        bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines,
+        int &iproc, int &jproc, int &kproc);
 
 #endif //CFD3D_ARGUMENTPARSER_HPP

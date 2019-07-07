@@ -33,13 +33,19 @@
 
 class VtkWriter : public OutputFileWriter {
 public:
-    VtkWriter(bool isBinaryVtk = true) : isBinaryVtk(isBinaryVtk) {}
+    VtkWriter(int nproc, int myrank, bool isBinaryVtk = true) : nproc(nproc), myrank(myrank), isBinaryVtk(isBinaryVtk)
+    {}
     virtual ~VtkWriter();
 
     /**
      * @return The file ending of the format.
      */
     virtual std::string getOutputFormatEnding() { return ".vtk"; }
+
+    /**
+     * Sets data for use with the MPI solver.
+     */
+    virtual void setMpiData(int il, int iu, int jl, int ju, int kl, int ku);
 
     /**
      * Intializes the file writer.
@@ -82,7 +88,10 @@ private:
     bool isBinaryVtk;
     std::string filename;
 
+    bool isMpiMode = false;
+    int nproc, myrank;
     int imax, jmax, kmax;
+    int il, iu, jl, ju, kl, ku;
     Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
 
     // For binary mode. (Note: ParaView only supports float, and not double.)

@@ -166,5 +166,4 @@ void CfdSolverCpp::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T)
     memcpy(W, this->W, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1));
     memcpy(P, this->P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
     memcpy(T, this->T, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
-    memcpy(Flag, this->Flag, sizeof(unsigned int)*(imax+2)*(jmax+2)*(kmax+2));
 }

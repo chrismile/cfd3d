@@ -30,6 +30,16 @@
 #include <iostream>
 #include "VtkWriter.hpp"
 
+void VtkWriter::setMpiData(int il, int iu, int jl, int ju, int kl, int ku) {
+    this->il = il;
+    this->iu = iu;
+    this->jl = jl;
+    this->ju = ju;
+    this->kl = kl;
+    this->ku = ku;
+    isMpiMode = true;
+}
+
 bool VtkWriter::initializeWriter(const std::string &filename,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin) {
     this->filename = filename;
@@ -43,9 +53,15 @@ bool VtkWriter::initializeWriter(const std::string &filename,
     this->yOrigin = yOrigin;
     this->zOrigin = zOrigin;
 
-    pointData = new float[(imax+1)*(jmax+1)*(kmax+1)*3];
-    cellData = new float[(imax+1)*(jmax+1)*(kmax+1)];
-    cellDataUint = new uint8_t[(imax+1)*(jmax+1)*(kmax+1)];
+    if (isMpiMode) {
+        pointData = new float[(iu-il+2)*(ju-jl+2)*(ku-kl+2)*3];
+        cellData = new float[(iu-il+2)*(ju-jl+2)*(ku-kl+2)];
+        cellDataUint = new uint8_t[(iu-il+2)*(ju-jl+2)*(ku-kl+2)];
+    } else {
+        pointData = new float[(imax+1)*(jmax+1)*(kmax+1)*3];
+        cellData = new float[(imax+1)*(jmax+1)*(kmax+1)];
+        cellDataUint = new uint8_t[(imax+1)*(jmax+1)*(kmax+1)];
+    }
 
     return true;
 }
@@ -61,6 +77,10 @@ VtkWriter::~VtkWriter() {
 void VtkWriter::writeTimestep(
         int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) {
     std::string vtkFilename = filename + "." + std::to_string(timeStepNumber) + ".vtk";
+    if (nproc != 1) {
+        // Each process outputs its own file.
+        vtkFilename = filename + "." + std::to_string(myrank) + "." + std::to_string(timeStepNumber) + ".vtk";
+    }
     FILE *file = nullptr;
     if (isBinaryVtk) {
         file = fopen(vtkFilename.c_str(), "wb");

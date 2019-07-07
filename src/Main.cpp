@@ -33,6 +33,10 @@
 #include "CfdSolver/Flag.hpp"
 #include "CfdSolver/CfdSolver.hpp"
 #include "CfdSolver/Cpp/CfdSolverCpp.hpp"
+#ifdef USE_MPI
+#include "CfdSolver/Mpi/CfdSolverMpi.hpp"
+#include "CfdSolver/Mpi/MpiHelpers.hpp"
+#endif
 #ifdef USE_CUDA
 #include "CfdSolver/Cuda/CfdSolverCuda.hpp"
 #endif
@@ -44,6 +48,7 @@
 #include "IO/ProgressBar.hpp"
 #include "IO/ScenarioFile.hpp"
 #include "IO/NetCdfWriter.hpp"
+#include "IO/VtkWriter.hpp"
 #include "IO/TrajectoriesFile.hpp"
 #include "IO/GeometryCreator.hpp"
 #include "ParticleTracer/StreamlineTracer.hpp"
@@ -58,20 +63,55 @@ const std::string lineDirectory = "lines/";
 int main(int argc, char *argv[]) {
     CfdSolver *cfdSolver;
     ProgressBar progressBar;
+    std::string outputFileWriterType;
     OutputFileWriter *outputFileWriter = nullptr;
     bool traceStreamlines = false, traceStreaklines = false, tracePathlines = false;
     std::vector<rvec3> particleSeedingLocations;
     bool dataIsUpToDate = true;
     bool shallWriteOutput = true;
 
+    // For MPI
+#ifdef USE_MPI
+    int myrank, nproc, rankL, rankR, rankD, rankU, rankB, rankF, threadIdxI, threadIdxJ, threadIdxK,
+            il, iu, jl, ju, kl, ku;
+#else
+    int nproc = 1;
+    int myrank = 1;
+#endif
+    int iproc = 0, jproc = 0, kproc = 0;
+
     int imax, jmax, kmax, itermax, numParticles;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
             dt, dx, dy, dz, alpha, omg, tau, eps, beta, T_h, T_c;
     bool useTemperature = true;
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
-    parseArguments(argc, argv, outputFileWriter, scenarioName, solverName, numParticles,
-            traceStreamlines, traceStreaklines, tracePathlines);
+    parseArguments(argc, argv, outputFileWriterType, scenarioName, solverName, numParticles,
+            traceStreamlines, traceStreaklines, tracePathlines, iproc, jproc, kproc);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
+
+#ifdef USE_MPI
+    if (solverName == "mpi") {
+        mpiInit(argc, argv, iproc, jproc, kproc, imax, jmax, kmax,
+                myrank, il, iu, jl, ju, kl, ku,
+                rankL, rankR, rankD, rankU, rankB, rankF,
+                threadIdxI, threadIdxJ, threadIdxK, nproc);
+    }
+#endif
+
+    if (outputFileWriterType == "netcdf") {
+        outputFileWriter = new NetCdfWriter(nproc, myrank);
+    } else if (outputFileWriterType == "vtk") {
+        outputFileWriter = new VtkWriter(nproc, myrank);
+    } else if (outputFileWriterType == "vtk-binary") {
+        outputFileWriter = new VtkWriter(nproc, myrank, true);
+    } else if (outputFileWriterType == "vtk-ascii") {
+        outputFileWriter = new VtkWriter(nproc, myrank, false);
+    } else if (outputFileWriterType.length() == 0) {
+        outputFileWriter = new VtkWriter(nproc, myrank);
+    } else {
+        std::cerr << "Invalid output format." << std::endl;
+        exit(1);
+    }
 
     readScenarioConfigurationFromFile(
             scenarioFilename, scenarioName, geometryName,
@@ -115,24 +155,56 @@ int main(int argc, char *argv[]) {
     Real t = 0;
     Real tWrite = 0;
 
-    // Create all arrays for the simulation.
-    Real *U = new Real[(imax+1)*(jmax+2)*(kmax+2)];
-    Real *V = new Real[(imax+2)*(jmax+1)*(kmax+2)];
-    Real *W = new Real[(imax+2)*(jmax+2)*(kmax+1)];
-    Real *P = new Real[(imax+2)*(jmax+2)*(kmax+2)];
-    Real *T = new Real[(imax+2)*(jmax+2)*(kmax+2)];
-    FlagType *Flag = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
+    Real *U, *V, *W, *P, *T;
+    FlagType *Flag, *FlagAll;
+
+#ifdef USE_MPI
+    if (solverName == "mpi") {
+        // Create all arrays for the simulation.
+        U = new Real[(iu - il + 4)*(ju - jl + 3)*(ku - kl + 3)];
+        V = new Real[(iu - il + 3)*(ju - jl + 4)*(ku - kl + 3)];
+        W = new Real[(iu - il + 3)*(ju - jl + 3)*(ku - kl + 4)];
+        P = new Real[(iu - il + 3)*(ju - jl + 3)*(ku - kl + 3)];
+        T = new Real[(iu - il + 3)*(ju - jl + 3)*(ku - kl + 3)];
+        Flag = new FlagType[(iu - il + 3)*(ju - jl + 3)*(ku - kl + 3)];
+        FlagAll = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
+    } else
+#endif
+    {
+        // Create all arrays for the simulation.
+        U = new Real[(imax+1)*(jmax+2)*(kmax+2)];
+        V = new Real[(imax+2)*(jmax+1)*(kmax+2)];
+        W = new Real[(imax+2)*(jmax+2)*(kmax+1)];
+        P = new Real[(imax+2)*(jmax+2)*(kmax+2)];
+        T = new Real[(imax+2)*(jmax+2)*(kmax+2)];
+        Flag = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
+        FlagAll = Flag;
+    }
 
     if (geometryName == "none") {
-        initFlagNoObstacles(scenarioName, imax, jmax, kmax, Flag);
+        initFlagNoObstacles(scenarioName, imax, jmax, kmax, FlagAll);
     } else {
         if (!boost::filesystem::exists(geometryFilename)) {
             generateScenario(scenarioName, geometryFilename, imax, jmax, kmax);
         }
-        initFlagFromGeometryFile(scenarioName, geometryFilename, imax, jmax, kmax, Flag);
+        initFlagFromGeometryFile(scenarioName, geometryFilename, imax, jmax, kmax, FlagAll);
     }
-    initArrays(UI, VI, WI, PI, TI, imax, jmax, kmax, U, V, W, P, T, Flag);
+    initArrays(UI, VI, WI, PI, TI, imax, jmax, kmax, U, V, W, P, T, FlagAll);
 
+#ifdef USE_MPI
+    if (solverName == "mpi") {
+        outputFileWriter->setMpiData(il, iu, jl, ju, kl, ku);
+
+        for (int i = il - 1; i <= iu + 1; i++) {
+            for (int j = jl - 1; j <= ju + 1; j++) {
+                for (int k = kl - 1; k <= ku + 1; k++) {
+                    Flag[(((i) - (il-1))*(ju - jl + 3)*(ku - kl + 3) + ((j) - (jl-1))*(ku - kl + 3) + ((k) - (kl-1)))]
+                            = FlagAll[IDXFLAG(i, j, k)];
+                }
+            }
+        }
+    }
+#endif
 
     auto startTime = std::chrono::system_clock::now();
 
@@ -145,6 +217,11 @@ int main(int argc, char *argv[]) {
     if (solverName == "cpp") {
         cfdSolver = new CfdSolverCpp();
     }
+#ifdef USE_MPI
+    else if (solverName == "mpi") {
+        cfdSolver = new CfdSolverMpi(il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF);
+    }
+#endif
 #ifdef USE_CUDA
     else if (solverName == "cuda") {
         cfdSolver = new CfdSolverCuda();
@@ -157,6 +234,7 @@ int main(int argc, char *argv[]) {
 #endif
     else {
         std::cerr << "Fatal error: Unsupported solver name \"" << solverName << "\"." << std::endl;
+        exit(1);
     }
     cfdSolver->initialize(scenarioName, Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T, Flag);
@@ -241,6 +319,9 @@ int main(int argc, char *argv[]) {
     delete[] W;
     delete[] P;
     delete[] T;
+    if (Flag != FlagAll) {
+        delete[] FlagAll;
+    }
     delete[] Flag;
 
     return 0;

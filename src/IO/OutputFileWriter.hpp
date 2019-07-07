@@ -45,6 +45,11 @@ public:
     virtual std::string getOutputFormatEnding() = 0;
 
     /**
+     * Sets data for use with the MPI solver.
+     */
+    virtual void setMpiData(int il, int iu, int jl, int ju, int kl, int ku) = 0;
+
+    /**
      * Intializes the file(s) for writing.
      * @param filename The file name of the file to write to.
      * @param imax Number of cells in x direction inside of the domain.
