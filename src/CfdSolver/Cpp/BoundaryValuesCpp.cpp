@@ -544,5 +544,25 @@ void setBoundaryValuesScenarioSpecificCpp(
                 W[IDXW(0,j,k)] = 0.0;
             }
         }
+    } else if (scenarioName == "inflow_test_j") {
+        //#pragma omp parallel for
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Left wall
+                U[IDXU(0,j,k)] = 1.0;
+                V[IDXV(0,j,k)] = 0.0;
+                W[IDXW(0,j,k)] = 0.0;
+            }
+        }
+    } else if (scenarioName == "inflow_test_k") {
+        //#pragma omp parallel for
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                // Left wall
+                U[IDXU(0,j,k)] = 1.0;
+                V[IDXV(0,j,k)] = 0.0;
+                W[IDXW(0,j,k)] = 0.0;
+            }
+        }
     }
 }

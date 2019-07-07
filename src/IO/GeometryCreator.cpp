@@ -191,6 +191,39 @@ void createFlowOverStepGeometry(
 void createInflowTestGeometry(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    geometryCreator.setLayersInObject(G_FREE_SLIP, 0, kmax+1, [&](int i, int j, int k) {
+        return j == 0 || j == jmax+1;
+    });
+    geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == 0 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
+    geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
+void createInflowTestGeometry_j(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    geometryCreator.setLayersInObject(G_FREE_SLIP, 0, kmax+1, [&](int i, int j, int k) {
+        return j == 0 || j == jmax+1;
+    });
+    geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == 0 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
+    geometryCreator.setLayersInObject(G_OUTFLOW, 0, kmax+1, [&](int i, int j, int k) {
+        return i == imax+1 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
+    });
+    geometryCreator.writeToBinGeoFile(geometryFilename);
+}
+
+void createInflowTestGeometry_k(
+        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
+    GeometryCreator geometryCreator(imax, jmax, kmax, G_NO_SLIP);
+    geometryCreator.setLayersInObject(G_FREE_SLIP, 0, kmax+1, [&](int i, int j, int k) {
+        return k == 0 || k == kmax+1;
+    });
     geometryCreator.setLayersInObject(G_INFLOW, 0, kmax+1, [&](int i, int j, int k) {
         return i == 0 && j >= 1 && j <= jmax && k >= 1 && k <= kmax;
     });
@@ -284,6 +317,10 @@ void generateScenario(
         createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "single_tower")) {
         createTowerGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "inflow_test_j")) {
+        createInflowTestGeometry_j(scenarioName, geometryFilename, imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "inflow_test_k")) {
+        createInflowTestGeometry_k(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "inflow_test")) {
         createInflowTestGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "terrain_1")) {

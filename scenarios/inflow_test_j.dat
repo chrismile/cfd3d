@@ -1,8 +1,8 @@
 #--------------------------------------------
 #     Scenario name and geometry file             
 #--------------------------------------------
-scenario	inflow_test
-geometry	inflow_test.bingeo
+scenario	inflow_test_j
+geometry	inflow_test_j.bingeo
 
 #--------------------------------------------
 #            Size of the domain             
