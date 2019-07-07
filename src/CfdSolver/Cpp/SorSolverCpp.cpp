@@ -33,9 +33,9 @@
 #include "SorSolverCpp.hpp"
 
 // Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
-#define SOR_GAUSS_SEIDL
+//#define SOR_GAUSS_SEIDL
 //#define SOR_GAUSS_SEIDL_PARALLEL
-//#define SOR_JACOBI
+#define SOR_JACOBI
 //#define SOR_HYBRID
 
 void sorSolverIterationCpp(
@@ -114,14 +114,14 @@ void sorSolverIterationCpp(
 
 
 
-#if defined(SOR_JACOBI) || defined(SOR_HYBRID) || defined(SOR_GAUSS_SEIDL_PARALLEL)
+#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
     //memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
     // Using multiple threads for the copy is faster for large amounts of data.
     #pragma omp parallel for
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
-                P_temp[IDXP(i,j,k)] = P[IDXP(i,j,k)];
+                P_temp[IDXP(i, j, k)] = P[IDXP(i, j, k)];
             }
         }
     }
@@ -145,7 +145,7 @@ void sorSolverIterationCpp(
     }
 #endif
 #ifdef SOR_GAUSS_SEIDL_PARALLEL
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -178,11 +178,13 @@ void sorSolverIterationCpp(
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
+                if (isFluid(Flag[IDXFLAG(i,j,k)])) {
                 P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
                         ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
                          + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
                          + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
                          - RS[IDXRS(i,j,k)]);
+                }
             }
         }
     }
@@ -258,13 +260,11 @@ void sorSolverCpp(
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
-#if defined(SOR_JACOBI)
+#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
     omg = 1.0;
-#endif
-#if defined(SOR_HYBRID)
-    omg = 1.0;
-#endif
+#else
     omg = 1.5;
+#endif
 
     const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
     Real residual = Real(1e9);
