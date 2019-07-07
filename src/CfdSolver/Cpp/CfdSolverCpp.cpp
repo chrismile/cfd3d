@@ -129,6 +129,47 @@ void CfdSolverCpp::setBoundaryValuesScenarioSpecific() {
         std::cout << std::endl;
     }
     std::cout << std::endl;*/
+
+    /*if (jmax == 1) {
+        std::cout << std::endl;
+        for (int k = kmax+1; k >= 0; k--) {
+            for (int i = 0; i <= imax; i++) {
+                std::cout << U[IDXU(i,jmax/2+1,k)] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    } else {
+        std::cout << std::endl;
+        for (int j = jmax+1; j >= 0; j--) {
+            for (int i = 0; i <= imax; i++) {
+                std::cout << U[IDXU(i,j,kmax/2+1)] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }*/
+
+    /*if (jmax == 1) {
+        std::cout << std::endl;
+        for (int k = kmax; k >= 0; k--) {
+            for (int i = 0; i <= imax+1; i++) {
+                std::cout << W[IDXW(i,jmax/2+1,k)] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    } else {
+        std::cout << std::endl;
+        for (int j = jmax; j >= 0; j--) {
+            for (int i = 0; i <= imax+1; i++) {
+                std::cout << V[IDXV(i,j,kmax/2+1)] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }*/
+
 }
 
 Real CfdSolverCpp::calculateDt() {
@@ -151,7 +192,7 @@ void CfdSolverCpp::calculateFgh() {
 void CfdSolverCpp::calculateRs() {
     calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 
-    if (jmax == 1) {
+    /*if (jmax == 1) {
         std::cout << std::endl;
         for (int k = kmax; k >= 1; k--) {
             for (int i = 1; i <= imax; i++) {
@@ -169,7 +210,7 @@ void CfdSolverCpp::calculateRs() {
             std::cout << std::endl;
         }
         std::cout << std::endl;
-    }
+    }*/
 }
 
 
