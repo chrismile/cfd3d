@@ -7,9 +7,9 @@ geometry	inflow_test.bingeo
 #--------------------------------------------
 #            Size of the domain             
 #--------------------------------------------
-xLength		2
-yLength		0.1
-zLength		1
+xLength		10
+yLength		2
+zLength		2
 
 #--------------------------------------------
 #         Bottom lower left corner
@@ -24,8 +24,8 @@ zOrigin    0
 //imax		100
 //jmax		20
 //kmax		20
-imax		20
-jmax		1
+imax		50
+jmax		10
 kmax		10
 
 #--------------------------------------------
