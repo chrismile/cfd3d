@@ -43,8 +43,8 @@ bool VtkWriter::initializeWriter(const std::string &filename,
     this->yOrigin = yOrigin;
     this->zOrigin = zOrigin;
 
-    pointData = new Real[(imax+1)*(jmax+1)*(kmax+1)*3];
-    cellData = new Real[(imax+1)*(jmax+1)*(kmax+1)];
+    pointData = new float[(imax+1)*(jmax+1)*(kmax+1)*3];
+    cellData = new float[(imax+1)*(jmax+1)*(kmax+1)];
     cellDataUint = new uint8_t[(imax+1)*(jmax+1)*(kmax+1)];
 
     return true;
@@ -142,7 +142,7 @@ void VtkWriter::writePointData(FILE *file, int imax, int jmax, int kmax, Real *U
     fprintf(file, "VECTORS velocity float\n");
 
     if (isBinaryVtk) {
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int k = 0; k <= kmax; k++) {
             for (int j = 0; j <= jmax; j++) {
                 for (int i = 0; i <= imax; i++) {
@@ -245,6 +245,7 @@ void VtkWriter::writeCellData(FILE *file, int imax, int jmax, int kmax, Real *P,
     if (isBinaryVtk) {
         fprintf(file, "SCALARS geometry unsigned_char 1\n");
         fprintf(file, "LOOKUP_TABLE default\n");
+        #pragma omp parallel for
         for (int k = 1; k <= kmax; k++) {
             for (int j = 1; j <= jmax; j++) {
                 for (int i = 1; i <= imax; i++) {

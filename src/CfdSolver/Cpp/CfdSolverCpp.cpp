@@ -27,6 +27,7 @@
  */
 
 #include <cstring>
+#include <iostream>
 #include "BoundaryValuesCpp.hpp"
 #include "UvwCpp.hpp"
 #include "SorSolverCpp.hpp"
@@ -73,6 +74,19 @@ void CfdSolverCpp::initialize(const std::string &scenarioName,
     this->H = new Real[(imax+1)*(jmax+1)*(kmax+1)];
     this->RS = new Real[(imax+1)*(jmax+1)*(kmax+1)];
     this->Flag = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
+
+    memset(this->U, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2));
+    memset(this->V, 0, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2));
+    memset(this->W, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+1));
+    memset(this->P, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->P_temp, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->T, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->T_temp, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->F, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->G, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->H, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->RS, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->Flag, 0, sizeof(FlagType)*(imax+2)*(jmax+2)*(kmax+2));
 
     // Copy the content of U, V, W, P, T and Flag to the internal representation.
     memcpy(this->U, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2));
@@ -136,6 +150,15 @@ void CfdSolverCpp::calculateFgh() {
 
 void CfdSolverCpp::calculateRs() {
     calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+
+    /*std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 1; i <= imax; i++) {
+            std::cout << RS[IDXRS(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;*/
 }
 
 
