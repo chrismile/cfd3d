@@ -36,8 +36,9 @@ void parseArguments(
         int argc, char *argv[], OutputFileWriter *&outputFileWriter,
         std::string &scenarioName, std::string &solverName, int &numParticles,
         bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
-    // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1, ...
-    scenarioName = "flow_over_step";
+    // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
+    // fuji_san, zugspitze, ...
+    scenarioName = "zugspitze";
     solverName = "cpp";
     numParticles = 400;
     traceStreamlines = false;

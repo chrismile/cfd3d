@@ -62,8 +62,8 @@ void GeometryCreator::writeToBinGeoFile(const std::string &filename) {
 }
 
 void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerStart, int layerEnd) {
-    int pgmWidth, pgmHeight;
-    std::vector<unsigned int> pgmValuesRead = loadPgmFile(filename, &pgmWidth, &pgmHeight);
+    int pgmWidth, pgmHeight, levels;
+    std::vector<unsigned int> pgmValuesRead = loadPgmFile(filename, pgmWidth, pgmHeight, levels);
     std::vector<unsigned int> pgmValues;
     nearestNeighborUpsamplingPgm2D(pgmValuesRead, pgmWidth, pgmHeight, pgmValues, imax+2, jmax+2);
 
@@ -223,13 +223,14 @@ void createHeightMapGeometry(
     // Load the height map from the specified .pgm image file.
     int pgmWidth = 0;
     int pgmHeight = 0;
-    std::vector<unsigned int> heightMapPgmData = loadPgmFile(heightmapFilename, &pgmWidth, &pgmHeight);
+    int levels = 1;
+    std::vector<unsigned int> heightMapPgmData = loadPgmFile(heightmapFilename, pgmWidth, pgmHeight, levels);
     std::vector<unsigned int> heightMapInt;
     nearestNeighborUpsampling2D(heightMapPgmData, pgmWidth, pgmHeight, heightMapPgmData, imax, kmax);
-    std::vector<float> heightMapFloat;
+    std::vector<Real> heightMapFloat;
     heightMapFloat.resize(heightMapPgmData.size());
     for (size_t i = 0; i < heightMapPgmData.size(); i++) {
-        heightMapFloat[i] = heightMapPgmData[i]/255.0f;
+        heightMapFloat[i] = heightMapPgmData[i]/Real(levels);
     }
 
     // Now set all cells below the specified heights to no-slip obstacles.
@@ -238,7 +239,7 @@ void createHeightMapGeometry(
         if (i < 1 || i > imax || k < 1 || k > kmax) {
             return false;
         }
-        float heightMapEntry = heightMapFloat.at((i-1) * kmax + (k-1));
+        Real heightMapEntry = heightMapFloat.at((i-1) * kmax + (k-1));
         int integerHeight = static_cast<int>(heightMapEntry * jmax);
         return j <= integerHeight;
     });
@@ -257,11 +258,6 @@ void createHeightMapGeometry(
     geometryCreator.writeToBinGeoFile(geometryFilename);
 }
 
-void createTerrainGeometry(
-        const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
-    createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/heightmap1.pgm", imax, jmax, kmax);
-}
-
 void generateScenario(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     if (scenarioName == "natural_convection") {
@@ -273,6 +269,10 @@ void generateScenario(
     } else if (boost::starts_with(scenarioName, "single_tower")) {
         createTowerGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "terrain_1")) {
-        createTerrainGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
+        createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/heightmap1.pgm", imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "fuji_san")) {
+        createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/Fuji-san.pgm", imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "zugspitze")) {
+        createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/Zugspitze.pgm", imax, jmax, kmax);
     }
 }

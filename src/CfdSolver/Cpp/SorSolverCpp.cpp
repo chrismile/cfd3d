@@ -279,4 +279,8 @@ void sorSolverCpp(
         std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
                 << residual << ")." << std::endl;
     }
+    if (std::isnan(residual)) {
+        std::cout << "\nResidual in SOR solver is not a number." << std::endl;
+        exit(1);
+    }
 }

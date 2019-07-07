@@ -31,7 +31,7 @@
 #include <cstring>
 #include "PgmFile.hpp"
 
-std::vector<unsigned int> loadPgmFile(const std::string &filename, int *width, int *height)
+std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, int &height, int &levels)
 {
     FILE *file = nullptr;
     if ((file = fopen(filename.c_str(), "rb")) == nullptr) {
@@ -40,7 +40,6 @@ std::vector<unsigned int> loadPgmFile(const std::string &filename, int *width, i
     }
 
     char line[1024];
-    int levels = 0;
     std::vector<unsigned int> pgmValues;
 
     if (fread(line, 1, 3, file) != 3) {
@@ -55,21 +54,21 @@ std::vector<unsigned int> loadPgmFile(const std::string &filename, int *width, i
     } while (*line == '#');
 
     // Read the image width and height
-    sscanf(line, "%d %d\n", width, height);
+    sscanf(line, "%d %d\n", &width, &height);
 
     // Read the number of gray levels
     assert(fgets(line, sizeof line, file) != nullptr);
     sscanf(line, "%d\n", &levels);
-    pgmValues.resize(static_cast<size_t>((*width) * (*height)));
+    pgmValues.resize(static_cast<size_t>(width * height));
 
-    for (int y = 0; y < *height; y++) {
-        for (int x = 0; x < *width; ++x) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; ++x) {
             unsigned int value;
             if (fscanf(file, "%u", &value) == EOF) {
                 fclose(file);
                 std::cerr << "Invalid number of lines in file \"" << filename << "\"." << std::endl;
             }
-            pgmValues[static_cast<size_t>(x * (*height) + y)] = value;
+            pgmValues[static_cast<size_t>(x * height + y)] = value;
         }
     }
 
