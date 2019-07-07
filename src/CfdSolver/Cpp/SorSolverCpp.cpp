@@ -234,6 +234,7 @@ void sorSolverCpp(
 #if defined(SOR_HYBRID)
     omg = 1.0;
 #endif
+    omg = 1.5;
 
     const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
     Real residual = Real(1e9);

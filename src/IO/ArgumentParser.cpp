@@ -37,7 +37,7 @@ void parseArguments(
         std::string &scenarioName, std::string &solverName, int &numParticles,
         bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1, ...
-    scenarioName = "terrain_1";
+    scenarioName = "flow_over_step";
     solverName = "cpp";
     numParticles = 400;
     traceStreamlines = false;

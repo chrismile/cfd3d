@@ -175,9 +175,9 @@ void setFrontBackBoundaries(
             }
             // Back wall
             if (isNoSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
-                U[IDXU(i,j,kmax)] = -U[IDXU(i,j,kmax)];
-                V[IDXV(i,j,kmax)] = -V[IDXV(i,j,kmax)];
-                W[IDXW(i,j,kmax+1)] = 0.0;
+                U[IDXU(i,j,kmax+1)] = -U[IDXU(i,j,kmax)];
+                V[IDXV(i,j,kmax+1)] = -V[IDXV(i,j,kmax)];
+                W[IDXW(i,j,kmax)] = 0.0;
             }
             else if (isFreeSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
                 U[IDXU(i,j,kmax+1)] = U[IDXU(i,j,kmax)];
