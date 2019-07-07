@@ -501,7 +501,7 @@ void setBoundaryValuesScenarioSpecificCpp(
         }
     } else if (scenarioName == "flow_over_step") {
         #pragma omp parallel for
-        for (int j = 1; j <= jmax; j++) {
+        for (int j = jmax/2+1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
                 // Left wall
                 U[IDXU(0,j,k)] = 1.0;
