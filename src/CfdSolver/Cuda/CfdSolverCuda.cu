@@ -27,6 +27,7 @@
  */
 
 #include <cstring>
+#include <iostream>
 #include "BoundaryValuesCuda.hpp"
 #include "UvwCuda.hpp"
 #include "SorSolverCuda.hpp"
@@ -63,18 +64,18 @@ void CfdSolverCuda::initialize(const std::string &scenarioName,
     this->dz = dz;
 
     // Create all arrays for the simulation.
-    cudaMalloc(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real)); 
-    cudaMalloc(&this->V, (imax+2)*(jmax+1)*(kmax+2)*sizeof(Real)); 
+    cudaMalloc(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMalloc(&this->V, (imax+2)*(jmax+1)*(kmax+2)*sizeof(Real));
     cudaMalloc(&this->W, (imax+2)*(jmax+2)*(kmax+1)*sizeof(Real));
     cudaMalloc(&this->P, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
     cudaMalloc(&this->P_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
     cudaMalloc(&this->T, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
-    cudaMalloc(&this->T_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real)); 
-    cudaMalloc(&this->F, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->G, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->H, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real)); 
-    cudaMalloc(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int)); 
+    cudaMalloc(&this->T_temp, (imax+2)*(jmax+2)*(kmax+2)*sizeof(Real));
+    cudaMalloc(&this->F, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real));
+    cudaMalloc(&this->G, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real));
+    cudaMalloc(&this->H, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real));
+    cudaMalloc(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real));
+    cudaMalloc(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int));
 
     // Copy the content of U, V, W, P, T and Flag to the internal representation.
     cudaMemcpy(this->U, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), cudaMemcpyHostToDevice);
@@ -110,9 +111,9 @@ void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
 
 Real CfdSolverCuda::calculateDt() {
     dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateDtCuda<<<dimGrid,dimBlock>>>(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
-    return 0.003;
+    return dt;
 }
 
 
@@ -121,19 +122,19 @@ void CfdSolverCuda::calculateTemperature() {
     T = T_temp;
     T_temp = temp;
     dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateTemperatureCuda<<<dimGrid,dimBlock>>>(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
 void CfdSolverCuda::calculateFgh() {
     dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateFghCuda<<<dimGrid,dimBlock>>>(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 }
 
 void CfdSolverCuda::calculateRs() {
     dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateRsCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
 
@@ -144,7 +145,7 @@ void CfdSolverCuda::executeSorSolver() {
 
 void CfdSolverCuda::calculateUvw() {
     dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateUvwCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
 }
 

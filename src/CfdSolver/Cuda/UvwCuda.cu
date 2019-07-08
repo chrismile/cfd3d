@@ -33,9 +33,9 @@ __global__ void calculateFghCuda(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
 
-    int i = blockIdx.x + 1;
-    int j = blockIdx.y + threadIdx.y + 1;
-    int k = blockIdx.z + threadIdx.x + 1;
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     Real d2u_dx2,d2u_dy2,d2u_dz2,
             d2v_dx2,d2v_dy2,d2v_dz2,
@@ -171,9 +171,9 @@ __global__ void calculateFghCuda(
 __global__ void calculateRsCuda(
     Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
     Real *F, Real *G, Real *H, Real *RS) {
-        int i = blockIdx.x + 1;
-        int j = blockIdx.y + threadIdx.y + 1;
-        int k = blockIdx.z + threadIdx.x + 1;
+        int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
         if (i <= imax && j <= jmax && k <= kmax){
             RS[IDXRS(i, j, k)] = ((F[IDXF(i, j, k)] - F[IDXF(i - 1, j, k)]) / dx +
@@ -194,9 +194,9 @@ __global__ void calculateUvwCuda(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
 
-        int i = blockIdx.x + 1;
-        int j = blockIdx.y + threadIdx.y + 1;
-        int k = blockIdx.z + threadIdx.x + 1;
+        int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
         
         if (i <= imax - 1 && j <= jmax && k <= kmax){
             U[IDXU(i, j, k)] = F[IDXF(i, j, k)] - dt / dx * (P[IDXP(i + 1, j, k)] - P[IDXP(i, j, k)]);
@@ -217,9 +217,9 @@ __global__ void calculateTemperatureCuda(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
 
-        int i = blockIdx.x + 1;
-        int j = blockIdx.y + threadIdx.y + 1;
-        int k = blockIdx.z + threadIdx.x + 1;
+        int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
         Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
 

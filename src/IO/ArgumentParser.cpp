@@ -34,7 +34,7 @@ void parseArguments(
         bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, ...
     scenarioName = "driven_cavity";
-    solverName = "cpp";
+    solverName = "cuda";
     numParticles = 400;
     traceStreamlines = false;
     traceStreaklines = false;

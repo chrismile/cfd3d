@@ -156,7 +156,7 @@ void sorSolverCpp(
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
 #if defined(SOR_JACOBI)
-    omg = 1.7;
+    omg = 1.0;
 #endif
 #if defined(SOR_HYBRID)
     omg = 1.0;

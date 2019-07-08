@@ -37,10 +37,10 @@
 __global__ void set_x_y_planes_pressure_boundaries(
     int imax, int jmax, int kmax, Real *P){
 
-        int i = blockIdx.x + threadIdx.y + 1;
-        int j = blockIdx.y + threadIdx.x + 1;
-        
-        // Set the boundary values for the pressure on the x-y-planes.
+        int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+        int j = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
+    // Set the boundary values for the pressure on the x-y-planes.
         if (i <= imax && j <= jmax){
                 P[IDXP(i,j,0)] = P[IDXP(i,j,1)];
                 P[IDXP(i,j,kmax+1)] = P[IDXP(i,j,kmax)];
@@ -50,8 +50,8 @@ __global__ void set_x_y_planes_pressure_boundaries(
 __global__ void set_x_z_planes_pressure_boundaries(
     int imax, int jmax, int kmax, Real *P){
 
-        int i = blockIdx.x + threadIdx.y + 1;
-        int k = blockIdx.y + threadIdx.x + 1;
+        int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
         // Set the boundary values for the pressure on the x-z-planes.
         if (i <= imax && k<= jmax){
             P[IDXP(i,0,k)] = P[IDXP(i,1,k)];
@@ -62,8 +62,8 @@ __global__ void set_x_z_planes_pressure_boundaries(
 __global__ void set_y_z_planes_pressure_boundaries(
     int imax, int jmax, int kmax, Real *P){
 
-        int j = blockIdx.x + threadIdx.y + 1;
-        int k = blockIdx.y + threadIdx.x + 1;
+        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
         // Set the boundary values for the pressure on the y-z-planes.
         if (j <= imax && k<= jmax){
             P[IDXP(0,j,k)] = P[IDXP(1,j,k)];
@@ -75,10 +75,10 @@ __global__ void sorSolverIterationCuda(
         Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
 
-        int i = blockIdx.x + 1;
-        int j = blockIdx.y + threadIdx.y + 1;
-        int k = blockIdx.z + threadIdx.x + 1;   
-    
+        int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
         // Now start with the actual SOR iteration.
     #ifdef SOR_GAUSS_SEIDL
         if (i <= imax && j <= jmax && k <= kmax){
@@ -139,37 +139,45 @@ __global__ void sorSolverIterationCuda(
 void sorSolverCuda(Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
-    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
 #if defined(SOR_JACOBI)
     omg = 1.0;
 #endif
 #if defined(SOR_HYBRID)
     omg = 1.0;
 #endif
+    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
+
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
-        dim3 dimBlock(blockSize,blockSize);
-        dim3 dimGrid_x_y(iceil(imax,dimBlock.y),iceil(jmax,dimBlock.x));
-        set_x_y_planes_pressure_boundaries<<<dimGrid_x_y,dimBlock>>>(imax, jmax, kmax, P);
+        dim3 dimBlock2D(blockSize,blockSize);
+        dim3 dimGrid_x_y(iceil(jmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
+        set_x_y_planes_pressure_boundaries<<<dimGrid_x_y,dimBlock2D>>>(imax, jmax, kmax, P);
 
-        dim3 dimGrid_x_z(iceil(imax,dimBlock.y),iceil(kmax,dimBlock.x));
-        set_x_z_planes_pressure_boundaries<<<dimGrid_x_z,dimBlock>>>(imax, jmax, kmax, P);
+        dim3 dimGrid_x_z(iceil(kmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
+        set_x_z_planes_pressure_boundaries<<<dimGrid_x_z,dimBlock2D>>>(imax, jmax, kmax, P);
 
-        dim3 dimGrid_y_z(iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
-        set_y_z_planes_pressure_boundaries<<<dimGrid_y_z,dimBlock>>>(imax, jmax, kmax, P);
+        dim3 dimGrid_y_z(iceil(kmax,dimBlock2D.x),iceil(jmax,dimBlock2D.y));
+        set_y_z_planes_pressure_boundaries<<<dimGrid_y_z,dimBlock2D>>>(imax, jmax, kmax, P);
 
 #if defined(SOR_JACOBI) || defined(SOR_HYBRID)
         cudaMemcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToDevice);
 #endif
 
-        dim3 dimGrid(iceil(imax,dimBlock.z),iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+        dim3 dimBlock(blockSize,blockSize);
+        dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
         sorSolverIterationCuda<<<dimGrid,dimBlock>>>(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
 
         it++;
     }
 
-    if (residual > eps && it == itermax || std::isnan(residual)) {
-        std::cerr << "\nSOR solver reached maximum number of iterations without converging." << std::endl;
+    if ((residual > eps && it == itermax) || std::isnan(residual)) {
+        std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
+                  << residual << ")." << std::endl;
     }
+    if (std::isnan(residual)) {
+        std::cout << "\nResidual in SOR solver is not a number." << std::endl;
+        exit(1);
+    }
+
 }
