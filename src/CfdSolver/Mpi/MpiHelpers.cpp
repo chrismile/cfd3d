@@ -91,14 +91,6 @@ void mpiInit(
     threadIdxI = myrank % iproc;
     threadIdxJ = (myrank % (iproc*jproc)) / iproc;
     threadIdxK = myrank / (iproc*jproc);
-
-    // Set range of the domain
-    il = imax/iproc * (threadIdxI) + 1;
-    iu = std::min(imax/iproc * (threadIdxI + 1), imax);
-    jl = jmax/jproc * (threadIdxJ) + 1;
-    ju = std::min(jmax/jproc * (threadIdxJ + 1), jmax);
-    kl = kmax/kproc * (threadIdxK) + 1;
-    ku = std::min(kmax/kproc * (threadIdxK + 1), kmax);
 }
 
 void mpiExchangeCellData(

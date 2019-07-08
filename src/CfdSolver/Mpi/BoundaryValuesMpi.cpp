@@ -42,18 +42,10 @@ void setLeftRightBoundariesMpi(
                 // Left wall
                 if (isNoSlip(Flag[IDXFLAG(0,j,k)])) {
                     U[IDXU(0,j,k)] = 0.0;
-                    V[IDXV(0,j,k)] = -V[IDXV(1,j,k)];
-                    W[IDXW(0,j,k)] = -W[IDXW(1,j,k)];
-                }
-                else if (isFreeSlip(Flag[IDXFLAG(0,j,k)])) {
+                } else if (isFreeSlip(Flag[IDXFLAG(0,j,k)])) {
                     U[IDXU(0,j,k)] = 0.0;
-                    V[IDXV(0,j,k)] = V[IDXV(1,j,k)];
-                    W[IDXW(0,j,k)] = W[IDXW(1,j,k)];
-                }
-                else if (isOutflow(Flag[IDXFLAG(0,j,k)])) {
+                } else if (isOutflow(Flag[IDXFLAG(0,j,k)])) {
                     U[IDXU(0,j,k)] = U[IDXU(1,j,k)];
-                    V[IDXV(0,j,k)] = V[IDXV(1,j,k)];
-                    W[IDXW(0,j,k)] = W[IDXW(1,j,k)];
                 }
 
                 // Left boundary T
@@ -66,6 +58,23 @@ void setLeftRightBoundariesMpi(
                 }
             }
         }
+        for (int j = jl-1; j <= ju; j++) {
+            for (int k = kl-1; k <= ku; k++) {
+                // Left wall
+                if (isNoSlip(Flag[IDXFLAG(0,j,k)])) {
+                    V[IDXV(0,j,k)] = -V[IDXV(1,j,k)];
+                    W[IDXW(0,j,k)] = -W[IDXW(1,j,k)];
+                }
+                else if (isFreeSlip(Flag[IDXFLAG(0,j,k)])) {
+                    V[IDXV(0,j,k)] = V[IDXV(1,j,k)];
+                    W[IDXW(0,j,k)] = W[IDXW(1,j,k)];
+                }
+                else if (isOutflow(Flag[IDXFLAG(0,j,k)])) {
+                    V[IDXV(0,j,k)] = V[IDXV(1,j,k)];
+                    W[IDXW(0,j,k)] = W[IDXW(1,j,k)];
+                }
+            }
+        }
     }
 
     if (iu == imax) {
@@ -74,18 +83,10 @@ void setLeftRightBoundariesMpi(
                 // Right wall
                 if (isNoSlip(Flag[IDXFLAG(imax+1,j,k)])) {
                     U[IDXU(imax,j,k)] = 0.0;
-                    V[IDXV(imax+1,j,k)] = -V[IDXV(imax,j,k)];
-                    W[IDXW(imax+1,j,k)] = -W[IDXW(imax,j,k)];
-                }
-                else if (isFreeSlip(Flag[IDXFLAG(imax+1,j,k)])) {
+                } else if (isFreeSlip(Flag[IDXFLAG(imax+1,j,k)])) {
                     U[IDXU(imax,j,k)] = 0.0;
-                    V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
-                    W[IDXW(imax+1,j,k)] = W[IDXW(imax,j,k)];
-                }
-                else if (isOutflow(Flag[IDXFLAG(imax+1,j,k)])) {
+                } else if (isOutflow(Flag[IDXFLAG(imax+1,j,k)])) {
                     U[IDXU(imax,j,k)] = U[IDXU(imax-1,j,k)];
-                    V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
-                    W[IDXW(imax+1,j,k)] = W[IDXW(imax,j,k)];
                 }
 
                 // Right boundary T
@@ -95,6 +96,23 @@ void setLeftRightBoundariesMpi(
                     T[IDXT(imax+1,j,k)] = 2 * T_c - T[IDXT(imax,j,k)];
                 } else {
                     T[IDXT(imax+1,j,k)] = T[IDXT(imax,j,k)];
+                }
+            }
+        }
+        for (int j = jl-1; j <= ju; j++) {
+            for (int k = kl-1; k <= ku; k++) {
+                // Right wall
+                if (isNoSlip(Flag[IDXFLAG(imax+1,j,k)])) {
+                    V[IDXV(imax+1,j,k)] = -V[IDXV(imax,j,k)];
+                    W[IDXW(imax+1,j,k)] = -W[IDXW(imax,j,k)];
+                }
+                else if (isFreeSlip(Flag[IDXFLAG(imax+1,j,k)])) {
+                    V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
+                    W[IDXW(imax+1,j,k)] = W[IDXW(imax,j,k)];
+                }
+                else if (isOutflow(Flag[IDXFLAG(imax+1,j,k)])) {
+                    V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
+                    W[IDXW(imax+1,j,k)] = W[IDXW(imax,j,k)];
                 }
             }
         }
@@ -112,17 +130,11 @@ void setDownUpBoundariesMpi(
             for (int k = kl; k <= ku; k++) {
                 // Down wall
                 if (isNoSlip(Flag[IDXFLAG(i,0,k)])) {
-                    U[IDXU(i,0,k)] = -U[IDXU(i,1,k)];
                     V[IDXV(i,0,k)] = 0.0;
-                    W[IDXW(i,0,k)] = -W[IDXW(i,1,k)];
                 } else if (isFreeSlip(Flag[IDXFLAG(i,0,k)])) {
-                    U[IDXU(i,0,k)] = U[IDXU(i,1,k)];
                     V[IDXV(i,0,k)] = 0.0;
-                    W[IDXW(i,0,k)] = W[IDXW(i,1,k)];
                 } else if (isOutflow(Flag[IDXFLAG(i,0,k)])) {
-                    U[IDXU(i,0,k)] = U[IDXU(i,1,k)];
                     V[IDXV(i,0,k)] = V[IDXV(i,1,k)];
-                    W[IDXW(i,0,k)] = W[IDXW(i,1,k)];
                 }
 
                 // Down boundary T
@@ -135,6 +147,21 @@ void setDownUpBoundariesMpi(
                 }
             }
         }
+        for (int i = il-1; i <= iu; i++) {
+            for (int k = kl-1; k <= ku; k++) {
+                // Down wall
+                if (isNoSlip(Flag[IDXFLAG(i,0,k)])) {
+                    U[IDXU(i,0,k)] = -U[IDXU(i,1,k)];
+                    W[IDXW(i,0,k)] = -W[IDXW(i,1,k)];
+                } else if (isFreeSlip(Flag[IDXFLAG(i,0,k)])) {
+                    U[IDXU(i,0,k)] = U[IDXU(i,1,k)];
+                    W[IDXW(i,0,k)] = W[IDXW(i,1,k)];
+                } else if (isOutflow(Flag[IDXFLAG(i,0,k)])) {
+                    U[IDXU(i,0,k)] = U[IDXU(i,1,k)];
+                    W[IDXW(i,0,k)] = W[IDXW(i,1,k)];
+                }
+            }
+        }
     }
 
     if (ju == jmax) {
@@ -142,17 +169,11 @@ void setDownUpBoundariesMpi(
             for (int k = kl; k <= ku; k++) {
                 // Up wall
                 if (isNoSlip(Flag[IDXFLAG(i,jmax+1,k)])) {
-                    U[IDXU(i,jmax+1,k)] = -U[IDXU(i,jmax,k)];
                     V[IDXV(i,jmax,k)] = 0.0;
-                    W[IDXW(i,jmax+1,k)] = -W[IDXW(i,jmax,k)];
                 } else if (isFreeSlip(Flag[IDXFLAG(i,jmax+1,k)])) {
-                    U[IDXU(i,jmax+1,k)] = U[IDXU(i,jmax,k)];
                     V[IDXV(i,jmax,k)] = 0.0;
-                    W[IDXW(i,jmax+1,k)] = W[IDXW(i,jmax,k)];
                 } else if (isOutflow(Flag[IDXFLAG(i,jmax+1,k)])) {
-                    U[IDXU(i,jmax+1,k)] = U[IDXU(i,jmax,k)];
                     V[IDXV(i,jmax,k)] = V[IDXV(i,jmax-1,k)];
-                    W[IDXW(i,jmax+1,k)] = W[IDXW(i,jmax,k)];
                 }
 
                 // Up boundary T
@@ -162,6 +183,22 @@ void setDownUpBoundariesMpi(
                     T[IDXT(i,jmax+1,k)] = 2 * T_c - T[IDXT(i,jmax,k)];
                 } else {
                     T[IDXT(i,jmax+1,k)] = T[IDXT(i,jmax,k)];
+                }
+            }
+        }
+        for (int i = il-1; i <= iu; i++) {
+            for (int k = kl-1; k <= ku; k++) {
+                // Up wall
+                if (isNoSlip(Flag[IDXFLAG(i,jmax+1,k)])) {
+                    U[IDXU(i,jmax+1,k)] = -U[IDXU(i,jmax,k)];
+                    W[IDXW(i,jmax+1,k)] = -W[IDXW(i,jmax,k)];
+                } else if (isFreeSlip(Flag[IDXFLAG(i,jmax+1,k)])) {
+                    U[IDXU(i,jmax+1,k)] = U[IDXU(i,jmax,k)];
+                    W[IDXW(i,jmax+1,k)] = W[IDXW(i,jmax,k)];
+                } else if (isOutflow(Flag[IDXFLAG(i,jmax+1,k)])) {
+                    U[IDXU(i,jmax+1,k)] = U[IDXU(i,jmax,k)];
+                    V[IDXV(i,jmax,k)] = V[IDXV(i,jmax-1,k)];
+                    W[IDXW(i,jmax+1,k)] = W[IDXW(i,jmax,k)];
                 }
             }
         }
@@ -179,18 +216,12 @@ void setFrontBackBoundariesMpi(
             for (int j = jl; j <= ju; j++) {
                 // Back wall
                 if (isNoSlip(Flag[IDXFLAG(i,j,0)])) {
-                    U[IDXU(i,j,0)] = -U[IDXU(i,j,1)];
-                    V[IDXV(i,j,0)] = -V[IDXV(i,j,1)];
                     W[IDXW(i,j,0)] = 0.0;
                 }
                 else if (isFreeSlip(Flag[IDXFLAG(i,j,0)])) {
-                    U[IDXU(i,j,0)] = U[IDXU(i,j,1)];
-                    V[IDXV(i,j,0)] = V[IDXV(i,j,1)];
                     W[IDXW(i,j,0)] = 0.0;
                 }
                 else if (isOutflow(Flag[IDXFLAG(i,j,0)])) {
-                    U[IDXU(i,j,0)] = U[IDXU(i,j,1)];
-                    V[IDXV(i,j,0)] = V[IDXV(i,j,1)];
                     W[IDXW(i,j,0)] = W[IDXW(i,j,1)];
                 }
 
@@ -206,6 +237,23 @@ void setFrontBackBoundariesMpi(
                 }
             }
         }
+        for (int i = il-1; i <= iu; i++) {
+            for (int j = jl-1; j <= ju; j++) {
+                // Back wall
+                if (isNoSlip(Flag[IDXFLAG(i,j,0)])) {
+                    U[IDXU(i,j,0)] = -U[IDXU(i,j,1)];
+                    V[IDXV(i,j,0)] = -V[IDXV(i,j,1)];
+                }
+                else if (isFreeSlip(Flag[IDXFLAG(i,j,0)])) {
+                    U[IDXU(i,j,0)] = U[IDXU(i,j,1)];
+                    V[IDXV(i,j,0)] = V[IDXV(i,j,1)];
+                }
+                else if (isOutflow(Flag[IDXFLAG(i,j,0)])) {
+                    U[IDXU(i,j,0)] = U[IDXU(i,j,1)];
+                    V[IDXV(i,j,0)] = V[IDXV(i,j,1)];
+                }
+            }
+        }
     }
 
     if (ku == kmax) {
@@ -213,18 +261,12 @@ void setFrontBackBoundariesMpi(
             for (int j = jl; j <= ju; j++) {
                 // Front wall
                 if (isNoSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
-                    U[IDXU(i,j,kmax+1)] = -U[IDXU(i,j,kmax)];
-                    V[IDXV(i,j,kmax+1)] = -V[IDXV(i,j,kmax)];
                     W[IDXW(i,j,kmax)] = 0.0;
                 }
                 else if (isFreeSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
-                    U[IDXU(i,j,kmax+1)] = U[IDXU(i,j,kmax)];
-                    V[IDXV(i,j,kmax+1)] = V[IDXV(i,j,kmax)];
                     W[IDXW(i,j,kmax)] = 0.0;
                 }
                 else if (isOutflow(Flag[IDXFLAG(i,j,kmax+1)])) {
-                    U[IDXU(i,j,kmax+1)] = U[IDXU(i,j,kmax)];
-                    V[IDXV(i,j,kmax+1)] = V[IDXV(i,j,kmax)];
                     W[IDXW(i,j,kmax)] = W[IDXW(i,j,kmax-1)];
                 }
 
@@ -240,11 +282,24 @@ void setFrontBackBoundariesMpi(
                 }
             }
         }
+        for (int i = il-1; i <= iu; i++) {
+            for (int j = jl-1; j <= ju; j++) {
+                // Front wall
+                if (isNoSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
+                    U[IDXU(i,j,kmax+1)] = -U[IDXU(i,j,kmax)];
+                    V[IDXV(i,j,kmax+1)] = -V[IDXV(i,j,kmax)];
+                }
+                else if (isFreeSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
+                    U[IDXU(i,j,kmax+1)] = U[IDXU(i,j,kmax)];
+                    V[IDXV(i,j,kmax+1)] = V[IDXV(i,j,kmax)];
+                }
+                else if (isOutflow(Flag[IDXFLAG(i,j,kmax+1)])) {
+                    U[IDXU(i,j,kmax+1)] = U[IDXU(i,j,kmax)];
+                    V[IDXV(i,j,kmax+1)] = V[IDXV(i,j,kmax)];
+                }
+            }
+        }
     }
-
-
-
-
 }
 
 
@@ -253,8 +308,7 @@ void setInternalUBoundariesMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
         Real *U,
         FlagType *Flag) {
-
-    for (int i = il; i <= iu-1; i++) {
+    for (int i = std::max(il-1, 1); i <= iu && i != imax; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 int R_check = 0;
@@ -282,8 +336,6 @@ void setInternalUBoundariesMpi(
                             U[IDXU(i, j, k)] = -U[IDXU(i, j + 1, k)];
                             R1_check = 1;
                         }
-
-
                     }
 
                     if (B_D(Flag[IDXFLAG(i, j, k)])) {
@@ -326,7 +378,7 @@ void setInternalVBoundariesMpi(
         Real *V,
         FlagType *Flag) {
     for (int i = il; i <= iu; i++) {
-        for (int j = jl; j <= ju-1; j++) {
+        for (int j = std::max(jl-1, 1); j <= ju && j != jmax; j++) {
             for (int k = kl; k <= ku; k++) {
                 int U_check = 0;
                 int D_check = 0;
@@ -396,7 +448,7 @@ void setInternalWBoundariesMpi(
         FlagType *Flag) {
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
-            for (int k = kl; k <= ku-1; k++) {
+            for (int k = std::max(kl-1, 1); k <= ku && k != kmax; k++) {
                 int F_check = 0;
                 int B_check = 0;
                 int F1_check = 0;

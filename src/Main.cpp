@@ -72,13 +72,13 @@ int main(int argc, char *argv[]) {
 
     // For MPI
 #ifdef USE_MPI
-    int myrank, nproc, rankL, rankR, rankD, rankU, rankB, rankF, threadIdxI, threadIdxJ, threadIdxK,
+    int myrank = 0, nproc = 1, rankL, rankR, rankD, rankU, rankB, rankF, threadIdxI, threadIdxJ, threadIdxK,
             il, iu, jl, ju, kl, ku;
 #else
     int nproc = 1;
-    int myrank = 1;
+    int myrank = 0;
 #endif
-    int iproc = 0, jproc = 0, kproc = 0;
+    int iproc = 1, jproc = 1, kproc = 1;
 
     int imax, jmax, kmax, itermax, numParticles;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
@@ -109,7 +109,9 @@ int main(int argc, char *argv[]) {
     } else if (outputFileWriterType.length() == 0) {
         outputFileWriter = new VtkWriter(nproc, myrank);
     } else {
-        std::cerr << "Invalid output format." << std::endl;
+        if (myrank == 0) {
+            std::cerr << "Invalid output format." << std::endl;
+        }
         exit(1);
     }
 
@@ -142,10 +144,12 @@ int main(int argc, char *argv[]) {
 
     geometryFilename = geometryDirectory + geometryName;
     outputFilename = outputDirectory + scenarioName;
-    std::cout << "Scenario name: " << scenarioName << std::endl;
-    std::cout << "Scenario file: " << scenarioFilename << std::endl;
-    std::cout << "Geometry file: " << geometryFilename << std::endl;
-    std::cout << "Output file: " << geometryFilename << std::endl;
+    if (myrank == 0) {
+        std::cout << "Scenario name: " << scenarioName << std::endl;
+        std::cout << "Scenario file: " << scenarioFilename << std::endl;
+        std::cout << "Geometry file: " << geometryFilename << std::endl;
+        std::cout << "Output file: " << geometryFilename << std::endl;
+    }
 
     std::string outputFormatEnding = outputFileWriter->getOutputFormatEnding();
 
@@ -160,6 +164,14 @@ int main(int argc, char *argv[]) {
 
 #ifdef USE_MPI
     if (solverName == "mpi") {
+        // Set range of the domain
+        il = imax/iproc * (threadIdxI) + 1;
+        iu = std::min(imax/iproc * (threadIdxI + 1), imax);
+        jl = jmax/jproc * (threadIdxJ) + 1;
+        ju = std::min(jmax/jproc * (threadIdxJ + 1), jmax);
+        kl = kmax/kproc * (threadIdxK) + 1;
+        ku = std::min(kmax/kproc * (threadIdxK + 1), kmax);
+
         // Create all arrays for the simulation.
         U = new Real[(iu - il + 4)*(ju - jl + 3)*(ku - kl + 3)];
         V = new Real[(iu - il + 3)*(ju - jl + 4)*(ku - kl + 3)];
@@ -245,7 +257,9 @@ int main(int argc, char *argv[]) {
             T_h, T_c, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T, Flag);
 
     while (t < tEnd) {
-        progressBar.printProgress(t, tEnd, 50);
+        if (myrank == 0) {
+            progressBar.printProgress(t, tEnd, 50);
+        }
 
         cfdSolver->setBoundaryValues();
         cfdSolver->setBoundaryValuesScenarioSpecific();
@@ -271,7 +285,9 @@ int main(int argc, char *argv[]) {
                 }
                 outputFileWriter->writeTimestep(n, t, U, V, W, P, T, Flag);
             }
-            progressBar.printOutput(n, t, 50);
+            if (myrank == 0) {
+                progressBar.printOutput(n, t, 50);
+            }
             tWrite -= dtWrite;
         }
         if (traceStreaklines || tracePathlines) {
@@ -287,7 +303,9 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    progressBar.printOutput(n, t, 50);
+    if (myrank == 0) {
+        progressBar.printOutput(n, t, 50);
+    }
 
     if (traceStreamlines) {
         if (!dataIsUpToDate) {
@@ -315,7 +333,9 @@ int main(int argc, char *argv[]) {
 
     auto endTime = std::chrono::system_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
-    std::cout << "System time elapsed: " << (elapsedTime.count() * 1e-6) << "s" << std::endl;
+    if (myrank == 0) {
+        std::cout << "System time elapsed: " << (elapsedTime.count() * 1e-6) << "s" << std::endl;
+    }
 
     delete cfdSolver;
     delete outputFileWriter;

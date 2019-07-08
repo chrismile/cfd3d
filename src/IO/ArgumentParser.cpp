@@ -37,8 +37,8 @@ void parseArguments(
         int &iproc, int &jproc, int &kproc) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
     // fuji_san, zugspitze, ...
-    scenarioName = "zugspitze";
-    solverName = "cpp";
+    scenarioName = "driven_cavity";
+    solverName = "mpi";
     numParticles = 400;
     traceStreamlines = false;
     traceStreaklines = false;

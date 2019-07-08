@@ -29,7 +29,7 @@
 #include "BoundaryValuesCpp.hpp"
 #include "../Flag.hpp"
 
-void setLeftRightBoundaries(
+void setLeftRightBoundariesCpp(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
@@ -42,29 +42,26 @@ void setLeftRightBoundaries(
                 U[IDXU(0,j,k)] = 0.0;
                 V[IDXV(0,j,k)] = -V[IDXV(1,j,k)];
                 W[IDXW(0,j,k)] = -W[IDXW(1,j,k)];
-            }
-            else if (isFreeSlip(Flag[IDXFLAG(0,j,k)])) {
+            } else if (isFreeSlip(Flag[IDXFLAG(0,j,k)])) {
                 U[IDXU(0,j,k)] = 0.0;
                 V[IDXV(0,j,k)] = V[IDXV(1,j,k)];
                 W[IDXW(0,j,k)] = W[IDXW(1,j,k)];
-            }
-            else if (isOutflow(Flag[IDXFLAG(0,j,k)])) {
+            } else if (isOutflow(Flag[IDXFLAG(0,j,k)])) {
                 U[IDXU(0,j,k)] = U[IDXU(1,j,k)];
                 V[IDXV(0,j,k)] = V[IDXV(1,j,k)];
                 W[IDXW(0,j,k)] = W[IDXW(1,j,k)];
             }
+
             // Right wall
             if (isNoSlip(Flag[IDXFLAG(imax+1,j,k)])) {
                 U[IDXU(imax,j,k)] = 0.0;
                 V[IDXV(imax+1,j,k)] = -V[IDXV(imax,j,k)];
                 W[IDXW(imax+1,j,k)] = -W[IDXW(imax,j,k)];
-            }
-            else if (isFreeSlip(Flag[IDXFLAG(imax+1,j,k)])) {
+            } else if (isFreeSlip(Flag[IDXFLAG(imax+1,j,k)])) {
                 U[IDXU(imax,j,k)] = 0.0;
                 V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
                 W[IDXW(imax+1,j,k)] = W[IDXW(imax,j,k)];
-            }
-            else if (isOutflow(Flag[IDXFLAG(imax+1,j,k)])) {
+            } else if (isOutflow(Flag[IDXFLAG(imax+1,j,k)])) {
                 U[IDXU(imax,j,k)] = U[IDXU(imax-1,j,k)];
                 V[IDXV(imax+1,j,k)] = V[IDXV(imax,j,k)];
                 W[IDXW(imax+1,j,k)] = W[IDXW(imax,j,k)];
@@ -91,7 +88,7 @@ void setLeftRightBoundaries(
     }
 }
 
-void setDownUpBoundaries(
+void setDownUpBoundariesCpp(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
@@ -113,6 +110,7 @@ void setDownUpBoundaries(
                 V[IDXV(i,0,k)] = V[IDXV(i,1,k)];
                 W[IDXW(i,0,k)] = W[IDXW(i,1,k)];
             }
+
             // Up wall
             if (isNoSlip(Flag[IDXFLAG(i,jmax+1,k)])) {
                 U[IDXU(i,jmax+1,k)] = -U[IDXU(i,jmax,k)];
@@ -149,7 +147,7 @@ void setDownUpBoundaries(
     }
 }
 
-void setFrontBackBoundaries(
+void setFrontBackBoundariesCpp(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
@@ -173,6 +171,7 @@ void setFrontBackBoundaries(
                 V[IDXV(i,j,0)] = V[IDXV(i,j,1)];
                 W[IDXW(i,j,0)] = W[IDXW(i,j,1)];
             }
+
             // Front wall
             if (isNoSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
                 U[IDXU(i,j,kmax+1)] = -U[IDXU(i,j,kmax)];
@@ -216,7 +215,7 @@ void setFrontBackBoundaries(
 }
 
 
-void setInternalUBoundaries(
+void setInternalUBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *U,
         FlagType *Flag) {
@@ -249,8 +248,6 @@ void setInternalUBoundaries(
                             U[IDXU(i, j, k)] = -U[IDXU(i, j + 1, k)];
                             R1_check = 1;
                         }
-
-
                     }
 
                     if (B_D(Flag[IDXFLAG(i, j, k)])) {
@@ -287,7 +284,7 @@ void setInternalUBoundaries(
     }     
 }
 
-void setInternalVBoundaries(
+void setInternalVBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *V,
         FlagType *Flag) {
@@ -355,7 +352,7 @@ void setInternalVBoundaries(
     }   
 }
 
-void setInternalWBoundaries(
+void setInternalWBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *W,
         FlagType *Flag) {
@@ -423,7 +420,7 @@ void setInternalWBoundaries(
     }      
 }
 
-void setInternalTBoundaries(
+void setInternalTBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *T,
         FlagType *Flag) {
@@ -476,13 +473,13 @@ void setBoundaryValuesCpp(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-    setLeftRightBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
-    setDownUpBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
-    setFrontBackBoundaries(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
-    setInternalUBoundaries(imax, jmax, kmax, U,Flag);
-    setInternalVBoundaries(imax, jmax, kmax, V,Flag);
-    setInternalWBoundaries(imax, jmax, kmax, W,Flag);
-    setInternalTBoundaries(imax, jmax, kmax, T,Flag);
+    setLeftRightBoundariesCpp(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setDownUpBoundariesCpp(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setFrontBackBoundariesCpp(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setInternalUBoundariesCpp(imax, jmax, kmax, U,Flag);
+    setInternalVBoundariesCpp(imax, jmax, kmax, V,Flag);
+    setInternalWBoundariesCpp(imax, jmax, kmax, W,Flag);
+    setInternalTBoundariesCpp(imax, jmax, kmax, T,Flag);
 }
 
 
