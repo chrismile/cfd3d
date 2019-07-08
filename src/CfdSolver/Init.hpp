@@ -50,7 +50,15 @@
  * @param T The temperature values.
  * @param Flag The flag values (@see Flag.hpp for more information).
  */
-void initArrays(Real UI, Real VI, Real WI, Real PI, Real TI, int imax, int jmax, int kmax,
+void initArrays(
+        Real UI, Real VI, Real WI, Real PI, Real TI, int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
+
+/**
+ * MPI version of the command above.
+ */
+void initArraysMpi(
+        Real UI, Real VI, Real WI, Real PI, Real TI, int il, int iu, int jl, int ju, int kl, int ku,
         Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
 
 #endif //CFD3D_INIT_HPP

@@ -52,6 +52,17 @@ bool NetCdfWriter::initializeWriter(const std::string &filename,
     this->yOrigin = yOrigin;
     this->zOrigin = zOrigin;
 
+    if (!isMpiMode) {
+        il = jl = kl = 1;
+        iu = imax;
+        ju = jmax;
+        ku = kmax;
+
+        std::cerr << "Error: NetCdfWriter doesn't support the distributed MPI solver (yet). "
+                << "Please consider using the VtkWriter class instead." << std::endl;
+        exit(1);
+    }
+
     // Another file still open?
     if (isFileOpen) {
         delete[] centerCellU;

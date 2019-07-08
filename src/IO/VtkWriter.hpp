@@ -79,11 +79,11 @@ public:
             int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
 
 private:
-    void writeVtkHeader(FILE *file, int imax, int jmax, int kmax);
-    void writePointCoordinates(FILE *file, int imax, int jmax, int kmax,
+    void writeVtkHeader(FILE *file);
+    void writePointCoordinates(FILE *file,
             Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
-    void writePointData(FILE *file, int imax, int jmax, int kmax, Real *U, Real *V, Real *W, FlagType *Flag);
-    void writeCellData(FILE *file, int imax, int jmax, int kmax, Real *P, Real *T, FlagType *Flag);
+    void writePointData(FILE *file, Real *U, Real *V, Real *W, FlagType *Flag);
+    void writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag);
 
     bool isBinaryVtk;
     std::string filename;

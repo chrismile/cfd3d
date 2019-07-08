@@ -179,11 +179,11 @@ void sorSolverIterationCpp(
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
-                        ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
-                         + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
-                         + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
-                         - RS[IDXRS(i,j,k)]);
+                    P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
+                            ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
+                             + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
+                             + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
+                             - RS[IDXRS(i,j,k)]);
                 }
             }
         }

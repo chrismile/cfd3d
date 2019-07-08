@@ -34,7 +34,7 @@ void setLeftRightBoundaries(
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int j = 1; j <= jmax; j++) {
         for (int k = 1; k <= kmax; k++) {
             // Left wall
@@ -157,7 +157,7 @@ void setFrontBackBoundaries(
     #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
-            // Front wall
+            // Back wall
             if (isNoSlip(Flag[IDXFLAG(i,j,0)])) {
                 U[IDXU(i,j,0)] = -U[IDXU(i,j,1)];
                 V[IDXV(i,j,0)] = -V[IDXV(i,j,1)];
@@ -173,7 +173,7 @@ void setFrontBackBoundaries(
                 V[IDXV(i,j,0)] = V[IDXV(i,j,1)];
                 W[IDXW(i,j,0)] = W[IDXW(i,j,1)];
             }
-            // Back wall
+            // Front wall
             if (isNoSlip(Flag[IDXFLAG(i,j,kmax+1)])) {
                 U[IDXU(i,j,kmax+1)] = -U[IDXU(i,j,kmax)];
                 V[IDXV(i,j,kmax+1)] = -V[IDXV(i,j,kmax)];
@@ -190,7 +190,7 @@ void setFrontBackBoundaries(
                 W[IDXW(i,j,kmax)] = W[IDXW(i,j,kmax-1)];
             }
 
-            // Front boundary T
+            // Back boundary T
             if (isHot(Flag[IDXFLAG(i,j,0)])) {
                 T[IDXT(i,j,0)] = 2 * T_h - T[IDXT(i,j,1)];
             }
@@ -201,7 +201,7 @@ void setFrontBackBoundaries(
                 T[IDXT(i,j,0)] = T[IDXT(i,j,1)];
             }
 
-            // Back boundary T
+            // Front boundary T
             if (isHot(Flag[IDXFLAG(i,j,kmax+1)])) {
                 T[IDXT(i,j,kmax+1)] = 2 * T_h - T[IDXT(i,j,kmax)];
             }

@@ -189,12 +189,12 @@ int main(int argc, char *argv[]) {
         }
         initFlagFromGeometryFile(scenarioName, geometryFilename, imax, jmax, kmax, FlagAll);
     }
-    initArrays(UI, VI, WI, PI, TI, imax, jmax, kmax, U, V, W, P, T, FlagAll);
 
 #ifdef USE_MPI
     if (solverName == "mpi") {
         outputFileWriter->setMpiData(il, iu, jl, ju, kl, ku);
 
+        // Copy the relevant part of the geometry.
         for (int i = il - 1; i <= iu + 1; i++) {
             for (int j = jl - 1; j <= ju + 1; j++) {
                 for (int k = kl - 1; k <= ku + 1; k++) {
@@ -203,8 +203,13 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
-    }
+
+        initArraysMpi(UI, VI, WI, PI, TI, il, iu, jl, ju, kl, ku, U, V, W, P, T, FlagAll);
+    } else
 #endif
+    {
+        initArrays(UI, VI, WI, PI, TI, imax, jmax, kmax, U, V, W, P, T, FlagAll);
+    }
 
     auto startTime = std::chrono::system_clock::now();
 

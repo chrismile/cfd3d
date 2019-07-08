@@ -46,36 +46,56 @@ void sorSolverIterationMpi(
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
     // Set the boundary values for the pressure on the x-y-planes.
-    #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            P[IDXP(i,j,0)] = P[IDXP(i,j,1)];
-            P[IDXP(i,j,kmax+1)] = P[IDXP(i,j,kmax)];
+    if (kl == 1) {
+        for (int i = 1; i <= imax; i++) {
+            for (int j = 1; j <= jmax; j++) {
+                P[IDXP(i, j, 0)] = P[IDXP(i, j, 1)];
+            }
+        }
+    }
+    if (ku == kmax) {
+        for (int i = 1; i <= imax; i++) {
+            for (int j = 1; j <= jmax; j++) {
+                P[IDXP(i, j, kmax + 1)] = P[IDXP(i, j, kmax)];
+            }
         }
     }
 
     // Set the boundary values for the pressure on the x-z-planes.
-    #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int k = 1; k <= kmax; k++) {
-            P[IDXP(i,0,k)] = P[IDXP(i,1,k)];
-            P[IDXP(i,jmax+1,k)] = P[IDXP(i,jmax,k)];
+    if (jl == 1) {
+        for (int i = 1; i <= imax; i++) {
+            for (int k = 1; k <= kmax; k++) {
+                P[IDXP(i,0,k)] = P[IDXP(i,1,k)];
+            }
+        }
+    }
+    if (ju == jmax) {
+        for (int i = 1; i <= imax; i++) {
+            for (int k = 1; k <= kmax; k++) {
+                P[IDXP(i,jmax+1,k)] = P[IDXP(i,jmax,k)];
+            }
         }
     }
 
     // Set the boundary values for the pressure on the y-z-planes.
-    #pragma omp parallel for
-    for (int j = 1; j <= jmax; j++) {
-        for (int k = 1; k <= kmax; k++) {
-            P[IDXP(0,j,k)] = P[IDXP(1,j,k)];
-            P[IDXP(imax+1,j,k)] = P[IDXP(imax,j,k)];
+    if (il == 1) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                P[IDXP(0,j,k)] = P[IDXP(1,j,k)];
+            }
+        }
+    }
+    if (iu == imax) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                P[IDXP(imax+1,j,k)] = P[IDXP(imax,j,k)];
+            }
         }
     }
 
-    #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+    for (int i = il; i <= iu; i++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 int numDirectFlag = 0;
                 Real P_temp = Real(0);
 
@@ -121,10 +141,9 @@ void sorSolverIterationMpi(
 #if defined(SOR_JACOBI) || defined(SOR_HYBRID)
     //memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
     // Using multiple threads for the copy is faster for large amounts of data.
-    #pragma omp parallel for
-    for (int i = 0; i <= imax+1; i++) {
-        for (int j = 0; j <= jmax+1; j++) {
-            for (int k = 0; k <= kmax+1; k++) {
+    for (int i = il-1; i <= iu+1; i++) {
+        for (int j = jl-1; j <= ju+1; j++) {
+            for (int k = kl-1; k <= ku+1; k++) {
                 P_temp[IDXP(i, j, k)] = P[IDXP(i, j, k)];
             }
         }
@@ -134,9 +153,9 @@ void sorSolverIterationMpi(
 
     // Now start with the actual SOR iteration.
 #ifdef SOR_GAUSS_SEIDL
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+    for (int i = il; i <= iu; i++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])){
                     P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
                             ((P[IDXP(i+1,j,k)]+P[IDXP(i-1,j,k)])/(dx*dx)
@@ -149,10 +168,9 @@ void sorSolverIterationMpi(
     }
 #endif
 #ifdef SOR_GAUSS_SEIDL_PARALLEL
-    #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+    for (int i = il; i <= iu; i++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])){
                     P_temp[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
                             ((P[IDXP(i+1,j,k)])/(dx*dx)
@@ -164,9 +182,9 @@ void sorSolverIterationMpi(
         }
     }
 
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+    for (int i = il; i <= iu; i++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])){
                     P[IDXP(i,j,k)] = P_temp[IDXP(i,j,k)] + coeff *
                             ((P[IDXP(i-1,j,k)])/(dx*dx)
@@ -178,16 +196,15 @@ void sorSolverIterationMpi(
     }
 #endif
 #ifdef SOR_JACOBI
-    #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+    for (int i = il; i <= iu; i++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
-                        ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
-                         + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
-                         + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
-                         - RS[IDXRS(i,j,k)]);
+                    P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
+                            ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
+                             + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
+                             + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
+                             - RS[IDXRS(i,j,k)]);
                 }
             }
         }
@@ -195,9 +212,9 @@ void sorSolverIterationMpi(
 #endif
 #ifdef SOR_HYBRID
     #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+    for (int i = il; i <= iu; i++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 // Just use Jacobi scheme in i direction, as we have only parallelized the outer loop.
                 P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
                         ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
@@ -216,9 +233,9 @@ void sorSolverIterationMpi(
     residual = 0;
     int numFluidCells = 0;
     #pragma omp parallel for reduction(+: residual) reduction(+: numFluidCells)
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+    for (int i = il; i <= iu; i++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 if (isFluid(Flag[IDXFLAG(i,j,k)])){
                     residual += SQR(
                                (P[IDXP(i+1,j,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
