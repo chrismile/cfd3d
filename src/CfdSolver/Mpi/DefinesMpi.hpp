@@ -44,6 +44,28 @@
 
 #endif
 
+#define IDXU_NORMAL(i,j,k) ((i)*(jmax+2)*(kmax+2) + (j)*(kmax+2) + (k))
+#define IDXV_NORMAL(i,j,k) ((i)*(jmax+1)*(kmax+2) + (j)*(kmax+2) + (k))
+#define IDXW_NORMAL(i,j,k) ((i)*(jmax+2)*(kmax+1) + (j)*(kmax+1) + (k))
+#define IDXP_NORMAL(i,j,k) ((i)*(jmax+2)*(kmax+2) + (j)*(kmax+2) + (k))
+#define IDXT_NORMAL(i,j,k) ((i)*(jmax+2)*(kmax+2) + (j)*(kmax+2) + (k))
+#define IDXF_NORMAL(i,j,k) ((i)*(jmax+1)*(kmax+1) + (j)*(kmax+1) + (k))
+#define IDXG_NORMAL(i,j,k) ((i)*(jmax+1)*(kmax+1) + (j)*(kmax+1) + (k))
+#define IDXH_NORMAL(i,j,k) ((i)*(jmax+1)*(kmax+1) + (j)*(kmax+1) + (k))
+#define IDXRS_NORMAL(i,j,k) ((i)*(jmax+1)*(kmax+1) + (j)*(kmax+1) + (k))
+#define IDXFLAG_NORMAL(i,j,k) ((i)*(jmax+2)*(kmax+2) + (j)*(kmax+2) + (k))
+
+#define IDXU_MPI(i,j,k) (((i) - (il-2))*(ju - jl + 3)*(ku - kl + 3) + ((j) - (jl-1))*(ku - kl + 3) + ((k) - (kl-1)))
+#define IDXV_MPI(i,j,k) (((i) - (il-1))*(ju - jl + 4)*(ku - kl + 3) + ((j) - (jl-2))*(ku - kl + 3) + ((k) - (kl-1)))
+#define IDXW_MPI(i,j,k) (((i) - (il-1))*(ju - jl + 3)*(ku - kl + 4) + ((j) - (jl-1))*(ku - kl + 4) + ((k) - (kl-2)))
+#define IDXP_MPI(i,j,k) (((i) - (il-1))*(ju - jl + 3)*(ku - kl + 3) + ((j) - (jl-1))*(ku - kl + 3) + ((k) - (kl-1)))
+#define IDXT_MPI(i,j,k) (((i) - (il-1))*(ju - jl + 3)*(ku - kl + 3) + ((j) - (jl-1))*(ku - kl + 3) + ((k) - (kl-1)))
+#define IDXF_MPI(i,j,k) (((i) - (il-2))*(ju - jl + 3)*(ku - kl + 3) + ((j) - (jl-1))*(ku - kl + 3) + ((k) - (kl-1)))
+#define IDXG_MPI(i,j,k) (((i) - (il-1))*(ju - jl + 4)*(ku - kl + 3) + ((j) - (jl-2))*(ku - kl + 3) + ((k) - (kl-1)))
+#define IDXH_MPI(i,j,k) (((i) - (il-1))*(ju - jl + 3)*(ku - kl + 4) + ((j) - (jl-1))*(ku - kl + 4) + ((k) - (kl-2)))
+#define IDXRS_MPI(i,j,k) (((i) - (il))*(ju - jl + 1)*(ku - kl + 1) + ((j) - (jl))*(ku - kl + 1) + ((k) - (kl)))
+#define IDXFLAG_MPI(i,j,k) (((i) - (il-1))*(ju - jl + 3)*(ku - kl + 3) + ((j) - (jl-1))*(ku - kl + 3) + ((k) - (kl-1)))
+
 #define IDXU(i,j,k) (((i) - (il-2))*(ju - jl + 3)*(ku - kl + 3) + ((j) - (jl-1))*(ku - kl + 3) + ((k) - (kl-1)))
 #define IDXV(i,j,k) (((i) - (il-1))*(ju - jl + 4)*(ku - kl + 3) + ((j) - (jl-2))*(ku - kl + 3) + ((k) - (kl-1)))
 #define IDXW(i,j,k) (((i) - (il-1))*(ju - jl + 3)*(ku - kl + 4) + ((j) - (jl-1))*(ku - kl + 4) + ((k) - (kl-2)))

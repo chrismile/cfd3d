@@ -31,8 +31,8 @@
 #include <cstring>
 #include "../Flag.hpp"
 #include "MpiHelpers.hpp"
-#include "DefinesMpi.hpp"
 #include "SorSolverMpi.hpp"
+#include "DefinesMpi.hpp"
 
 // Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
 #define SOR_GAUSS_SEIDL

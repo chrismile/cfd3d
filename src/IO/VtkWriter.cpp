@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <iostream>
 #include "VtkWriter.hpp"
+#include "CfdSolver/Mpi/DefinesMpi.hpp"
 
 void VtkWriter::setMpiData(int il, int iu, int jl, int ju, int kl, int ku) {
     this->il = il;
@@ -164,35 +165,82 @@ void VtkWriter::writePointData(FILE *file, Real *U, Real *V, Real *W, FlagType *
     fprintf(file, "VECTORS velocity float\n");
 
     if (isBinaryVtk) {
-        #pragma omp parallel for
-        for (int k = kl-1; k <= ku; k++) {
-            for (int j = jl-1; j <= ju; j++) {
-                for (int i = il-1; i <= iu; i++) {
-                    Real u = 0, v = 0, w = 0;
-                    if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                        u = (U[IDXU(i,j,k)] + U[IDXU(i,j+1,k)] + U[IDXU(i,j,k+1)] + U[IDXU(i,j+1,k+1)]) * Real(0.25);
-                        v = (V[IDXV(i,j,k)] + V[IDXV(i+1,j,k)] + V[IDXV(i,j,k+1)] + V[IDXV(i+1,j,k+1)]) * Real(0.25);
-                        w = (W[IDXW(i,j,k)] + W[IDXW(i,j+1,k)] + W[IDXW(i+1,j,k)] + W[IDXW(i+1,j+1,k)]) * Real(0.25);
+        if (isMpiMode) {
+            for (int k = kl-1; k <= ku; k++) {
+                for (int j = jl-1; j <= ju; j++) {
+                    for (int i = il-1; i <= iu; i++) {
+                        Real u = 0, v = 0, w = 0;
+                        if (isFluid(Flag[IDXFLAG_MPI(i,j,k)])) {
+                            u = (U[IDXU_MPI(i,j,k)] + U[IDXU_MPI(i,j+1,k)] + U[IDXU_MPI(i,j,k+1)]
+                                    + U[IDXU_MPI(i,j+1,k+1)]) * Real(0.25);
+                            v = (V[IDXV_MPI(i,j,k)] + V[IDXV_MPI(i+1,j,k)] + V[IDXV_MPI(i,j,k+1)]
+                                    + V[IDXV_MPI(i+1,j,k+1)]) * Real(0.25);
+                            w = (W[IDXW_MPI(i,j,k)] + W[IDXW_MPI(i,j+1,k)] + W[IDXW_MPI(i+1,j,k)]
+                                    + W[IDXW_MPI(i+1,j+1,k)]) * Real(0.25);
+                        }
+                        pointData[IDXPT(i,j,k,0)] = u;
+                        pointData[IDXPT(i,j,k,1)] = v;
+                        pointData[IDXPT(i,j,k,2)] = w;
                     }
-                    pointData[IDXPT(i,j,k,0)] = u;
-                    pointData[IDXPT(i,j,k,1)] = v;
-                    pointData[IDXPT(i,j,k,2)] = w;
+                }
+            }
+        } else {
+            #pragma omp parallel for
+            for (int k = kl-1; k <= ku; k++) {
+                for (int j = jl-1; j <= ju; j++) {
+                    for (int i = il-1; i <= iu; i++) {
+                        Real u = 0, v = 0, w = 0;
+                        if (isFluid(Flag[IDXFLAG_NORMAL(i,j,k)])) {
+                            u = (U[IDXU_NORMAL(i,j,k)] + U[IDXU_NORMAL(i,j+1,k)] + U[IDXU_NORMAL(i,j,k+1)]
+                                    + U[IDXU_NORMAL(i,j+1,k+1)]) * Real(0.25);
+                            v = (V[IDXV_NORMAL(i,j,k)] + V[IDXV_NORMAL(i+1,j,k)] + V[IDXV_NORMAL(i,j,k+1)]
+                                    + V[IDXV_NORMAL(i+1,j,k+1)]) * Real(0.25);
+                            w = (W[IDXW_NORMAL(i,j,k)] + W[IDXW_NORMAL(i,j+1,k)] + W[IDXW_NORMAL(i+1,j,k)]
+                                    + W[IDXW_NORMAL(i+1,j+1,k)]) * Real(0.25);
+                        }
+                        pointData[IDXPT(i,j,k,0)] = u;
+                        pointData[IDXPT(i,j,k,1)] = v;
+                        pointData[IDXPT(i,j,k,2)] = w;
+                    }
                 }
             }
         }
         swapEndianness(pointData, (iu-il+2)*(ju-jl+2)*(ku-kl+2)*3);
         fwrite(pointData, sizeof(float), (iu-il+2)*(ju-jl+2)*(ku-kl+2)*3, file);
     } else {
-        for (int k = kl-1; k <= ku; k++) {
-            for (int j = jl-1; j <= ju; j++) {
-                for (int i = il-1; i <= iu; i++) {
-                    if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                        Real u = (U[IDXU(i,j,k)] + U[IDXU(i,j+1,k)] + U[IDXU(i,j,k+1)] + U[IDXU(i,j+1,k+1)]) * Real(0.25);
-                        Real v = (V[IDXV(i,j,k)] + V[IDXV(i+1,j,k)] + V[IDXV(i,j,k+1)] + V[IDXV(i+1,j,k+1)]) * Real(0.25);
-                        Real w = (W[IDXW(i,j,k)] + W[IDXW(i,j+1,k)] + W[IDXW(i+1,j,k)] + W[IDXW(i+1,j+1,k)]) * Real(0.25);
-                        fprintf(file, "%f %f %f\n", u, v, w);
-                    } else {
-                        fprintf(file, "0 0 0\n");
+        if (isMpiMode) {
+            for (int k = kl-1; k <= ku; k++) {
+                for (int j = jl-1; j <= ju; j++) {
+                    for (int i = il-1; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_MPI(i,j,k)])) {
+                            Real u = (U[IDXU_MPI(i,j,k)] + U[IDXU_MPI(i,j+1,k)] + U[IDXU_MPI(i,j,k+1)]
+                                    + U[IDXU_MPI(i,j+1,k+1)]) * Real(0.25);
+                            Real v = (V[IDXV_MPI(i,j,k)] + V[IDXV_MPI(i+1,j,k)] + V[IDXV_MPI(i,j,k+1)]
+                                    + V[IDXV_MPI(i+1,j,k+1)]) * Real(0.25);
+                            Real w = (W[IDXW_MPI(i,j,k)] + W[IDXW_MPI(i,j+1,k)] + W[IDXW_MPI(i+1,j,k)]
+                                    + W[IDXW_MPI(i+1,j+1,k)]) * Real(0.25);
+                            fprintf(file, "%f %f %f\n", u, v, w);
+                        } else {
+                            fprintf(file, "0 0 0\n");
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int k = kl-1; k <= ku; k++) {
+                for (int j = jl-1; j <= ju; j++) {
+                    for (int i = il-1; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_NORMAL(i,j,k)])) {
+                            Real u = (U[IDXU_NORMAL(i,j,k)] + U[IDXU_NORMAL(i,j+1,k)] + U[IDXU_NORMAL(i,j,k+1)]
+                                    + U[IDXU_NORMAL(i,j+1,k+1)]) * Real(0.25);
+                            Real v = (V[IDXV_NORMAL(i,j,k)] + V[IDXV_NORMAL(i+1,j,k)] + V[IDXV_NORMAL(i,j,k+1)]
+                                    + V[IDXV_NORMAL(i+1,j,k+1)]) * Real(0.25);
+                            Real w = (W[IDXW_NORMAL(i,j,k)] + W[IDXW_NORMAL(i,j+1,k)] + W[IDXW_NORMAL(i+1,j,k)]
+                                    + W[IDXW_NORMAL(i+1,j+1,k)]) * Real(0.25);
+                            fprintf(file, "%f %f %f\n", u, v, w);
+                        } else {
+                            fprintf(file, "0 0 0\n");
+                        }
                     }
                 }
             }
@@ -209,14 +257,28 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
     fprintf(file, "SCALARS pressure float 1\n");
     fprintf(file, "LOOKUP_TABLE default\n");
     if (isBinaryVtk) {
-        #pragma omp parallel for
-        for (int k = kl; k <= ku; k++) {
-            for (int j = jl; j <= ju; j++) {
-                for (int i = il; i <= iu; i++) {
-                    if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                        cellData[IDXCELL(i,j,k)] = P[IDXP(i,j,k)];
-                    } else {
-                        cellData[IDXCELL(i,j,k)] = 0;
+        if (isMpiMode) {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_MPI(i,j,k)])) {
+                            cellData[IDXCELL(i,j,k)] = P[IDXP_MPI(i,j,k)];
+                        } else {
+                            cellData[IDXCELL(i,j,k)] = 0;
+                        }
+                    }
+                }
+            }
+        } else {
+            #pragma omp parallel for
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_NORMAL(i,j,k)])) {
+                            cellData[IDXCELL(i,j,k)] = P[IDXP_NORMAL(i,j,k)];
+                        } else {
+                            cellData[IDXCELL(i,j,k)] = 0;
+                        }
                     }
                 }
             }
@@ -224,13 +286,27 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
         swapEndianness(cellData, (iu-il+1)*(ju-jl+1)*(ku-kl+1));
         fwrite(cellData, sizeof(float), (iu-il+1)*(ju-jl+1)*(ku-kl+1), file);
     } else {
-        for (int k = kl; k <= ku; k++) {
-            for (int j = jl; j <= ju; j++) {
-                for (int i = il; i <= iu; i++) {
-                    if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                        fprintf(file, "%f\n", P[IDXP(i,j,k)]);
-                    } else {
-                        fprintf(file, "0\n");
+        if (isMpiMode) {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_MPI(i,j,k)])) {
+                            fprintf(file, "%f\n", P[IDXP_MPI(i,j,k)]);
+                        } else {
+                            fprintf(file, "0\n");
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_NORMAL(i,j,k)])) {
+                            fprintf(file, "%f\n", P[IDXP_NORMAL(i,j,k)]);
+                        } else {
+                            fprintf(file, "0\n");
+                        }
                     }
                 }
             }
@@ -240,14 +316,28 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
     fprintf(file, "SCALARS temperature float 1\n");
     fprintf(file, "LOOKUP_TABLE default\n");
     if (isBinaryVtk) {
-        #pragma omp parallel for
-        for (int k = kl; k <= ku; k++) {
-            for (int j = jl; j <= ju; j++) {
-                for (int i = il; i <= iu; i++) {
-                    if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                        cellData[IDXCELL(i,j,k)] = T[IDXT(i,j,k)];
-                    } else {
-                        cellData[IDXCELL(i,j,k)] = 0;
+        if (isMpiMode) {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_MPI(i,j,k)])) {
+                            cellData[IDXCELL(i,j,k)] = T[IDXT_MPI(i,j,k)];
+                        } else {
+                            cellData[IDXCELL(i,j,k)] = 0;
+                        }
+                    }
+                }
+            }
+        } else {
+            #pragma omp parallel for
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_NORMAL(i,j,k)])) {
+                            cellData[IDXCELL(i,j,k)] = T[IDXT_NORMAL(i,j,k)];
+                        } else {
+                            cellData[IDXCELL(i,j,k)] = 0;
+                        }
                     }
                 }
             }
@@ -255,13 +345,27 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
         swapEndianness(cellData, (iu-il+1)*(ju-jl+1)*(ku-kl+1));
         fwrite(cellData, sizeof(float), (iu-il+1)*(ju-jl+1)*(ku-kl+1), file);
     } else {
-        for (int k = kl; k <= ku; k++) {
-            for (int j = jl; j <= ju; j++) {
-                for (int i = il; i <= iu; i++) {
-                    if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                        fprintf(file, "%f\n", T[IDXT(i,j,k)]);
-                    } else {
-                        fprintf(file, "0\n");
+        if (isMpiMode) {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_MPI(i,j,k)])) {
+                            fprintf(file, "%f\n", T[IDXT_MPI(i,j,k)]);
+                        } else {
+                            fprintf(file, "0\n");
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        if (isFluid(Flag[IDXFLAG_NORMAL(i,j,k)])) {
+                            fprintf(file, "%f\n", T[IDXT_NORMAL(i,j,k)]);
+                        } else {
+                            fprintf(file, "0\n");
+                        }
                     }
                 }
             }
@@ -271,11 +375,21 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
     if (isBinaryVtk) {
         fprintf(file, "SCALARS geometry unsigned_char 1\n");
         fprintf(file, "LOOKUP_TABLE default\n");
-        #pragma omp parallel for
-        for (int k = kl; k <= ku; k++) {
-            for (int j = jl; j <= ju; j++) {
-                for (int i = il; i <= iu; i++) {
-                    cellDataUint[IDXCELL(i,j,k)] = (Flag[IDXFLAG(i,j,k)] & 0x1) == 1;
+        if (isMpiMode) {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        cellDataUint[IDXCELL(i,j,k)] = (Flag[IDXFLAG_MPI(i,j,k)] & 0x1) == 1;
+                    }
+                }
+            }
+        } else {
+            #pragma omp parallel for
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        cellDataUint[IDXCELL(i,j,k)] = (Flag[IDXFLAG_NORMAL(i,j,k)] & 0x1) == 1;
+                    }
                 }
             }
         }
@@ -283,10 +397,20 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
     } else {
         fprintf(file, "SCALARS geometry bit 1\n");
         fprintf(file, "LOOKUP_TABLE default\n");
-        for (int k = kl; k <= ku; k++) {
-            for (int j = jl; j <= ju; j++) {
-                for (int i = il; i <= iu; i++) {
-                    fprintf(file, "%u\n", (Flag[IDXFLAG(i, j, k)] & 0x1) == 1);
+        if (isMpiMode) {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        fprintf(file, "%u\n", (Flag[IDXFLAG_MPI(i, j, k)] & 0x1) == 1);
+                    }
+                }
+            }
+        } else {
+            for (int k = kl; k <= ku; k++) {
+                for (int j = jl; j <= ju; j++) {
+                    for (int i = il; i <= iu; i++) {
+                        fprintf(file, "%u\n", (Flag[IDXFLAG_NORMAL(i, j, k)] & 0x1) == 1);
+                    }
                 }
             }
         }
