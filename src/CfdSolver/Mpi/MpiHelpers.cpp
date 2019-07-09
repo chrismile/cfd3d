@@ -72,14 +72,14 @@ void mpiInit(
         rankU = myrank + iproc;
     }
 
-    // Front neighbor.
+    // Back neighbor.
     if (myrank / (iproc*jproc) == 0) {
         rankB = MPI_PROC_NULL;
     } else {
         rankB = myrank - iproc*jproc;
     }
 
-    // Back neighbor.
+    // Front neighbor.
     if (myrank / (iproc*jproc) == kproc-1) {
         rankF = MPI_PROC_NULL;
     } else {
