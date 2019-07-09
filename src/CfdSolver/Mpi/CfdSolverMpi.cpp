@@ -37,13 +37,14 @@
 
 CfdSolverMpi::CfdSolverMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
-        int rankL, int rankR, int rankD, int rankU, int rankB, int rankF) {
+        int myrank, int rankL, int rankR, int rankD, int rankU, int rankB, int rankF) {
     this->il = il;
     this->iu = iu;
     this->jl = jl;
     this->ju = ju;
     this->kl = kl;
     this->ku = ku;
+    this->myrank = myrank;
     this->rankL = rankL;
     this->rankR = rankR;
     this->rankD = rankD;
@@ -176,7 +177,7 @@ void CfdSolverMpi::calculateRs() {
 
 void CfdSolverMpi::executeSorSolver() {
     sorSolverMpi(
-            omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, il, iu, jl, ju, kl, ku,
+            myrank, omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, il, iu, jl, ju, kl, ku,
             rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, P, P_temp, RS, Flag);
 }
 

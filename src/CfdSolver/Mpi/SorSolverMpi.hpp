@@ -35,7 +35,7 @@
  * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
  */
 void sorSolverMpi(
-        Real omg, Real eps, int itermax,
+        int myrank, Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,

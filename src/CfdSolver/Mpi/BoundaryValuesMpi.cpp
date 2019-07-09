@@ -583,7 +583,7 @@ void setBoundaryValuesScenarioSpecificMpi(
         FlagType *Flag) {
     if (scenarioName == "driven_cavity") {
         if (ju == jmax) {
-            for (int i = il; i <= iu; i++) {
+            for (int i = il-1; i <= iu; i++) {
                 for (int k = kl; k <= ku; k++) {
                     // Upper wall
                     U[IDXU(i,jmax+1,k)] = 2.0 - U[IDXU(i,jmax,k)];

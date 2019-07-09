@@ -256,7 +256,7 @@ void sorSolverIterationMpi(
 }
 
 void sorSolverMpi(
-        Real omg, Real eps, int itermax,
+        int myrank, Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
@@ -279,12 +279,17 @@ void sorSolverMpi(
         it++;
     }
 
-    if ((residual > eps && it == itermax) || std::isnan(residual)) {
-        std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
-                << residual << ")." << std::endl;
+    if (myrank == 0) {
+        if ((residual > eps && it == itermax) || std::isnan(residual)) {
+            std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
+                      << residual << ")." << std::endl;
+        }
+        if (std::isnan(residual)) {
+            std::cout << "\nResidual in SOR solver is not a number." << std::endl;
+        }
     }
     if (std::isnan(residual)) {
-        std::cout << "\nResidual in SOR solver is not a number." << std::endl;
+        mpiStop();
         exit(1);
     }
 }

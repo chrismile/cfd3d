@@ -35,7 +35,7 @@ class CfdSolverMpi : public CfdSolver {
 public:
     CfdSolverMpi(
             int il, int iu, int jl, int ju, int kl, int ku,
-            int rankL, int rankR, int rankD, int rankU, int rankB, int rankF);
+            int myrank, int rankL, int rankR, int rankD, int rankU, int rankB, int rankF);
 
     /**
      * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
@@ -143,7 +143,7 @@ private:
     int itermax;
     int imax, jmax, kmax;
     int il, iu, jl, ju, kl, ku;
-    int rankL, rankR, rankD, rankU, rankB, rankF;
+    int myrank, rankL, rankR, rankD, rankU, rankB, rankF;
     Real dx, dy, dz;
     Real *U, *V, *W, *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
     FlagType *Flag;

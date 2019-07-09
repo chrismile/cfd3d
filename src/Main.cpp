@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
     }
 #ifdef USE_MPI
     else if (solverName == "mpi") {
-        cfdSolver = new CfdSolverMpi(il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF);
+        cfdSolver = new CfdSolverMpi(il, iu, jl, ju, kl, ku, myrank, rankL, rankR, rankD, rankU, rankB, rankF);
     }
 #endif
 #ifdef USE_CUDA
