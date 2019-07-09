@@ -29,6 +29,7 @@
 #include <iostream>
 #include <chrono>
 #include <boost/filesystem.hpp>
+#include <omp.h>
 #include "CfdSolver/Init.hpp"
 #include "CfdSolver/Flag.hpp"
 #include "CfdSolver/CfdSolver.hpp"
@@ -95,6 +96,9 @@ int main(int argc, char *argv[]) {
                 myrank, il, iu, jl, ju, kl, ku,
                 rankL, rankR, rankD, rankU, rankB, rankF,
                 threadIdxI, threadIdxJ, threadIdxK, nproc);
+
+        // Don't use OpenMP and MPI simultaneously.
+        omp_set_num_threads(1);
     }
 #endif
 
@@ -348,6 +352,12 @@ int main(int argc, char *argv[]) {
         delete[] FlagAll;
     }
     delete[] Flag;
+
+#ifdef USE_MPI
+    if (solverName == "mpi") {
+        mpiStop();
+    }
+#endif
 
     return 0;
 }

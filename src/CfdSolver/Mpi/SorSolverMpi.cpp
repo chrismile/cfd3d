@@ -47,15 +47,15 @@ void sorSolverIterationMpi(
         Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
     // Set the boundary values for the pressure on the x-y-planes.
     if (kl == 1) {
-        for (int i = 1; i <= imax; i++) {
-            for (int j = 1; j <= jmax; j++) {
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
                 P[IDXP(i, j, 0)] = P[IDXP(i, j, 1)];
             }
         }
     }
     if (ku == kmax) {
-        for (int i = 1; i <= imax; i++) {
-            for (int j = 1; j <= jmax; j++) {
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
                 P[IDXP(i, j, kmax + 1)] = P[IDXP(i, j, kmax)];
             }
         }
@@ -63,15 +63,15 @@ void sorSolverIterationMpi(
 
     // Set the boundary values for the pressure on the x-z-planes.
     if (jl == 1) {
-        for (int i = 1; i <= imax; i++) {
-            for (int k = 1; k <= kmax; k++) {
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
                 P[IDXP(i,0,k)] = P[IDXP(i,1,k)];
             }
         }
     }
     if (ju == jmax) {
-        for (int i = 1; i <= imax; i++) {
-            for (int k = 1; k <= kmax; k++) {
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
                 P[IDXP(i,jmax+1,k)] = P[IDXP(i,jmax,k)];
             }
         }
@@ -79,15 +79,15 @@ void sorSolverIterationMpi(
 
     // Set the boundary values for the pressure on the y-z-planes.
     if (il == 1) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 P[IDXP(0,j,k)] = P[IDXP(1,j,k)];
             }
         }
     }
     if (iu == imax) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
                 P[IDXP(imax+1,j,k)] = P[IDXP(imax,j,k)];
             }
         }
@@ -211,7 +211,6 @@ void sorSolverIterationMpi(
     }
 #endif
 #ifdef SOR_HYBRID
-    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -232,7 +231,6 @@ void sorSolverIterationMpi(
     // Compute the residual.
     residual = 0;
     int numFluidCells = 0;
-    #pragma omp parallel for reduction(+: residual) reduction(+: numFluidCells)
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
