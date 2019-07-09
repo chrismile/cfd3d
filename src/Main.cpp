@@ -307,9 +307,6 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    if (myrank == 0) {
-        progressBar.printOutput(n, t, 50);
-    }
 
     if (traceStreamlines) {
         if (!dataIsUpToDate) {

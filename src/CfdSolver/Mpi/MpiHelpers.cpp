@@ -180,7 +180,7 @@ void mpiExchangeCellData(
             bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = PT[IDXP(i,j,ku)];
         }
     }
-    chunk = (iu - il + 1) * (ku - kl + 1);
+    chunk = (iu - il + 1) * (ju - jl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
         for (int j = jl; j <= ju; j++) {
