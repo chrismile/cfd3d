@@ -490,7 +490,7 @@ void setBoundaryValuesScenarioSpecificCpp(
         FlagType *Flag) {
     if (scenarioName == "driven_cavity") {
         #pragma omp parallel for
-        for (int i = 1; i <= imax; i++) {
+        for (int i = 0; i <= imax; i++) {
             for (int k = 1; k <= kmax; k++) {
                 // Upper wall
                 U[IDXU(i,jmax+1,k)] = 2.0 - U[IDXU(i,jmax,k)];

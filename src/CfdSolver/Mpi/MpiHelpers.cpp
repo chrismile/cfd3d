@@ -106,7 +106,7 @@ void mpiExchangeCellData(
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankL, 1, bufRecv, chunk, MPI_REAL, rankR, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
     for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
             PT[IDXP(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
@@ -121,8 +121,8 @@ void mpiExchangeCellData(
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankR, 1, bufRecv, chunk, MPI_REAL, rankL, 1, MPI_COMM_WORLD, status);
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankR, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankL, 1, MPI_COMM_WORLD, status);
+    for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
             PT[IDXP(il - 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
         }
@@ -136,7 +136,7 @@ void mpiExchangeCellData(
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankD, 1, bufRecv, chunk, MPI_REAL, rankU, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankD, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankU, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
         for (int k = kl; k <= ku; k++) {
             PT[IDXP(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
@@ -151,7 +151,7 @@ void mpiExchangeCellData(
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankU, 1, bufRecv, chunk, MPI_REAL, rankD, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
         for (int k = kl; k <= ku; k++) {
             PT[IDXP(i,jl - 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
@@ -166,7 +166,7 @@ void mpiExchangeCellData(
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankB, 1, bufRecv, chunk, MPI_REAL, rankF, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
         for (int j = jl; j <= ju; j++) {
             PT[IDXP(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
@@ -181,7 +181,7 @@ void mpiExchangeCellData(
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankF, 1, bufRecv, chunk, MPI_REAL, rankB, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
         for (int j = jl; j <= ju; j++) {
             PT[IDXP(i,j,kl - 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
@@ -202,7 +202,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankL, 1, bufRecv, chunk, MPI_REAL, rankR, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
     for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
             U[IDXU(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
@@ -211,11 +211,11 @@ void mpiExchangeUvw(
 
     for (int j = jl - 1; j <= ju && rankL != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXU(il,j,k)];
+            bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXV(il,j,k)];
         }
     }
     chunk = (ju - jl + 2) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankL, 1, bufRecv, chunk, MPI_REAL, rankR, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
     for (int j = jl - 1; j <= ju && rankR != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
             V[IDXV(iu + 1,j,k)] = bufRecv[(j - jl + 1) * (ku - kl + 1) + (k - kl)];
@@ -228,7 +228,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 2);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankL, 1, bufRecv, chunk, MPI_REAL, rankR, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
     for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
         for (int k = kl - 1; k <= ku; k++) {
             W[IDXW(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 2) + (k - kl + 1)];
@@ -244,8 +244,8 @@ void mpiExchangeUvw(
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankR, 1, bufRecv, chunk, MPI_REAL, rankL, 1, MPI_COMM_WORLD, status);
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankR, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankL, 1, MPI_COMM_WORLD, status);
+    for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
             U[IDXU(il - 2,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
         }
@@ -253,11 +253,11 @@ void mpiExchangeUvw(
 
     for (int j = jl - 1; j <= ju && rankR != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXU(iu,j,k)];
+            bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXV(iu,j,k)];
         }
     }
     chunk = (ju - jl + 2) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankR, 1, bufRecv, chunk, MPI_REAL, rankL, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankR, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankL, 1, MPI_COMM_WORLD, status);
     for (int j = jl - 1; j <= ju && rankL != MPI_PROC_NULL; j++) {
         for (int k = kl; k <= ku; k++) {
             V[IDXV(il - 1,j,k)] = bufRecv[(j - jl + 1) * (ku - kl + 1) + (k - kl)];
@@ -270,7 +270,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 2);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankR, 1, bufRecv, chunk, MPI_REAL, rankL, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankR, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankL, 1, MPI_COMM_WORLD, status);
     for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
         for (int k = kl - 1; k <= ku; k++) {
             W[IDXW(il - 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 2) + (k - kl + 1)];
@@ -286,7 +286,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 2) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankD, 1, bufRecv, chunk, MPI_REAL, rankU, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankD, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankU, 1, MPI_COMM_WORLD, status);
     for (int i = il - 1; i <= iu && rankU != MPI_PROC_NULL; i++) {
         for (int k = kl; k <= ku; k++) {
             U[IDXU(i,ju + 1,k)] = bufRecv[(i - il + 1) * (ku - kl + 1) + (k - kl)];
@@ -299,7 +299,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankD, 1, bufRecv, chunk, MPI_REAL, rankU, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankD, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankU, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
         for (int k = kl; k <= ku; k++) {
             V[IDXV(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
@@ -312,7 +312,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 2);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankD, 1, bufRecv, chunk, MPI_REAL, rankU, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankD, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankU, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
         for (int k = kl - 1; k <= ku; k++) {
             W[IDXW(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 2) + (k - kl + 1)];
@@ -328,7 +328,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 2) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankU, 1, bufRecv, chunk, MPI_REAL, rankD, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
     for (int i = il - 1; i <= iu && rankD != MPI_PROC_NULL; i++) {
         for (int k = kl; k <= ku; k++) {
             U[IDXU(i,jl - 1,k)] = bufRecv[(i - il + 1) * (ku - kl + 1) + (k - kl)];
@@ -341,7 +341,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankU, 1, bufRecv, chunk, MPI_REAL, rankD, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
         for (int k = kl; k <= ku; k++) {
             V[IDXV(i,jl - 2,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
@@ -354,7 +354,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 2);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankU, 1, bufRecv, chunk, MPI_REAL, rankD, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
         for (int k = kl - 1; k <= ku; k++) {
             W[IDXW(i,jl - 1,k)] = bufRecv[(i - il) * (ku - kl + 2) + (k - kl + 1)];
@@ -370,7 +370,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 2) * (ju - jl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankB, 1, bufRecv, chunk, MPI_REAL, rankF, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
     for (int i = il - 1; i <= iu && rankF != MPI_PROC_NULL; i++) {
         for (int j = jl; j <= ju; j++) {
             U[IDXU(i,j,ku + 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - kl)];
@@ -383,8 +383,8 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 2);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankB, 1, bufRecv, chunk, MPI_REAL, rankF, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
+    for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
         for (int j = jl - 1; j <= ju; j++) {
             V[IDXV(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 2) + (j - jl + 1)];
         }
@@ -396,7 +396,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankB, 1, bufRecv, chunk, MPI_REAL, rankF, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
         for (int j = jl; j <= ju; j++) {
             W[IDXW(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
@@ -412,7 +412,7 @@ void mpiExchangeUvw(
         }
     }
     chunk = (iu - il + 2) * (ju - jl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankF, 1, bufRecv, chunk, MPI_REAL, rankB, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
     for (int i = il - 1; i <= iu && rankB != MPI_PROC_NULL; i++) {
         for (int j = jl; j <= ju; j++) {
             U[IDXU(i,j,kl - 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - jl)];
@@ -420,27 +420,27 @@ void mpiExchangeUvw(
     }
 
     for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
+        for (int j = jl - 1; j <= ju; j++) {
             bufSend[(i - il) * (ju - jl + 2) + (j - jl + 1)] = V[IDXV(i,j,ku)];
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 2);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankF, 1, bufRecv, chunk, MPI_REAL, rankB, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
+        for (int j = jl - 1; j <= ju; j++) {
             V[IDXV(i,j,kl - 1)] = bufRecv[(i - il) * (ju - jl + 2) + (j - jl + 1)];
         }
     }
 
     for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl - 1; j <= ju; j++) {
+        for (int j = jl; j <= ju; j++) {
             bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = W[IDXW(i,j,ku - 1)];
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 1);
-    MPI_Sendrecv(bufSend, chunk, MPI_REAL, rankF, 1, bufRecv, chunk, MPI_REAL, rankB, 1, MPI_COMM_WORLD, status);
+    MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
     for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl - 1; j <= ju; j++) {
+        for (int j = jl; j <= ju; j++) {
             W[IDXW(i,j,kl - 2)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
         }
     }
