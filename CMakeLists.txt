@@ -51,7 +51,9 @@ else()
     endif()
 endif()
 
-include_directories(${NETCDF_INCLUDES})
+include_directories(${NETCDF_INCLUDE_DIR})
+include_directories(${BOOST_INCLUDE_DIR})
+include_directories(${GLM_INCLUDE_DIR})
 
 target_link_libraries(cfd3d ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${NETCDF_LIBRARIES})
 
