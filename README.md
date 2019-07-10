@@ -8,7 +8,7 @@ The solver is able to use either OpenMP or CUDA.
 On Ubuntu 18.04 for example, you can install all necessary packages with this command:
 
 ```
-sudo apt-get install git cmake libboost-filesystem-dev libnetcdf-dev netcdf-bin libglm-dev
+sudo apt-get install git cmake libboost-filesystem-dev libnetcdf-dev netcdf-bin libglm-dev libopenmpi-dev
 ```
 
 Then, to build the program, execute the following commands in the repository directory.
@@ -20,9 +20,15 @@ cmake ..
 make -j 4
 ```
 
-This builds the program with only the OpenMP solver. If the user wishes to also build the program with CUDA or SYCL
+This builds the program with only the OpenMP solver. If the user wishes to also build the program with MPI, CUDA or SYCL
 support, run one of the following commands instead.
 
+
+For MPI support:
+
+```
+cmake .. -DUSE_MPI=ON
+```
 
 For CUDA support:
 
@@ -57,6 +63,7 @@ Here are some examples how to call the program.
 
 ```
 ./cfd3d --scenario driven_cavity --solver cpp
+mpirun -np 8 ./cfd3d --scenario driven_cavity --solver mpi --numproc 2 2 2
 ./cfd3d --scenario driven_cavity --solver cuda --tracestreamlines true --numparticles 1000
 ./cfd3d --scenario natural_convection --solver cuda --tracestreaklines true --numparticles 4000
 ./cfd3d --scenario natural_convection --solver cuda --tracepathlines true
@@ -79,9 +86,13 @@ The valid values for the arguments are:
 * scenario: driven_cavity, flow_over_step, natural_convection, rayleigh_benard_convection_8-2-1,
 rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4, rayleigh_benard_convection_2d,
 single_tower, terrain_1
-* solver: cpp, cuda, sycl
+* solver: cpp, mpi, cuda, sycl
 * outputformat: netcdf, vtk (= vtk-binary), vtk-binary, vtk-ascii
 * tracestreamlines: false, true
 * tracestreaklines: false, true
 * tracepathlines: false, true
 * numparticles: any positive integer number
+
+Additionally, for the MPI solver, the user MUST also specify the number of processes in x, y and z direction (which must
+match the total number of MPI processes):
+* numproc: integer x integer x integer

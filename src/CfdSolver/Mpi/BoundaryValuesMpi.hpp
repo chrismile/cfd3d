@@ -26,33 +26,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_ARGUMENTPARSER_HPP
-#define CFD3D_ARGUMENTPARSER_HPP
+#ifndef CFD3D_BOUNDARYVALUESMPI_HPP
+#define CFD3D_BOUNDARYVALUESMPI_HPP
 
 #include <string>
-
-class OutputFileWriter;
+#include "Defines.hpp"
 
 /**
- * Parses the command line arguments passed to the program. For more information on the format, please see README.md.
- * @param argc The number of arguments.
- * @param argv The arguments.
- * @param scenarioName The name of the scenario to use.
- * @param solverName The name of the solver to use.
- * @param outputFileWriterType The type of the output file writer to use.
- * @param shallWriteOutput Whether to write an output file at all.
- * @param numParticles The number of particles to seed when using a particle tracer.
- * @param traceStreamlines Whether to trace streamlines in the fluid flow.
- * @param traceStreaklines Whether to trace streaklines in the fluid flow.
- * @param tracePathlines Whether to trace pathlines in the fluid flow.
- * @param iproc The number of processes in x direction (MPI solver only).
- * @param jproc The number of processes in y direction (MPI solver only).
- * @param kproc The number of processes in z direction (MPI solver only).
+ * Sets the boundary condition values of U, V, W and T using the Flag array.
  */
-void parseArguments(
-        int argc, char *argv[], std::string &scenarioName, std::string &solverName,
-        std::string &outputFileWriterType, bool &shallWriteOutput,
-        int &numParticles, bool &traceStreamlines,  bool &traceStreaklines, bool &tracePathlines,
-        int &iproc, int &jproc, int &kproc);
+void setBoundaryValuesMpi(
+        Real T_h, Real T_c,
+        int imax, int jmax, int kmax,
+        int il, int iu, int jl, int ju, int kl, int ku,
+        Real *U, Real *V, Real *W, Real *T,
+        FlagType *Flag);
 
-#endif //CFD3D_ARGUMENTPARSER_HPP
+/**
+ * Sets special boundary conditions (typically something like inflow) specific to the different scenarios.
+ */
+void setBoundaryValuesScenarioSpecificMpi(
+        const std::string &scenarioName,
+        int imax, int jmax, int kmax,
+        int il, int iu, int jl, int ju, int kl, int ku,
+        Real *U, Real *V, Real *W,
+        FlagType *Flag);
+
+#endif //CFD3D_BOUNDARYVALUESMPI_HPP

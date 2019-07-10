@@ -26,33 +26,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_ARGUMENTPARSER_HPP
-#define CFD3D_ARGUMENTPARSER_HPP
+#ifndef CFD3D_SORSOLVERMPI_HPP
+#define CFD3D_SORSOLVERMPI_HPP
 
-#include <string>
-
-class OutputFileWriter;
+#include "Defines.hpp"
 
 /**
- * Parses the command line arguments passed to the program. For more information on the format, please see README.md.
- * @param argc The number of arguments.
- * @param argv The arguments.
- * @param scenarioName The name of the scenario to use.
- * @param solverName The name of the solver to use.
- * @param outputFileWriterType The type of the output file writer to use.
- * @param shallWriteOutput Whether to write an output file at all.
- * @param numParticles The number of particles to seed when using a particle tracer.
- * @param traceStreamlines Whether to trace streamlines in the fluid flow.
- * @param traceStreaklines Whether to trace streaklines in the fluid flow.
- * @param tracePathlines Whether to trace pathlines in the fluid flow.
- * @param iproc The number of processes in x direction (MPI solver only).
- * @param jproc The number of processes in y direction (MPI solver only).
- * @param kproc The number of processes in z direction (MPI solver only).
+ * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
  */
-void parseArguments(
-        int argc, char *argv[], std::string &scenarioName, std::string &solverName,
-        std::string &outputFileWriterType, bool &shallWriteOutput,
-        int &numParticles, bool &traceStreamlines,  bool &traceStreaklines, bool &tracePathlines,
-        int &iproc, int &jproc, int &kproc);
+void sorSolverMpi(
+        int myrank, Real omg, Real eps, int itermax,
+        Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        int il, int iu, int jl, int ju, int kl, int ku,
+        int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag);
 
-#endif //CFD3D_ARGUMENTPARSER_HPP
+#endif //CFD3D_SORSOLVERMPI_HPP

@@ -30,6 +30,16 @@
 #include <netcdf.h>
 #include "NetCdfWriter.hpp"
 
+void NetCdfWriter::setMpiData(int il, int iu, int jl, int ju, int kl, int ku) {
+    this->il = il;
+    this->iu = iu;
+    this->jl = jl;
+    this->ju = ju;
+    this->kl = kl;
+    this->ku = ku;
+    isMpiMode = true;
+}
+
 bool NetCdfWriter::initializeWriter(const std::string &filename,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin) {
     this->imax = imax;
@@ -41,6 +51,17 @@ bool NetCdfWriter::initializeWriter(const std::string &filename,
     this->xOrigin = xOrigin;
     this->yOrigin = yOrigin;
     this->zOrigin = zOrigin;
+
+    if (!isMpiMode) {
+        il = jl = kl = 1;
+        iu = imax;
+        ju = jmax;
+        ku = kmax;
+
+        std::cerr << "Error: NetCdfWriter doesn't support the distributed MPI solver (yet). "
+                << "Please consider using the VtkWriter class instead." << std::endl;
+        exit(1);
+    }
 
     // Another file still open?
     if (isFileOpen) {

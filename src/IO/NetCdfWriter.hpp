@@ -33,12 +33,19 @@
 
 class NetCdfWriter : public OutputFileWriter {
 public:
+    NetCdfWriter(int nproc, int myrank) : nproc(nproc), myrank(myrank) {}
+
     virtual ~NetCdfWriter();
 
     /**
      * @return The file ending of the format.
      */
     virtual std::string getOutputFormatEnding() { return ".nc"; }
+
+    /**
+     * Sets data for use with the MPI solver.
+     */
+    virtual void setMpiData(int il, int iu, int jl, int ju, int kl, int ku);
 
     /**
      * Opens a NetCDF file for writing.
@@ -76,7 +83,10 @@ private:
     void writeTimeDependentVariable3D_Normal(int ncVar, int jsize, int ksize, Real *values);
     void ncPutAttributeText(int varid, const std::string &name, const std::string &value);
 
+    bool isMpiMode = false;
+    int nproc, myrank;
     int imax, jmax, kmax;
+    int il, iu, jl, ju, kl, ku;
     Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
     Real *centerCellU;
     Real *centerCellV;

@@ -33,13 +33,19 @@
 
 class VtkWriter : public OutputFileWriter {
 public:
-    VtkWriter(bool isBinaryVtk = true) : isBinaryVtk(isBinaryVtk) {}
+    VtkWriter(int nproc, int myrank, bool isBinaryVtk = true) : nproc(nproc), myrank(myrank), isBinaryVtk(isBinaryVtk)
+    {}
     virtual ~VtkWriter();
 
     /**
      * @return The file ending of the format.
      */
     virtual std::string getOutputFormatEnding() { return ".vtk"; }
+
+    /**
+     * Sets data for use with the MPI solver.
+     */
+    virtual void setMpiData(int il, int iu, int jl, int ju, int kl, int ku);
 
     /**
      * Intializes the file writer.
@@ -73,16 +79,19 @@ public:
             int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
 
 private:
-    void writeVtkHeader(FILE *file, int imax, int jmax, int kmax);
-    void writePointCoordinates(FILE *file, int imax, int jmax, int kmax,
+    void writeVtkHeader(FILE *file);
+    void writePointCoordinates(FILE *file,
             Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
-    void writePointData(FILE *file, int imax, int jmax, int kmax, Real *U, Real *V, Real *W, FlagType *Flag);
-    void writeCellData(FILE *file, int imax, int jmax, int kmax, Real *P, Real *T, FlagType *Flag);
+    void writePointData(FILE *file, Real *U, Real *V, Real *W, FlagType *Flag);
+    void writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag);
 
     bool isBinaryVtk;
     std::string filename;
 
+    bool isMpiMode = false;
+    int nproc, myrank;
     int imax, jmax, kmax;
+    int il, iu, jl, ju, kl, ku;
     Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
 
     // For binary mode. (Note: ParaView only supports float, and not double.)

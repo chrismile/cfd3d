@@ -143,5 +143,4 @@ void CfdSolverCuda::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T
     cudaMemcpy(W, this->W, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), cudaMemcpyDeviceToHost);
     cudaMemcpy(P, this->P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToHost);
     cudaMemcpy(T, this->T, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToHost);
-    cudaMemcpy(Flag, this->Flag, sizeof(unsigned int)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToHost);
 }

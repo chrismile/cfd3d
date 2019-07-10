@@ -28,7 +28,8 @@
 
 #include "Init.hpp"
 
-void initArrays(Real UI, Real VI, Real WI, Real PI, Real TI, int imax, int jmax, int kmax,
+void initArrays(
+        Real UI, Real VI, Real WI, Real PI, Real TI, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) {
     #pragma omp parallel for
     for (int i = 0; i <= imax; i++) {
@@ -61,6 +62,45 @@ void initArrays(Real UI, Real VI, Real WI, Real PI, Real TI, int imax, int jmax,
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
+                P[IDXP(i,j,k)] = PI;
+                T[IDXT(i,j,k)] = TI;
+            }
+        }
+    }
+}
+
+#include "CfdSolver/Mpi/DefinesMpi.hpp"
+
+void initArraysMpi(
+        Real UI, Real VI, Real WI, Real PI, Real TI, int il, int iu, int jl, int ju, int kl, int ku,
+        Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) {
+    for (int i = il - 2; i <= iu + 1; i++) {
+        for (int j = jl - 1; j <= ju + 1; j++) {
+            for (int k = kl - 1; k <= ku + 1; k++) {
+                U[IDXU(i,j,k)] = UI;
+            }
+        }
+    }
+
+    for (int i = il - 1; i <= iu + 1; i++) {
+        for (int j = jl - 2; j <= ju + 1; j++) {
+            for (int k = kl - 1; k <= ku + 1; k++) {
+                V[IDXV(i,j,k)] = VI;
+            }
+        }
+    }
+
+    for (int i = il - 1; i <= iu + 1; i++) {
+        for (int j = jl - 1; j <= ju + 1; j++) {
+            for (int k = kl - 2; k <= ku + 1; k++) {
+                W[IDXW(i,j,k)] = WI;
+            }
+        }
+    }
+
+    for (int i = il - 1; i <= iu + 1; i++) {
+        for (int j = jl - 1; j <= ju + 1; j++) {
+            for (int k = kl - 1; k <= ku + 1; k++) {
                 P[IDXP(i,j,k)] = PI;
                 T[IDXT(i,j,k)] = TI;
             }
