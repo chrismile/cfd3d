@@ -110,10 +110,8 @@ void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
 }
 
 Real CfdSolverCuda::calculateDt() {
-    dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
-    calculateDtCuda<<<dimGrid,dimBlock>>>(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
-    return dt;
+    //calculateDtCuda(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
+    return 0.003;
 }
 
 

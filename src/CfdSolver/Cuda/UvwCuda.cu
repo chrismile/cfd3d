@@ -27,6 +27,9 @@
  */
 
 #include "UvwCuda.hpp"
+#include <algorithm>
+#include <iostream>
+#include <unistd.h>
 
 __global__ void calculateFghCuda(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
@@ -182,12 +185,151 @@ __global__ void calculateRsCuda(
         }
 }
 
-__global__ void calculateDtCuda(
+__global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput){
+        extern __shared__ Real sdata[];
+
+        unsigned int tid = threadIdx.x;
+        unsigned int i = blockIdx.x*(blockDim.x*2) + threadIdx.x;
+
+        if (i+blockDim.x < sizeOfInput){
+                sdata[tid] = fmax(input[i],input[i+blockDim.x]);
+        }
+        else if (i < sizeOfInput){
+                sdata[tid] = input[i];
+        }
+        else{
+                sdata[tid] = -INFINITY;
+        }
+        __syncthreads();
+        // do reduction in shared mem
+        for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
+                if (tid < s) {
+                        sdata[tid] = fmax(sdata[tid],sdata[tid + s]);
+                }
+                __syncthreads();
+        }
+        // write result for this block to global mem
+        if (tid == 0) output[blockIdx.x] = sdata[0];
+}
+
+void calculateDtCuda(
         Real Re, Real Pr, Real tau,
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
         bool useTemperature) {
-    // TODO
+    Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
+    
+    Real *U_reductionInput = U;
+    Real *V_reductionInput = V;
+    Real *W_reductionInput = W;
+    Real *U_reductionOutput, *V_reductionOutput, *W_reductionOutput;
+
+    int sizeOfInput = (imax+1)*(jmax+2)*(kmax+2);
+    int numberOfBlocks = (imax+1)*(jmax+2)*(kmax+2);
+    bool finished = false;
+
+    while (!finished) {
+        
+        numberOfBlocks = iceil(numberOfBlocks, blockSize*blockSize*2);
+
+        cudaMalloc(&U_reductionOutput, numberOfBlocks*sizeof(Real));
+        cudaMalloc(&V_reductionOutput, numberOfBlocks*sizeof(Real));
+        cudaMalloc(&W_reductionOutput, numberOfBlocks*sizeof(Real));
+        cudaMemset(&U_reductionOutput, -INFINITY, numberOfBlocks*sizeof(Real));
+        cudaMemset(&V_reductionOutput, -INFINITY, numberOfBlocks*sizeof(Real));
+        cudaMemset(&W_reductionOutput, -INFINITY, numberOfBlocks*sizeof(Real));
+
+        dim3 dimBlock(blockSize*blockSize);
+        dim3 dimGrid(numberOfBlocks);
+
+        calculateMaximum<<<dimGrid,dimBlock>>>(U_reductionInput, U_reductionOutput, sizeOfInput);
+        calculateMaximum<<<dimGrid,dimBlock>>>(V_reductionInput, V_reductionOutput, sizeOfInput);
+        calculateMaximum<<<dimGrid,dimBlock>>>(W_reductionInput, W_reductionOutput, sizeOfInput);
+
+        U_reductionInput = U_reductionOutput;
+        V_reductionInput = V_reductionOutput;
+        W_reductionInput = W_reductionOutput;
+
+        sizeOfInput = numberOfBlocks;
+
+        if (numberOfBlocks == 1){
+                finished = true;
+        }
+    }
+
+    cudaMemcpy(&uMaxAbs, U_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&vMaxAbs, V_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&wMaxAbs, W_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+
+    Real uMaxAbs_cpu = Real(0.0), vMaxAbs_cpu = Real(0.0), wMaxAbs_cpu = Real(0.0);
+
+    Real *U_cpu = new Real[(imax+1)*(jmax+2)*(kmax+2)];
+    Real *V_cpu = new Real[(imax+2)*(jmax+1)*(kmax+2)];
+    Real *W_cpu = new Real[(imax+2)*(jmax+2)*(kmax+1)];
+    cudaMemcpy(U_cpu, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToHost);
+    cudaMemcpy(V_cpu, V, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2), cudaMemcpyDeviceToHost);
+    cudaMemcpy(W_cpu, W, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), cudaMemcpyDeviceToHost);
+
+    // First, compute the maximum absolute velocities in x, y and z direction.
+    #pragma omp parallel for reduction(max: uMaxAbs_cpu)
+    for (int i = 0; i <= imax; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                uMaxAbs_cpu = std::max(uMaxAbs_cpu, std::abs(U_cpu[IDXU(i,j,k)]));
+            }
+        }
+    }
+    #pragma omp parallel for reduction(max: vMaxAbs_cpu)
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax; j++) {
+            for (int k = 0; k <= kmax+1; k++) {
+                vMaxAbs_cpu = std::max(vMaxAbs_cpu, std::abs(V_cpu[IDXV(i,j,k)]));
+            }
+        }
+    }
+
+    #pragma omp parallel for reduction(max: wMaxAbs_cpu)
+    for (int i = 0; i <= imax+1; i++) {
+        for (int j = 0; j <= jmax+1; j++) {
+            for (int k = 0; k <= kmax; k++) {
+                wMaxAbs_cpu = std::max(wMaxAbs_cpu, std::abs(W_cpu[IDXW(i,j,k)]));
+            }
+        }
+    }
+
+    std::cout << "uMaxAbs: " << uMaxAbs << std::endl;
+    std::cout << "uMaxAbs_cpu: " << uMaxAbs_cpu << std::endl;
+    std::cout << "vMaxAbs: " << vMaxAbs << std::endl;
+    std::cout << "vMaxAbs_cpu: " << vMaxAbs_cpu << std::endl;
+    std::cout << "wMaxAbs: " << wMaxAbs << std::endl;
+    std::cout << "wMaxAbs_cpu: " << wMaxAbs_cpu << std::endl;
+
+    if (tau < Real(0.0)) {
+        // Constant time step manually specified in configuration file. Check for stability.
+        assert(2 / Re * dt < dx * dx * dy * dy * dz * dz / (dx * dx + dy * dy + dz * dz));
+        assert(uMaxAbs * dt < dx);
+        assert(vMaxAbs * dt < dy);
+        assert(wMaxAbs * dt < dz);
+        if (useTemperature){
+            assert(dt < (Re*Pr/2)*(1/((1/(dx*dx))+1/(dy*dy)+1/(dz*dz))));
+        }
+        return;
+    }
+
+    // Now, use formula (14) from worksheet 1 to compute the time step size.
+    dt = std::min(dx / uMaxAbs, dy / vMaxAbs);
+    std::cout << "dt: " << dt << std::endl;
+    dt = std::min(dt, dz / wMaxAbs);
+    std::cout << "dt: " << dt << std::endl;
+    dt = std::min(dt, (Re / Real(2.0)) * (Real(1.0) / (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy)
+            + Real(1.0) / (dz*dz))));
+    std::cout << "dt: " << dt << std::endl;
+    if (useTemperature){
+        dt = std::min(dt, (Re * Pr / Real(2.0)) * (Real(1.0) / (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy)
+                + Real(1.0) / (dz*dz))));
+    }
+    std::cout << "dt: " << dt << std::endl;
+    dt = tau * dt;
 }
 
 __global__ void calculateUvwCuda(

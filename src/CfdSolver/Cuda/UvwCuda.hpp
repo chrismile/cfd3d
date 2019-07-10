@@ -49,7 +49,7 @@ __global__ void calculateRsCuda(
 /*
  * Determines the maximum time step size. The time step size is restricted according to the CFL theorem.
  */
-__global__ void calculateDtCuda(
+void calculateDtCuda(
         Real Re, Real Pr, Real tau,
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
