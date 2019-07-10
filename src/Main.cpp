@@ -66,12 +66,12 @@ int main(int argc, char *argv[]) {
     ProgressBar progressBar;
     std::string outputFileWriterType;
     OutputFileWriter *outputFileWriter = nullptr;
+    LinearSystemSolverType linearSystemSolverType;
     bool traceStreamlines = false, traceStreaklines = false, tracePathlines = false;
     std::vector<rvec3> particleSeedingLocations;
     bool dataIsUpToDate = true;
     bool shallWriteOutput = true;
 
-    // For MPI
 #ifdef USE_MPI
     int myrank = 0, nproc = 1, rankL, rankR, rankD, rankU, rankB, rankF, threadIdxI, threadIdxJ, threadIdxK,
             il, iu, jl, ju, kl, ku;
@@ -79,15 +79,21 @@ int main(int argc, char *argv[]) {
     int nproc = 1;
     int myrank = 0;
 #endif
+    // MPI data
     int iproc = 1, jproc = 1, kproc = 1;
+
+    // CUDA data
+    int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
 
     int imax, jmax, kmax, itermax, numParticles;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
             dt, dx, dy, dz, alpha, omg, tau, eps, beta, T_h, T_c;
     bool useTemperature = true;
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
-    parseArguments(argc, argv, scenarioName, solverName, outputFileWriterType, shallWriteOutput,
-            numParticles, traceStreamlines, traceStreaklines, tracePathlines, iproc, jproc, kproc);
+    parseArguments(
+            argc, argv, scenarioName, solverName, outputFileWriterType, shallWriteOutput, linearSystemSolverType,
+            numParticles, traceStreamlines, traceStreaklines, tracePathlines, iproc, jproc, kproc,
+            blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
 #ifdef USE_MPI
@@ -257,7 +263,8 @@ int main(int argc, char *argv[]) {
         std::cerr << "Fatal error: Unsupported solver name \"" << solverName << "\"." << std::endl;
         exit(1);
     }
-    cfdSolver->initialize(scenarioName, Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
+    cfdSolver->initialize(scenarioName, linearSystemSolverType,
+            Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T, Flag);
 
     while (t < tEnd) {

@@ -59,6 +59,7 @@ void CfdSolverMpi::initialize(const std::string &scenarioName,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
         Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag) {
     this->scenarioName = scenarioName;
+    this->linearSystemSolverType = linearSystemSolverType;
     this->Re = Re;
     this->Pr = Pr;
     this->omg = omg;
@@ -177,7 +178,7 @@ void CfdSolverMpi::calculateRs() {
 
 void CfdSolverMpi::executeSorSolver() {
     sorSolverMpi(
-            myrank, omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, il, iu, jl, ju, kl, ku,
+            myrank, omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax, il, iu, jl, ju, kl, ku,
             rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, P, P_temp, RS, Flag);
 }
 

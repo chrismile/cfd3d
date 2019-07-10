@@ -38,6 +38,14 @@
  */
 typedef unsigned int FlagType;
 
+/**
+ * The solver type for the linear system of equations for the Pressure Poisson Equation (PPE).
+ */
+enum LinearSystemSolverType {
+    LINEAR_SOLVER_JACOBI, LINEAR_SOLVER_SOR, LINEAR_SOLVER_GAUSS_SEIDEL, LINEAR_SOLVER_SOR_PARALLEL,
+    LINEAR_SOLVER_GAUSS_SEIDEL_PARALLEL
+};
+
 
 /**
  * The floating point type used for the simulation. float is faster, but double has a higher accuracy.

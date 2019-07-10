@@ -54,6 +54,7 @@ void CfdSolverSycl::initialize(const std::string &scenarioName,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
         Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag) {
     this->scenarioName = scenarioName;
+    this->linearSystemSolverType = linearSystemSolverType;
     this->Re = Re;
     this->Pr = Pr;
     this->omg = omg;
@@ -139,7 +140,9 @@ void CfdSolverSycl::calculateRs() {
 
 
 void CfdSolverSycl::executeSorSolver() {
-    sorSolverSycl(queue, omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, PBuffer, P_tempBuffer, RSBuffer, FlagBuffer);
+    sorSolverSycl(
+            queue, omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax,
+            PBuffer, P_tempBuffer, RSBuffer, FlagBuffer);
 }
 
 void CfdSolverSycl::calculateUvw() {

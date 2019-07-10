@@ -30,7 +30,7 @@
 #include "SorSolverSycl.hpp"
 
 void sorSolverIterationSycl(
-        cl::sycl::queue &queue,
+        cl::sycl::queue &queue, LinearSystemSolverType linearSystemSolverType,
         Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
         cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
         cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer,
@@ -40,10 +40,18 @@ void sorSolverIterationSycl(
 
 void sorSolverSycl(
         cl::sycl::queue &queue,
-        Real omg, Real eps, int itermax,
+        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
         cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer) {
+    if (linearSystemSolverType == LINEAR_SOLVER_SOR || linearSystemSolverType == LINEAR_SOLVER_SOR_PARALLEL) {
+        // Successive over-relaxation based on Gauss-Seidl. A factor of 1.5 proved to give the best results here.
+        omg = 1.5;
+    } else {
+        // A method named JOR (Jacobi over-relaxation) with omega != 1 exists, but doesn't converge for this problem.
+        omg = 1.0;
+    }
+
     const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
     Real residual = 1e9;
     int it = 0;
@@ -53,7 +61,9 @@ void sorSolverSycl(
             ReadAccReal P_tempWrite = P_tempBuffer.get_access<cl::sycl::access::mode::write>(cgh);
             cgh.copy(PRead, P_tempWrite);
         });
-        sorSolverIterationSycl(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
+        sorSolverIterationSycl(
+                queue, linearSystemSolverType, omg, dx, dy, dz, coeff,
+                imax, jmax, kmax, P, P_temp, RS, Flag, residual);
         it++;
     }
 

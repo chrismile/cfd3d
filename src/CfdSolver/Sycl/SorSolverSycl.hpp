@@ -37,7 +37,7 @@
  */
 void sorSolverSycl(
         cl::sycl::queue &queue,
-        Real omg, Real eps, int itermax,
+        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
         cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);

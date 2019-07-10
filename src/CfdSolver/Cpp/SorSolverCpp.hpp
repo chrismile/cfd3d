@@ -35,7 +35,7 @@
  * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
  */
 void sorSolverCpp(
-        Real omg, Real eps, int itermax,
+        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag);
 

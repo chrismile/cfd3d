@@ -34,15 +34,9 @@
 #include "SorSolverMpi.hpp"
 #include "DefinesMpi.hpp"
 
-// Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
-#define SOR_GAUSS_SEIDL
-//#define SOR_GAUSS_SEIDL_PARALLEL
-//#define SOR_JACOBI
-//#define SOR_HYBRID
-
 void sorSolverIterationMpi(
-        Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
-        int il, int iu, int jl, int ju, int kl, int ku,
+        Real omg, Real dx, Real dy, Real dz, Real coeff, LinearSystemSolverType linearSystemSolverType,
+        int imax, int jmax, int kmax, int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
     // Set the boundary values for the pressure on the x-y-planes.
@@ -93,6 +87,7 @@ void sorSolverIterationMpi(
         }
     }
 
+    // Boundary values for arbitrary geometries.
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -137,93 +132,47 @@ void sorSolverIterationMpi(
     }
 
 
-
-#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
-    //memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
-    // Using multiple threads for the copy is faster for large amounts of data.
-    for (int i = il-1; i <= iu+1; i++) {
-        for (int j = jl-1; j <= ju+1; j++) {
-            for (int k = kl-1; k <= ku+1; k++) {
-                P_temp[IDXP(i, j, k)] = P[IDXP(i, j, k)];
-            }
-        }
-    }
-#endif
-
-
-    // Now start with the actual SOR iteration.
-#ifdef SOR_GAUSS_SEIDL
-    for (int i = il; i <= iu; i++) {
-        for (int j = jl; j <= ju; j++) {
-            for (int k = kl; k <= ku; k++) {
-                if (isFluid(Flag[IDXFLAG(i,j,k)])){
-                    P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
-                            ((P[IDXP(i+1,j,k)]+P[IDXP(i-1,j,k)])/(dx*dx)
-                            + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
-                            + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
-                            - RS[IDXRS(i,j,k)]);
-                }
-            }
-        }
-    }
-#endif
-#ifdef SOR_GAUSS_SEIDL_PARALLEL
-    for (int i = il; i <= iu; i++) {
-        for (int j = jl; j <= ju; j++) {
-            for (int k = kl; k <= ku; k++) {
-                if (isFluid(Flag[IDXFLAG(i,j,k)])){
-                    P_temp[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
-                            ((P[IDXP(i+1,j,k)])/(dx*dx)
-                            + (P[IDXP(i,j+1,k)])/(dy*dy)
-                            + (P[IDXP(i,j,k+1)])/(dz*dz)
-                            - RS[IDXRS(i,j,k)]);
+    if (linearSystemSolverType == LINEAR_SOLVER_JACOBI) {
+        for (int i = il-1; i <= iu+1; i++) {
+            for (int j = jl-1; j <= ju+1; j++) {
+                for (int k = kl-1; k <= ku+1; k++) {
+                    P_temp[IDXP(i, j, k)] = P[IDXP(i, j, k)];
                 }
             }
         }
     }
 
-    for (int i = il; i <= iu; i++) {
-        for (int j = jl; j <= ju; j++) {
-            for (int k = kl; k <= ku; k++) {
-                if (isFluid(Flag[IDXFLAG(i,j,k)])){
-                    P[IDXP(i,j,k)] = P_temp[IDXP(i,j,k)] + coeff *
-                            ((P[IDXP(i-1,j,k)])/(dx*dx)
-                            + (P[IDXP(i,j-1,k)])/(dy*dy)
-                            + (P[IDXP(i,j,k-1)])/(dz*dz));
+
+    if (linearSystemSolverType == LINEAR_SOLVER_SOR || linearSystemSolverType == LINEAR_SOLVER_GAUSS_SEIDEL) {
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                for (int k = kl; k <= ku; k++) {
+                    if (isFluid(Flag[IDXFLAG(i,j,k)])){
+                        P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
+                                ((P[IDXP(i+1,j,k)]+P[IDXP(i-1,j,k)])/(dx*dx)
+                                + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
+                                + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
+                                - RS[IDXRS(i,j,k)]);
+                    }
+                }
+            }
+        }
+    } else if (linearSystemSolverType == LINEAR_SOLVER_JACOBI) {
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                for (int k = kl; k <= ku; k++) {
+                    if (isFluid(Flag[IDXFLAG(i,j,k)])) {
+                        P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
+                                ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
+                                 + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
+                                 + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
+                                 - RS[IDXRS(i,j,k)]);
+                    }
                 }
             }
         }
     }
-#endif
-#ifdef SOR_JACOBI
-    for (int i = il; i <= iu; i++) {
-        for (int j = jl; j <= ju; j++) {
-            for (int k = kl; k <= ku; k++) {
-                if (isFluid(Flag[IDXFLAG(i,j,k)])) {
-                    P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
-                            ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
-                             + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
-                             + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
-                             - RS[IDXRS(i,j,k)]);
-                }
-            }
-        }
-    }
-#endif
-#ifdef SOR_HYBRID
-    for (int i = il; i <= iu; i++) {
-        for (int j = jl; j <= ju; j++) {
-            for (int k = kl; k <= ku; k++) {
-                // Just use Jacobi scheme in i direction, as we have only parallelized the outer loop.
-                P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
-                        ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
-                         + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
-                         + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
-                         - RS[IDXRS(i,j,k)]);
-            }
-        }
-    }
-#endif
+
 
     MPI_Status *status = 0;
     mpiExchangeCellData(P, il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, status);
@@ -254,16 +203,18 @@ void sorSolverIterationMpi(
 }
 
 void sorSolverMpi(
-        int myrank, Real omg, Real eps, int itermax,
+        int myrank, Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
-#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
-    omg = 1.0;
-#else
-    omg = 1.5;
-#endif
+    if (linearSystemSolverType == LINEAR_SOLVER_SOR || linearSystemSolverType == LINEAR_SOLVER_SOR_PARALLEL) {
+        // Successive over-relaxation based on Gauss-Seidl. A factor of 1.5 proved to give the best results here.
+        omg = 1.5;
+    } else {
+        // A method named JOR (Jacobi over-relaxation) with omega != 1 exists, but doesn't converge for this problem.
+        omg = 1.0;
+    }
 
     const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
     Real residual = Real(1e9);
@@ -271,7 +222,8 @@ void sorSolverMpi(
 
     while (it < itermax && residual > eps) {
         sorSolverIterationMpi(
-                omg, dx, dy, dz, coeff, imax, jmax, kmax, il, iu, jl, ju, kl, ku,
+                omg, dx, dy, dz, coeff, linearSystemSolverType,
+                imax, jmax, kmax, il, iu, jl, ju, kl, ku,
                 rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv,
                 P, P_temp, RS, Flag, residual);
         it++;

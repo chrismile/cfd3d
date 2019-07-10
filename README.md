@@ -77,6 +77,7 @@ The standard values for the arguments are:
 * scenario: driven_cavity
 * solver: cpp
 * outputformat: vtk
+* linsolver: jacobi
 * tracestreamlines: false
 * tracestreaklines: false
 * tracepathlines: false
@@ -88,6 +89,7 @@ rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4, rayleigh_ben
 single_tower, terrain_1
 * solver: cpp, mpi, cuda, sycl
 * outputformat: netcdf, vtk (= vtk-binary), vtk-binary, vtk-ascii
+* linsolver: jacobi, sor, gauss-seidel
 * tracestreamlines: false, true
 * tracestreaklines: false, true
 * tracepathlines: false, true
@@ -96,3 +98,9 @@ single_tower, terrain_1
 Additionally, for the MPI solver, the user MUST also specify the number of processes in x, y and z direction (which must
 match the total number of MPI processes):
 * numproc: integer x integer x integer
+
+For the CUDA solver, the user CAN also specify the block size in x, y and z direction:
+* blocksize: integer x integer x integer
+
+The standard values for the CUDA solver are:
+* blocksize: 4 x 4 x 4
