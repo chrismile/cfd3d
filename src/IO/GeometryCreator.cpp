@@ -274,5 +274,7 @@ void generateScenario(
         createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/Fuji-san.pgm", imax, jmax, kmax);
     } else if (boost::starts_with(scenarioName, "zugspitze")) {
         createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/Zugspitze.pgm", imax, jmax, kmax);
+    } else if (boost::starts_with(scenarioName, "HK_Habor")) {
+        createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/HK_Habor.pgm", imax, jmax, kmax);
     }
 }
