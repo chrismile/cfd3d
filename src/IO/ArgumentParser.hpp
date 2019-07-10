@@ -40,7 +40,7 @@
  * @param solverName The passed solver name to use.
  */
 void parseArguments(
-        int argc, char *argv[], std::string &scenarioName, std::string &solverName, int &numParticles,
-        bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines);
+        int argc, char *argv[], std::string &scenarioName, std::string &solverName, bool &shallWriteOutput,
+        int &numParticles, bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines);
 
 #endif //CFD3D_ARGUMENTPARSER_HPP

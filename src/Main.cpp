@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
             dt, dx, dy, dz, alpha, omg, tau, eps, beta, T_h, T_c;
     bool useTemperature = true;
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
-    parseArguments(argc, argv, scenarioName, solverName, numParticles,
+    parseArguments(argc, argv, scenarioName, solverName, shallWriteOutput, numParticles,
             traceStreamlines, traceStreaklines, tracePathlines);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
@@ -182,9 +182,9 @@ int main(int argc, char *argv[]) {
             if (shallWriteOutput) {
                 if (!dataIsUpToDate) {
                     cfdSolver->getDataForOutput(U, V, W, P, T);
+                    netCdfWriter.writeTimestep(n, t, U, V, W, P, T, Flag);
                     dataIsUpToDate = true;
                 }
-                netCdfWriter.writeTimestep(n, t, U, V, W, P, T, Flag);
             }
             progressBar.printOutput(n, t, 50);
             tWrite -= dtWrite;

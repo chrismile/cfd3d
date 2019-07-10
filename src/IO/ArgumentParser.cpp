@@ -30,11 +30,12 @@
 #include "ArgumentParser.hpp"
 
 void parseArguments(
-        int argc, char *argv[], std::string &scenarioName, std::string &solverName, int &numParticles,
-        bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
+        int argc, char *argv[], std::string &scenarioName, std::string &solverName, bool &shallWriteOutput,
+        int &numParticles, bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, ...
     scenarioName = "natural_convection";
     solverName = "cpp";
+    shallWriteOutput = true;
     numParticles = 400;
     traceStreamlines = false;
     traceStreaklines = false;
@@ -48,6 +49,8 @@ void parseArguments(
             solverName = argv[i+1];
         } else if (strcmp(argv[i], "--numparticles") == 0 && i != argc-1) {
             numParticles = std::stoi(argv[i+1]);
+        } else if (strcmp(argv[i], "--output") == 0 && i != argc-1) {
+            shallWriteOutput = strcmp(argv[i+1], "false") == 0 ? false : true;
         } else if (strcmp(argv[i], "--tracestreamlines") == 0 && i != argc-1) {
             traceStreamlines = strcmp(argv[i+1], "false") == 0 ? false : true;
         } else if (strcmp(argv[i], "--tracestreaklines") == 0 && i != argc-1) {
