@@ -192,19 +192,27 @@ __global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput){
         unsigned int i = blockIdx.x*(blockDim.x*2) + threadIdx.x;
 
         if (i+blockDim.x < sizeOfInput){
-                sdata[tid] = fmax(input[i],input[i+blockDim.x]);
+#ifdef REAL_DOUBLE
+            sdata[tid] = fmax(input[i],input[i+blockDim.x]);
+#else
+            sdata[tid] = fmaxf(input[i],input[i+blockDim.x]);
+#endif
         }
         else if (i < sizeOfInput){
                 sdata[tid] = input[i];
         }
         else{
-                sdata[tid] = -INFINITY;
+                sdata[tid] = 0;
         }
         __syncthreads();
         // do reduction in shared mem
         for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
                 if (tid < s) {
-                        sdata[tid] = fmax(sdata[tid],sdata[tid + s]);
+#ifdef REAL_DOUBLE
+                    sdata[tid] = fmax(sdata[tid], sdata[tid + s]);
+#else
+                    sdata[tid] = fmaxf(sdata[tid], sdata[tid + s]);
+#endif
                 }
                 __syncthreads();
         }
@@ -235,9 +243,9 @@ void calculateDtCuda(
         cudaMalloc(&U_reductionOutput, numberOfBlocks*sizeof(Real));
         cudaMalloc(&V_reductionOutput, numberOfBlocks*sizeof(Real));
         cudaMalloc(&W_reductionOutput, numberOfBlocks*sizeof(Real));
-        cudaMemset(&U_reductionOutput, -INFINITY, numberOfBlocks*sizeof(Real));
-        cudaMemset(&V_reductionOutput, -INFINITY, numberOfBlocks*sizeof(Real));
-        cudaMemset(&W_reductionOutput, -INFINITY, numberOfBlocks*sizeof(Real));
+        cudaMemset(&U_reductionOutput, 0, numberOfBlocks*sizeof(Real));
+        cudaMemset(&V_reductionOutput, 0, numberOfBlocks*sizeof(Real));
+        cudaMemset(&W_reductionOutput, 0, numberOfBlocks*sizeof(Real));
 
         dim3 dimBlock(blockSize*blockSize);
         dim3 dimGrid(numberOfBlocks);

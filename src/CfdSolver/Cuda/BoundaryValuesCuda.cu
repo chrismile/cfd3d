@@ -50,8 +50,8 @@ __global__ void setLeftRightBoundariesCuda(
     Real *U, Real *V, Real *W, Real *T,
     FlagType *Flag) {
 
-    int j = blockIdx.x + threadIdx.y + 1;
-    int k = blockIdx.y + threadIdx.x + 1;
+    int j = blockIdx.y + threadIdx.y + 1;
+    int k = blockIdx.x + threadIdx.x + 1;
     // Set the boundary values for the pressure on the y-z-planes.
     if (j <= imax && k<= jmax){
         // Left wall
@@ -112,8 +112,8 @@ __global__ void setDownUpBoundariesCuda(
     int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W, Real *T,
     FlagType *Flag) {
-    int i = blockIdx.x + threadIdx.y + 1;
-    int k = blockIdx.y + threadIdx.x + 1;
+    int i = blockIdx.y + threadIdx.y + 1;
+    int k = blockIdx.x + threadIdx.x + 1;
     // Set the boundary values for the pressure on the x-z-planes.
     if (i <= imax && k<= jmax){
         // Down wall
@@ -170,8 +170,8 @@ __global__ void setFrontBackBoundariesCuda(
     int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W, Real *T,
     FlagType *Flag) {
-    int i = blockIdx.x + threadIdx.y + 1;
-    int j = blockIdx.y + threadIdx.x + 1;
+    int i = blockIdx.y + threadIdx.y + 1;
+    int j = blockIdx.x + threadIdx.x + 1;
     
     // Set the boundary values for the pressure on the x-y-planes.
     if (i <= imax && j <= jmax){
@@ -238,13 +238,13 @@ void setBoundaryValuesCuda(
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
     dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid_x_y(iceil(imax,dimBlock.y),iceil(jmax,dimBlock.x));
+    dim3 dimGrid_x_y(iceil(jmax,dimBlock.x),iceil(kmax,dimBlock.x));
     setFrontBackBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
-    dim3 dimGrid_x_z(iceil(imax,dimBlock.y),iceil(kmax,dimBlock.x));
+    dim3 dimGrid_x_z(iceil(kmax,dimBlock.x),iceil(imax,dimBlock.y));
     setDownUpBoundariesCuda<<<dimGrid_x_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
-    dim3 dimGrid_y_z(iceil(jmax,dimBlock.y),iceil(kmax,dimBlock.x));
+    dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
     setLeftRightBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 }
 
@@ -252,8 +252,8 @@ __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
         FlagType *Flag){
     
-    int i = blockIdx.x + threadIdx.y + 1;
-    int k = blockIdx.y + threadIdx.x + 1;
+    int i = blockIdx.y + threadIdx.y + 1;
+    int k = blockIdx.x + threadIdx.x + 1;
 
     if (i <= imax && k<= jmax){
         for (int i = 1; i <= imax; i++) {
@@ -273,7 +273,7 @@ void setBoundaryValuesScenarioSpecificCuda(
 
     dim3 dimBlock(blockSize,blockSize);
     if (scenarioName == "driven_cavity") {
-        dim3 dimGrid_x_z(iceil(imax,dimBlock.y),iceil(kmax,dimBlock.x));
+        dim3 dimGrid_x_z(iceil(kmax,dimBlock.x),iceil(imax,dimBlock.y));
         setDrivenCavityBoundariesCuda<<<dimBlock, dimGrid_x_z>>>(imax, jmax, kmax, U, V, W, Flag);
     }   
 }
