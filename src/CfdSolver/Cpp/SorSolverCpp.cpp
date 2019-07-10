@@ -28,13 +28,14 @@
 
 #include <iostream>
 #include <cmath>
+#include <cstring>
 #include "../Flag.hpp"
 #include "SorSolverCpp.hpp"
 
 // Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
-#define SOR_GAUSS_SEIDL
+//#define SOR_GAUSS_SEIDL
 //#define SOR_GAUSS_SEIDL_PARALLEL
-//#define SOR_JACOBI
+#define SOR_JACOBI
 //#define SOR_HYBRID
 
 void sorSolverIterationCpp(
@@ -67,15 +68,60 @@ void sorSolverIterationCpp(
         }
     }
 
+    #pragma omp parallel for
+    for (int i = 1; i <= imax; i++) {
+        for (int j = 1; j <= jmax; j++) {
+            for (int k = 1; k <= kmax; k++) {
+                int numDirectFlag = 0;
+                Real P_temp = Real(0);
 
-#if defined(SOR_JACOBI) || defined(SOR_HYBRID) || defined(SOR_GAUSS_SEIDL_PARALLEL)
+                if (!isFluid(Flag[IDXFLAG(i, j, k)])) {
+                    if (B_R(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i + 1, j, k)];
+                        numDirectFlag++;
+                    }
+
+                    if (B_L(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i - 1, j, k)];
+                        numDirectFlag++;
+                    }
+
+                    if (B_U(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j + 1, k)];
+                        numDirectFlag++;
+                    }
+
+                    if (B_D(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j - 1, k)];
+                        numDirectFlag++;
+                    }
+
+                    if (B_B(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j, k - 1)];
+                        numDirectFlag++;
+                    }
+
+                    if (B_F(Flag[IDXFLAG(i, j, k)])) {
+                        P_temp += P[IDXP(i, j, k + 1)];
+                        numDirectFlag++;
+                    }
+
+                    P[IDXP(i, j, k)] = P_temp / Real(numDirectFlag);
+                }
+            }     
+        }
+    }
+
+
+
+#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
     //memcpy(P_temp, P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
     // Using multiple threads for the copy is faster for large amounts of data.
     #pragma omp parallel for
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
-                P_temp[IDXP(i,j,k)] = P[IDXP(i,j,k)];
+                P_temp[IDXP(i, j, k)] = P[IDXP(i, j, k)];
             }
         }
     }
@@ -99,7 +145,7 @@ void sorSolverIterationCpp(
     }
 #endif
 #ifdef SOR_GAUSS_SEIDL_PARALLEL
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -132,11 +178,13 @@ void sorSolverIterationCpp(
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
+                if (isFluid(Flag[IDXFLAG(i,j,k)])) {
                 P[IDXP(i,j,k)] = (Real(1.0) - omg)*P_temp[IDXP(i,j,k)] + coeff *
                         ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
                          + (P_temp[IDXP(i,j+1,k)]+P_temp[IDXP(i,j-1,k)])/(dy*dy)
                          + (P_temp[IDXP(i,j,k+1)]+P_temp[IDXP(i,j,k-1)])/(dz*dz)
                          - RS[IDXRS(i,j,k)]);
+                }
             }
         }
     }
@@ -157,9 +205,13 @@ void sorSolverIterationCpp(
     }
 #endif
 
+    //Real *testArray = new Real[imax*jmax];
+    //memset(testArray, 0, sizeof(FlagType)*imax*jmax);
+
     // Compute the residual.
     residual = 0;
-    #pragma omp parallel for reduction(+: residual)
+    int numFluidCells = 0;
+    #pragma omp parallel for reduction(+: residual) reduction(+: numFluidCells)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -170,24 +222,48 @@ void sorSolverIterationCpp(
                              + (P[IDXP(i,j,k+1)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
                              - RS[IDXRS(i,j,k)]
                     );
+                    numFluidCells++;
+
+                    /*if (k == kmax/2) {
+                        testArray[(i-1)+(j-1)*imax] = SQR(
+                                (P[IDXP(i+1,j,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
+                                + (P[IDXP(i,j+1,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j-1,k)])/(dy*dy)
+                                + (P[IDXP(i,j,k+1)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
+                                - RS[IDXRS(i,j,k)]
+                        );
+                    }*/
                 }
             }
         }
     }
 
+    /*static int ctr = 0;
+    ctr++;
+    if (ctr > 500*800) {
+        std::cout << std::endl;
+        for (int j = jmax; j >= 1; j--) {
+            for (int i = 1; i <= imax; i++) {
+                std::cout << testArray[(i-1)+(j-1)*imax] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+    delete[] testArray;*/
+
+
     // The residual is normalized by dividing by the total number of fluid cells.
-    residual = std::sqrt(residual/(imax*jmax*kmax));
+    residual = std::sqrt(residual/numFluidCells);
 }
 
 void sorSolverCpp(
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
-#if defined(SOR_JACOBI)
+#if defined(SOR_JACOBI) || defined(SOR_HYBRID)
     omg = 1.0;
-#endif
-#if defined(SOR_HYBRID)
-    omg = 1.0;
+#else
+    omg = 1.5;
 #endif
 
     const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
@@ -202,5 +278,9 @@ void sorSolverCpp(
     if ((residual > eps && it == itermax) || std::isnan(residual)) {
         std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
                 << residual << ")." << std::endl;
+    }
+    if (std::isnan(residual)) {
+        std::cout << "\nResidual in SOR solver is not a number." << std::endl;
+        exit(1);
     }
 }

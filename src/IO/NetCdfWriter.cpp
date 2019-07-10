@@ -30,7 +30,7 @@
 #include <netcdf.h>
 #include "NetCdfWriter.hpp"
 
-bool NetCdfWriter::openFile(const std::string &filename,
+bool NetCdfWriter::initializeWriter(const std::string &filename,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin) {
     this->imax = imax;
     this->jmax = jmax;
@@ -51,9 +51,10 @@ bool NetCdfWriter::openFile(const std::string &filename,
     }
 
     // Open the NetCDF file for reading
-    int status = nc_create(filename.c_str(), NC_NETCDF4 | NC_CLOBBER, &ncid);
+    std::string netCdfFilename = filename + ".nc";
+    int status = nc_create(netCdfFilename.c_str(), NC_NETCDF4 | NC_CLOBBER, &ncid);
     if (status != 0) {
-        std::cerr << "ERROR in loadNetCdfFile: File \"" << filename << "\" couldn't be opened!" << std::endl;
+        std::cerr << "ERROR in loadNetCdfFile: File \"" << netCdfFilename << "\" couldn't be opened!" << std::endl;
         return false;
     }
     isFileOpen = true;

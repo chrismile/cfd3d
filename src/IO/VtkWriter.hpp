@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2019, Christoph Neuhauser, Stefan Haas, Paul Ng
+ * Copyright (c) 2019, Christoph Neuhauser
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_NETCDFWRITER_HPP
-#define CFD3D_NETCDFWRITER_HPP
+#ifndef CFD3D_VTKWRITER_HPP
+#define CFD3D_VTKWRITER_HPP
 
 #include "OutputFileWriter.hpp"
 
-class NetCdfWriter : public OutputFileWriter {
+class VtkWriter : public OutputFileWriter {
 public:
-    virtual ~NetCdfWriter();
+    VtkWriter(bool isBinaryVtk = true) : isBinaryVtk(isBinaryVtk) {}
+    virtual ~VtkWriter();
 
     /**
      * @return The file ending of the format.
      */
-    virtual std::string getOutputFormatEnding() { return ".nc"; }
+    virtual std::string getOutputFormatEnding() { return ".vtk"; }
 
     /**
-     * Opens a NetCDF file for writing.
-     * @param filename The file name of the NetCDF file to write to.
+     * Intializes the file writer.
+     * @param filename The file name of the file to write to.
      * @param imax Number of cells in x direction inside of the domain.
      * @param jmax Number of cells in y direction inside of the domain.
      * @param kmax Number of cells in z direction inside of the domain.
@@ -57,7 +58,7 @@ public:
     virtual bool initializeWriter(const std::string &filename,
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
     /**
-     * Writes the data of the current time step to the file.
+     * Writes the data of the current time step to a file.
      * @param timeStepNumber The time step number (i.e., 0 for the initial state, 1 after the first iteration of the
      * simulation, etc.).
      * @param time The current time of the simulation.
@@ -72,23 +73,23 @@ public:
             int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
 
 private:
-    void writeTimeDependentVariable3D_Staggered(int ncVar, int jsize, int ksize, Real *values);
-    void writeTimeDependentVariable3D_Normal(int ncVar, int jsize, int ksize, Real *values);
-    void ncPutAttributeText(int varid, const std::string &name, const std::string &value);
+    void writeVtkHeader(FILE *file, int imax, int jmax, int kmax);
+    void writePointCoordinates(FILE *file, int imax, int jmax, int kmax,
+            Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
+    void writePointData(FILE *file, int imax, int jmax, int kmax, Real *U, Real *V, Real *W, FlagType *Flag);
+    void writeCellData(FILE *file, int imax, int jmax, int kmax, Real *P, Real *T, FlagType *Flag);
+
+    bool isBinaryVtk;
+    std::string filename;
 
     int imax, jmax, kmax;
     Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
-    Real *centerCellU;
-    Real *centerCellV;
-    Real *centerCellW;
 
-    bool isFileOpen = false;
-    int ncid;
-    size_t writeIndex;
-
-    // NetCDF variables
-    int timeVar, xVar, yVar, zVar, geometryVar, UVar, VVar, WVar, PVar, TVar;
+    // For binary mode. (Note: ParaView only supports float, and not double.)
+    float *pointData = nullptr;
+    float *cellData = nullptr;
+    uint8_t *cellDataUint = nullptr;
 };
 
 
-#endif //CFD3D_NETCDFWRITER_HPP
+#endif //CFD3D_VTKWRITER_HPP

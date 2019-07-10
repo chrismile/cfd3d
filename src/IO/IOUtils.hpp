@@ -34,10 +34,13 @@
 /**
  * Makes sure the directories 'outputDirectory', 'outputDirectory' and 'outputDirectory' exists.
  * @param outputDirectory The output directory name.
+ * @param outputFilename The filename of the output file (not including the file ending).
+ * @param outputFormatEnding The file ending of the format to use.
  * @param lineDirectory The line directory name.
  * @param geometryDirectory The geometry directory name.
  */
 void prepareOutputDirectory(
-        const std::string &outputDirectory, const std::string &lineDirectory, const std::string &geometryDirectory);
+        const std::string &outputDirectory, const std::string &outputFilename, const std::string &outputFormatEnding,
+        const std::string &lineDirectory, const std::string &geometryDirectory);
 
 #endif //CFD3D_IOUTILS_HPP

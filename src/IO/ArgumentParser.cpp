@@ -27,13 +27,18 @@
  */
 
 #include <cstring>
+#include <iostream>
+#include "NetCdfWriter.hpp"
+#include "VtkWriter.hpp"
 #include "ArgumentParser.hpp"
 
 void parseArguments(
-        int argc, char *argv[], std::string &scenarioName, std::string &solverName, bool &shallWriteOutput,
-        int &numParticles, bool &traceStreamlines,  bool &traceStreaklines,  bool &tracePathlines) {
-    // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, ...
-    scenarioName = "natural_convection";
+        int argc, char *argv[], std::string &scenarioName, std::string &solverName,
+        OutputFileWriter *&outputFileWriter, bool &shallWriteOutput,
+        int &numParticles, bool &traceStreamlines,  bool &traceStreaklines, bool &tracePathlines) {
+    // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
+    // fuji_san, zugspitze, ...
+    scenarioName = "zugspitze";
     solverName = "cpp";
     shallWriteOutput = true;
     numParticles = 400;
@@ -47,6 +52,19 @@ void parseArguments(
             scenarioName = argv[i+1];
         } else if (strcmp(argv[i], "--solver") == 0 && i != argc-1) {
             solverName = argv[i+1];
+        } else if (strcmp(argv[i], "--outputformat") == 0 && i != argc-1) {
+            if (strcmp(argv[i+1], "netcdf") == 0) {
+                outputFileWriter = new NetCdfWriter();
+            } else if (strcmp(argv[i+1], "vtk") == 0) {
+                outputFileWriter = new VtkWriter();
+            } else if (strcmp(argv[i+1], "vtk-binary") == 0) {
+                outputFileWriter = new VtkWriter(true);
+            } else if (strcmp(argv[i+1], "vtk-ascii") == 0) {
+                outputFileWriter = new VtkWriter(false);
+            } else {
+                std::cerr << "Invalid output format." << std::endl;
+                exit(1);
+            }
         } else if (strcmp(argv[i], "--numparticles") == 0 && i != argc-1) {
             numParticles = std::stoi(argv[i+1]);
         } else if (strcmp(argv[i], "--output") == 0 && i != argc-1) {
@@ -58,5 +76,9 @@ void parseArguments(
         } else if (strcmp(argv[i], "--tracepathlines") == 0 && i != argc-1) {
             tracePathlines = strcmp(argv[i+1], "false") == 0 ? false : true;
         }
+    }
+
+    if (outputFileWriter == nullptr) {
+        outputFileWriter = new VtkWriter();
     }
 }

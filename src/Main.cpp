@@ -58,7 +58,7 @@ const std::string lineDirectory = "lines/";
 int main(int argc, char *argv[]) {
     CfdSolver *cfdSolver;
     ProgressBar progressBar;
-    NetCdfWriter netCdfWriter;
+    OutputFileWriter *outputFileWriter = nullptr;
     bool traceStreamlines = false, traceStreaklines = false, tracePathlines = false;
     std::vector<rvec3> particleSeedingLocations;
     bool dataIsUpToDate = true;
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
             dt, dx, dy, dz, alpha, omg, tau, eps, beta, T_h, T_c;
     bool useTemperature = true;
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
-    parseArguments(argc, argv, scenarioName, solverName, shallWriteOutput,
+    parseArguments(argc, argv, scenarioName, solverName, outputFileWriter, shallWriteOutput,
             numParticles, traceStreamlines, traceStreaklines, tracePathlines);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
@@ -101,13 +101,15 @@ int main(int argc, char *argv[]) {
     }
 
     geometryFilename = geometryDirectory + geometryName;
-    outputFilename = outputDirectory + scenarioName + ".nc";
+    outputFilename = outputDirectory + scenarioName;
     std::cout << "Scenario name: " << scenarioName << std::endl;
     std::cout << "Scenario file: " << scenarioFilename << std::endl;
     std::cout << "Geometry file: " << geometryFilename << std::endl;
     std::cout << "Output file: " << geometryFilename << std::endl;
 
-    prepareOutputDirectory(outputDirectory, lineDirectory, geometryDirectory);
+    std::string outputFormatEnding = outputFileWriter->getOutputFormatEnding();
+
+    prepareOutputDirectory(outputDirectory, outputFilename, outputFormatEnding, lineDirectory, geometryDirectory);
 
     Real n = 0;
     Real t = 0;
@@ -135,8 +137,8 @@ int main(int argc, char *argv[]) {
     auto startTime = std::chrono::system_clock::now();
 
     if (shallWriteOutput) {
-        netCdfWriter.openFile(outputFilename, imax, jmax, kmax, dx, dy, dz, xOrigin, yOrigin, zOrigin);
-        netCdfWriter.writeTimestep(0, t, U, V, W, P, T, Flag);
+        outputFileWriter->initializeWriter(outputFilename, imax, jmax, kmax, dx, dy, dz, xOrigin, yOrigin, zOrigin);
+        outputFileWriter->writeTimestep(0, t, U, V, W, P, T, Flag);
     }
 
 
@@ -184,7 +186,7 @@ int main(int argc, char *argv[]) {
                     cfdSolver->getDataForOutput(U, V, W, P, T);
                     dataIsUpToDate = true;
                 }
-                netCdfWriter.writeTimestep(n, t, U, V, W, P, T, Flag);
+                outputFileWriter->writeTimestep(n, t, U, V, W, P, T, Flag);
                 progressBar.printOutput(n, t, 50);
             }
             tWrite -= dtWrite;
@@ -232,6 +234,7 @@ int main(int argc, char *argv[]) {
     std::cout << "System time elapsed: " << (elapsedTime.count() * 1e-6) << "s" << std::endl;
 
     delete cfdSolver;
+    delete outputFileWriter;
     delete[] U;
     delete[] V;
     delete[] W;
