@@ -53,6 +53,9 @@ void calculateDtCuda(
         Real Re, Real Pr, Real tau,
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
+        Real *cudaReductionArrayU1, Real *cudaReductionArrayU2,
+        Real *cudaReductionArrayV1, Real *cudaReductionArrayV2,
+        Real *cudaReductionArrayW1, Real *cudaReductionArrayW2,
         bool useTemperature);
 
 /*

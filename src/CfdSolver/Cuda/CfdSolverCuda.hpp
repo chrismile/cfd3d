@@ -142,6 +142,13 @@ private:
     Real dx, dy, dz;
     Real *U, *V, *W , *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
     FlagType *Flag;
+
+    // For computing the maximum reduction of the absolute velocities and the sum reduction of the residual.
+    Real *cudaReductionArrayU1, *cudaReductionArrayU2;
+    Real *cudaReductionArrayV1, *cudaReductionArrayV2;
+    Real *cudaReductionArrayW1, *cudaReductionArrayW2;
+    Real *cudaReductionArrayResidual1, *cudaReductionArrayResidual2;
+    unsigned int *cudaReductionArrayNumCells1, *cudaReductionArrayNumCells2;
 };
 
 

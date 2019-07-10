@@ -77,6 +77,22 @@ void CfdSolverCuda::initialize(const std::string &scenarioName,
     cudaMalloc(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real));
     cudaMalloc(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int));
 
+    int cudaReductionArrayUSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize*blockSize*2);
+    int cudaReductionArrayVSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize*blockSize*2);
+    int cudaReductionArrayWSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize*blockSize*2);
+    int cudaReductionArrayResidualSize1 = iceil(imax*jmax*kmax, blockSize*blockSize*2)*blockSize*blockSize*2;
+    int cudaReductionArrayResidualSize2 = iceil(imax*jmax*kmax, blockSize*blockSize*2);
+    cudaMalloc(&cudaReductionArrayU1, cudaReductionArrayUSize*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayU2, cudaReductionArrayUSize*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayV1, cudaReductionArrayVSize*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayV2, cudaReductionArrayVSize*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayW1, cudaReductionArrayWSize*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayW2, cudaReductionArrayWSize*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayResidual1, cudaReductionArrayResidualSize1*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayResidual2, cudaReductionArrayResidualSize2*sizeof(Real));
+    cudaMalloc(&cudaReductionArrayNumCells1, cudaReductionArrayResidualSize1*sizeof(unsigned int));
+    cudaMalloc(&cudaReductionArrayNumCells2, cudaReductionArrayResidualSize2*sizeof(unsigned int));
+
     // Copy the content of U, V, W, P, T and Flag to the internal representation.
     cudaMemcpy(this->U, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), cudaMemcpyHostToDevice);
     cudaMemcpy(this->V, V, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2), cudaMemcpyHostToDevice);
@@ -99,6 +115,17 @@ CfdSolverCuda::~CfdSolverCuda() {
     cudaFree(H);
     cudaFree(RS);
     cudaFree(Flag);
+
+    cudaFree(cudaReductionArrayU1);
+    cudaFree(cudaReductionArrayU2);
+    cudaFree(cudaReductionArrayV1);
+    cudaFree(cudaReductionArrayV2);
+    cudaFree(cudaReductionArrayW1);
+    cudaFree(cudaReductionArrayW2);
+    cudaFree(cudaReductionArrayResidual1);
+    cudaFree(cudaReductionArrayResidual2);
+    cudaFree(cudaReductionArrayNumCells1);
+    cudaFree(cudaReductionArrayNumCells2);
 }
 
 void CfdSolverCuda::setBoundaryValues() {
@@ -110,8 +137,12 @@ void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
 }
 
 Real CfdSolverCuda::calculateDt() {
-    calculateDtCuda(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
-    //dt = 0.003;
+    calculateDtCuda(
+            Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W,
+            cudaReductionArrayU1, cudaReductionArrayU2,
+            cudaReductionArrayV1, cudaReductionArrayV2,
+            cudaReductionArrayW1, cudaReductionArrayW2,
+            useTemperature);
     return dt;
 }
 
@@ -122,13 +153,15 @@ void CfdSolverCuda::calculateTemperature() {
     T_temp = temp;
     dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
-    calculateTemperatureCuda<<<dimGrid,dimBlock>>>(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
+    calculateTemperatureCuda<<<dimGrid,dimBlock>>>(
+            Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
 void CfdSolverCuda::calculateFgh() {
     dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
-    calculateFghCuda<<<dimGrid,dimBlock>>>(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
+    calculateFghCuda<<<dimGrid,dimBlock>>>(
+            Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 }
 
 void CfdSolverCuda::calculateRs() {
@@ -139,7 +172,10 @@ void CfdSolverCuda::calculateRs() {
 
 
 void CfdSolverCuda::executeSorSolver() {
-    sorSolverCuda(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
+    sorSolverCuda(
+            omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag,
+            cudaReductionArrayResidual1, cudaReductionArrayResidual2,
+            cudaReductionArrayNumCells1, cudaReductionArrayNumCells2);
 }
 
 void CfdSolverCuda::calculateUvw() {

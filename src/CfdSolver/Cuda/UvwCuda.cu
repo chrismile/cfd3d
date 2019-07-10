@@ -185,52 +185,66 @@ __global__ void calculateRsCuda(
         }
 }
 
-__global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput){
+/**
+ * Reference: Based on kernel 4 from https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
+ * @param input The array of input values (of size 'sizeOfInput').
+ * @param output The output array (of size iceil(numberOfBlocksI, blockSize*blockSize*2)).
+ * @param sizeOfInput The number of input values.
+ */
+__global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput) {
         extern __shared__ Real sdata[];
 
-        unsigned int tid = threadIdx.x;
-        unsigned int i = blockIdx.x*(blockDim.x*2) + threadIdx.x;
+        unsigned int threadID = threadIdx.x;
+        unsigned int i = blockIdx.x * blockDim.x * 2 + threadIdx.x;
 
-        if (i+blockDim.x < sizeOfInput){
+        // Copy the data to the shared memory and do the first reduction step.
+        if (i + blockDim.x < sizeOfInput){
 #ifdef REAL_DOUBLE
-            sdata[tid] = fmax(fabs(input[i]),fabs(input[i+blockDim.x]));
+            sdata[threadID] = fmax(fabs(input[i]), fabs(input[i + blockDim.x]));
 #else
-            sdata[tid] = fmaxf(fabsf(input[i]),fabsf(input[i+blockDim.x]));
+            sdata[threadID] = fmaxf(fabsf(input[i]), fabsf(input[i + blockDim.x]));
 #endif
-        }
-        else if (i < sizeOfInput){
-                sdata[tid] = input[i];
-        }
-        else{
-                sdata[tid] = 0;
+        } else if (i < sizeOfInput){
+                sdata[threadID] = input[i];
+        } else{
+                sdata[threadID] = 0;
         }
         __syncthreads();
-        // do reduction in shared mem
-        for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
-                if (tid < s) {
+
+        // Do the reduction in the shared memory.
+        for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+                if (threadID < stride) {
 #ifdef REAL_DOUBLE
-                    sdata[tid] = fmax(fabs(sdata[tid]), fabs(sdata[tid + s]));
+                    sdata[threadID] = fmax(fabs(sdata[threadID]), fabs(sdata[threadID + stride]));
 #else
-                    sdata[tid] = fmaxf(fabsf(sdata[tid]), fabsf(sdata[tid + s]));
+                    sdata[threadID] = fmaxf(fabsf(sdata[threadID]), fabsf(sdata[threadID + stride]));
 #endif
                 }
                 __syncthreads();
         }
-        // write result for this block to global mem
-        if (tid == 0) output[blockIdx.x] = sdata[0];
+
+        // Write the result for this block to global memory.
+        if (threadID == 0) {
+            output[blockIdx.x] = sdata[0];
+        }
 }
 
 void calculateDtCuda(
         Real Re, Real Pr, Real tau,
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W,
+        Real *cudaReductionArrayU1, Real *cudaReductionArrayU2,
+        Real *cudaReductionArrayV1, Real *cudaReductionArrayV2,
+        Real *cudaReductionArrayW1, Real *cudaReductionArrayW2,
         bool useTemperature) {
     Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
     
     Real *U_reductionInput = U;
     Real *V_reductionInput = V;
     Real *W_reductionInput = W;
-    Real *U_reductionOutput, *V_reductionOutput, *W_reductionOutput;
+    Real *U_reductionOutput = cudaReductionArrayU1;
+    Real *V_reductionOutput = cudaReductionArrayV1;
+    Real *W_reductionOutput = cudaReductionArrayW1;
 
     int numberOfBlocksI = (imax+1)*(jmax+2)*(kmax+2);
     int numberOfBlocksJ = (imax+2)*(jmax+1)*(kmax+2);
@@ -242,6 +256,7 @@ void calculateDtCuda(
 
     //const int blockSize1D = 256;
 
+    int iteration = 0;
     while (!finished) {
         inputSizeI = numberOfBlocksI;
         inputSizeJ = numberOfBlocksJ;
@@ -251,44 +266,54 @@ void calculateDtCuda(
         numberOfBlocksK = iceil(numberOfBlocksK, blockSize*blockSize*2);
 
         if (inputSizeI != 1) {
-            cudaMalloc(&U_reductionOutput, numberOfBlocksI*sizeof(Real));
-            cudaMemset(&U_reductionOutput, 0, numberOfBlocksI*sizeof(Real));
-            int sharedMemorySize = iceil(inputSizeI, blockSize*blockSize*2) * blockSize*blockSize*2 * sizeof(Real);
+            int sharedMemorySize = blockSize*blockSize * sizeof(Real);
             calculateMaximum<<<numberOfBlocksI, blockSize*blockSize, sharedMemorySize>>>(
                     U_reductionInput, U_reductionOutput, inputSizeI);
-            U_reductionInput = U_reductionOutput;
-            cudaMemcpy(&uMaxAbs, U_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+            if (iteration % 2 == 0) {
+                U_reductionInput = cudaReductionArrayU1;
+                U_reductionOutput = cudaReductionArrayU2;
+            } else {
+                U_reductionInput = cudaReductionArrayU2;
+                U_reductionOutput = cudaReductionArrayU1;
+            }
         }
         if (inputSizeJ != 1) {
-            cudaMalloc(&V_reductionOutput, numberOfBlocksJ*sizeof(Real));
-            cudaMemset(&V_reductionOutput, 0, numberOfBlocksJ*sizeof(Real));
-            int sharedMemorySize = iceil(inputSizeJ, blockSize*blockSize*2) * blockSize*blockSize*2 * sizeof(Real);
+            int sharedMemorySize = blockSize*blockSize * sizeof(Real);
             calculateMaximum <<<numberOfBlocksJ, blockSize * blockSize, sharedMemorySize>>> (
                     V_reductionInput, V_reductionOutput, inputSizeJ);
-            V_reductionInput = V_reductionOutput;
-            cudaMemcpy(&vMaxAbs, V_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+            if (iteration % 2 == 0) {
+                V_reductionInput = cudaReductionArrayV1;
+                V_reductionOutput = cudaReductionArrayV2;
+            } else {
+                V_reductionInput = cudaReductionArrayV2;
+                V_reductionOutput = cudaReductionArrayV1;
+            }
         }
         if (inputSizeK != 1) {
-            cudaMalloc(&W_reductionOutput, numberOfBlocksK*sizeof(Real));
-            cudaMemset(&W_reductionOutput, 0, numberOfBlocksK*sizeof(Real));
-            int sharedMemorySize = iceil(inputSizeK, blockSize*blockSize*2) * blockSize*blockSize*2 * sizeof(Real);
+            int sharedMemorySize = blockSize*blockSize * sizeof(Real);
             calculateMaximum <<<numberOfBlocksK, blockSize * blockSize, sharedMemorySize>>> (
                     W_reductionInput, W_reductionOutput, inputSizeK);
-            W_reductionInput = W_reductionOutput;
-            cudaMemcpy(&wMaxAbs, W_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+            if (iteration % 2 == 0) {
+                W_reductionInput = cudaReductionArrayW1;
+                W_reductionOutput = cudaReductionArrayW2;
+            } else {
+                W_reductionInput = cudaReductionArrayW2;
+                W_reductionOutput = cudaReductionArrayW1;
+            }
         }
 
 
-        if (numberOfBlocksI == 1 && numberOfBlocksJ == 1 && numberOfBlocksK == 1){
+        if (numberOfBlocksI == 1 && numberOfBlocksJ == 1 && numberOfBlocksK == 1) {
             finished = true;
         }
+        iteration++;
     }
 
     cudaMemcpy(&uMaxAbs, U_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
     cudaMemcpy(&vMaxAbs, V_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
     cudaMemcpy(&wMaxAbs, W_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
 
-    Real uMaxAbs_cpu = Real(0.0), vMaxAbs_cpu = Real(0.0), wMaxAbs_cpu = Real(0.0);
+    /*Real uMaxAbs_cpu = Real(0.0), vMaxAbs_cpu = Real(0.0), wMaxAbs_cpu = Real(0.0);
 
     Real *U_cpu = new Real[(imax+1)*(jmax+2)*(kmax+2)];
     Real *V_cpu = new Real[(imax+2)*(jmax+1)*(kmax+2)];
@@ -329,7 +354,7 @@ void calculateDtCuda(
     std::cout << "vMaxAbs: " << vMaxAbs << std::endl;
     std::cout << "vMaxAbs_cpu: " << vMaxAbs_cpu << std::endl;
     std::cout << "wMaxAbs: " << wMaxAbs << std::endl;
-    std::cout << "wMaxAbs_cpu: " << wMaxAbs_cpu << std::endl;
+    std::cout << "wMaxAbs_cpu: " << wMaxAbs_cpu << std::endl;*/
 
     if (tau < Real(0.0)) {
         // Constant time step manually specified in configuration file. Check for stability.
@@ -345,17 +370,17 @@ void calculateDtCuda(
 
     // Now, use formula (14) from worksheet 1 to compute the time step size.
     dt = std::min(dx / uMaxAbs, dy / vMaxAbs);
-    std::cout << "dt: " << dt << std::endl;
+    //std::cout << "dt: " << dt << std::endl;
     dt = std::min(dt, dz / wMaxAbs);
-    std::cout << "dt: " << dt << std::endl;
+    //std::cout << "dt: " << dt << std::endl;
     dt = std::min(dt, (Re / Real(2.0)) * (Real(1.0) / (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy)
             + Real(1.0) / (dz*dz))));
-    std::cout << "dt: " << dt << std::endl;
+    //std::cout << "dt: " << dt << std::endl;
     if (useTemperature){
         dt = std::min(dt, (Re * Pr / Real(2.0)) * (Real(1.0) / (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy)
                 + Real(1.0) / (dz*dz))));
     }
-    std::cout << "dt: " << dt << std::endl;
+    //std::cout << "dt: " << dt << std::endl;
     dt = tau * dt;
 }
 

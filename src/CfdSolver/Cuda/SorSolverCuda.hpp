@@ -52,6 +52,8 @@ __global__ void copy_pressure(
 void sorSolverCuda(
         Real omg, Real eps, int itermax,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        Real *P, Real *P_temp, Real *RS, FlagType *Flag);
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag,
+        Real *cudaReductionArrayResidual1, Real *cudaReductionArrayResidual2,
+        unsigned int *cudaReductionArrayNumCells1, unsigned int *cudaReductionArrayNumCells2);
 
 #endif //CFD3D_SORSOLVERCUDA_HPP
