@@ -111,7 +111,8 @@ void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
 
 Real CfdSolverCuda::calculateDt() {
     //calculateDtCuda(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, useTemperature);
-    return 0.003;
+    dt = 0.003;
+    return dt;
 }
 
 
