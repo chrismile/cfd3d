@@ -219,7 +219,7 @@ void setInternalUBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *U,
         FlagType *Flag) {
-
+    #pragma omp parallel for
     for (int i = 1; i <= imax-1; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -288,6 +288,7 @@ void setInternalVBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *V,
         FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax-1; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -356,6 +357,7 @@ void setInternalWBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *W,
         FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax-1; k++) {
@@ -424,6 +426,7 @@ void setInternalTBoundariesCpp(
         int imax, int jmax, int kmax,
         Real *T,
         FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {

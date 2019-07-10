@@ -32,11 +32,10 @@
 #include "../Flag.hpp"
 #include "SorSolverCpp.hpp"
 
-// Three possible modes: Gauss-Seidl, Jacobi, Gauss-Seidl/Jacobi hybrid
-//#define SOR_GAUSS_SEIDL
-//#define SOR_GAUSS_SEIDL_PARALLEL
+// Three possible modes: Gauss-Seidel, Gauss-Seidel parallel, Jacobi
+//#define SOR_GAUSS_SEIDEL
+//#define SOR_GAUSS_SEIDEL_PARALLEL
 #define SOR_JACOBI
-//#define SOR_HYBRID
 
 void sorSolverIterationCpp(
         Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
@@ -129,7 +128,7 @@ void sorSolverIterationCpp(
 
 
     // Now start with the actual SOR iteration.
-#ifdef SOR_GAUSS_SEIDL
+#ifdef SOR_GAUSS_SEIDEL
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -144,7 +143,7 @@ void sorSolverIterationCpp(
         }
     }
 #endif
-#ifdef SOR_GAUSS_SEIDL_PARALLEL
+#ifdef SOR_GAUSS_SEIDEL_PARALLEL
     #pragma omp parallel for
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
@@ -189,24 +188,6 @@ void sorSolverIterationCpp(
         }
     }
 #endif
-#ifdef SOR_HYBRID
-    #pragma omp parallel for
-    for (int i = 1; i <= imax; i++) {
-        for (int j = 1; j <= jmax; j++) {
-            for (int k = 1; k <= kmax; k++) {
-                // Just use Jacobi scheme in i direction, as we have only parallelized the outer loop.
-                P[IDXP(i,j,k)] = (Real(1.0) - omg)*P[IDXP(i,j,k)] + coeff *
-                        ((P_temp[IDXP(i+1,j,k)]+P_temp[IDXP(i-1,j,k)])/(dx*dx)
-                         + (P[IDXP(i,j+1,k)]+P[IDXP(i,j-1,k)])/(dy*dy)
-                         + (P[IDXP(i,j,k+1)]+P[IDXP(i,j,k-1)])/(dz*dz)
-                         - RS[IDXRS(i,j,k)]);
-            }
-        }
-    }
-#endif
-
-    //Real *testArray = new Real[imax*jmax];
-    //memset(testArray, 0, sizeof(FlagType)*imax*jmax);
 
     // Compute the residual.
     residual = 0;
@@ -223,34 +204,10 @@ void sorSolverIterationCpp(
                              - RS[IDXRS(i,j,k)]
                     );
                     numFluidCells++;
-
-                    /*if (k == kmax/2) {
-                        testArray[(i-1)+(j-1)*imax] = SQR(
-                                (P[IDXP(i+1,j,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i-1,j,k)])/(dx*dx)
-                                + (P[IDXP(i,j+1,k)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j-1,k)])/(dy*dy)
-                                + (P[IDXP(i,j,k+1)] - Real(2.0)*P[IDXP(i,j,k)] + P[IDXP(i,j,k-1)])/(dz*dz)
-                                - RS[IDXRS(i,j,k)]
-                        );
-                    }*/
                 }
             }
         }
     }
-
-    /*static int ctr = 0;
-    ctr++;
-    if (ctr > 500*800) {
-        std::cout << std::endl;
-        for (int j = jmax; j >= 1; j--) {
-            for (int i = 1; i <= imax; i++) {
-                std::cout << testArray[(i-1)+(j-1)*imax] << " ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-    }
-    delete[] testArray;*/
-
 
     // The residual is normalized by dividing by the total number of fluid cells.
     residual = std::sqrt(residual/numFluidCells);
