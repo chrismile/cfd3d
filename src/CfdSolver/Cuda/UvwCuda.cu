@@ -232,36 +232,55 @@ void calculateDtCuda(
     Real *W_reductionInput = W;
     Real *U_reductionOutput, *V_reductionOutput, *W_reductionOutput;
 
-    int sizeOfInput = (imax+1)*(jmax+2)*(kmax+2);
-    int numberOfBlocks = (imax+1)*(jmax+2)*(kmax+2);
+    int numberOfBlocksI = (imax+1)*(jmax+2)*(kmax+2);
+    int numberOfBlocksJ = (imax+2)*(jmax+1)*(kmax+2);
+    int numberOfBlocksK = (imax+2)*(jmax+2)*(kmax+1);
+    int inputSizeI;
+    int inputSizeJ;
+    int inputSizeK;
     bool finished = false;
 
+    //const int blockSize1D = 256;
+
     while (!finished) {
-        
-        numberOfBlocks = iceil(numberOfBlocks, blockSize*blockSize*2);
+        inputSizeI = numberOfBlocksI;
+        inputSizeJ = numberOfBlocksJ;
+        inputSizeK = numberOfBlocksK;
+        numberOfBlocksI = iceil(numberOfBlocksI, blockSize*blockSize*2);
+        numberOfBlocksJ = iceil(numberOfBlocksJ, blockSize*blockSize*2);
+        numberOfBlocksK = iceil(numberOfBlocksK, blockSize*blockSize*2);
 
-        cudaMalloc(&U_reductionOutput, numberOfBlocks*sizeof(Real));
-        cudaMalloc(&V_reductionOutput, numberOfBlocks*sizeof(Real));
-        cudaMalloc(&W_reductionOutput, numberOfBlocks*sizeof(Real));
-        cudaMemset(&U_reductionOutput, 0, numberOfBlocks*sizeof(Real));
-        cudaMemset(&V_reductionOutput, 0, numberOfBlocks*sizeof(Real));
-        cudaMemset(&W_reductionOutput, 0, numberOfBlocks*sizeof(Real));
+        if (inputSizeI != 1) {
+            cudaMalloc(&U_reductionOutput, numberOfBlocksI*sizeof(Real));
+            cudaMemset(&U_reductionOutput, 0, numberOfBlocksI*sizeof(Real));
+            int sharedMemorySize = iceil(inputSizeI, blockSize*blockSize*2) * blockSize*blockSize*2 * sizeof(Real);
+            calculateMaximum<<<numberOfBlocksI, blockSize*blockSize, sharedMemorySize>>>(
+                    U_reductionInput, U_reductionOutput, inputSizeI);
+            U_reductionInput = U_reductionOutput;
+            cudaMemcpy(&uMaxAbs, U_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+        }
+        if (inputSizeJ != 1) {
+            cudaMalloc(&V_reductionOutput, numberOfBlocksJ*sizeof(Real));
+            cudaMemset(&V_reductionOutput, 0, numberOfBlocksJ*sizeof(Real));
+            int sharedMemorySize = iceil(inputSizeJ, blockSize*blockSize*2) * blockSize*blockSize*2 * sizeof(Real);
+            calculateMaximum <<<numberOfBlocksJ, blockSize * blockSize, sharedMemorySize>>> (
+                    V_reductionInput, V_reductionOutput, inputSizeJ);
+            V_reductionInput = V_reductionOutput;
+            cudaMemcpy(&vMaxAbs, V_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+        }
+        if (inputSizeK != 1) {
+            cudaMalloc(&W_reductionOutput, numberOfBlocksK*sizeof(Real));
+            cudaMemset(&W_reductionOutput, 0, numberOfBlocksK*sizeof(Real));
+            int sharedMemorySize = iceil(inputSizeK, blockSize*blockSize*2) * blockSize*blockSize*2 * sizeof(Real);
+            calculateMaximum <<<numberOfBlocksK, blockSize * blockSize, sharedMemorySize>>> (
+                    W_reductionInput, W_reductionOutput, inputSizeK);
+            W_reductionInput = W_reductionOutput;
+            cudaMemcpy(&wMaxAbs, W_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+        }
 
-        dim3 dimBlock(blockSize*blockSize);
-        dim3 dimGrid(numberOfBlocks);
 
-        calculateMaximum<<<dimGrid,dimBlock>>>(U_reductionInput, U_reductionOutput, sizeOfInput);
-        calculateMaximum<<<dimGrid,dimBlock>>>(V_reductionInput, V_reductionOutput, sizeOfInput);
-        calculateMaximum<<<dimGrid,dimBlock>>>(W_reductionInput, W_reductionOutput, sizeOfInput);
-
-        U_reductionInput = U_reductionOutput;
-        V_reductionInput = V_reductionOutput;
-        W_reductionInput = W_reductionOutput;
-
-        sizeOfInput = numberOfBlocks;
-
-        if (numberOfBlocks == 1){
-                finished = true;
+        if (numberOfBlocksI == 1 && numberOfBlocksJ == 1 && numberOfBlocksK == 1){
+            finished = true;
         }
     }
 
