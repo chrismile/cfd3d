@@ -193,9 +193,9 @@ __global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput){
 
         if (i+blockDim.x < sizeOfInput){
 #ifdef REAL_DOUBLE
-            sdata[tid] = fmax(input[i],input[i+blockDim.x]);
+            sdata[tid] = fmax(fabs(input[i]),fabs(input[i+blockDim.x]));
 #else
-            sdata[tid] = fmaxf(input[i],input[i+blockDim.x]);
+            sdata[tid] = fmaxf(fabsf(input[i]),fabsf(input[i+blockDim.x]));
 #endif
         }
         else if (i < sizeOfInput){
@@ -209,9 +209,9 @@ __global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput){
         for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
                 if (tid < s) {
 #ifdef REAL_DOUBLE
-                    sdata[tid] = fmax(sdata[tid], sdata[tid + s]);
+                    sdata[tid] = fmax(fabs(sdata[tid]), fabs(sdata[tid + s]));
 #else
-                    sdata[tid] = fmaxf(sdata[tid], sdata[tid + s]);
+                    sdata[tid] = fmaxf(fabsf(sdata[tid]), fabsf(sdata[tid + s]));
 #endif
                 }
                 __syncthreads();
