@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
 #endif
 #ifdef USE_CUDA
     else if (solverName == "cuda") {
-        cfdSolver = new CfdSolverCuda();
+        cfdSolver = new CfdSolverCuda(blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
     }
 #endif
 #ifdef USE_SYCL

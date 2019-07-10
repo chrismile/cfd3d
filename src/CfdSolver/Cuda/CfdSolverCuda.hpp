@@ -34,6 +34,14 @@
 class CfdSolverCuda : public CfdSolver {
 public:
     /**
+     * @param blockSizeX The block size to use for 3D domains in x direction.
+     * @param blockSizeY The block size to use for 3D domains in y direction.
+     * @param blockSizeZ The block size to use for 3D domains in z direction.
+     * @param blockSize1D The block size to use for 1D domains.
+     */
+    CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
+
+    /**
      * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
      * @param scenarioName The name of the scenario as a short string.
      * @param linearSystemSolverType The type of solver to use for solving the Pressure Poisson Equation (PPE).
@@ -144,6 +152,7 @@ private:
     Real dx, dy, dz;
     Real *U, *V, *W , *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
     FlagType *Flag;
+    int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
 };
 
 

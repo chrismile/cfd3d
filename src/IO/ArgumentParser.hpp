@@ -50,9 +50,9 @@ class OutputFileWriter;
  * @param jproc The number of processes in y direction (MPI solver only).
  * @param kproc The number of processes in z direction (MPI solver only).
  * @param blockSizeX The block size to use for 3D domains in x direction (CUDA solver only).
- * @param blockSizeX The block size to use for 3D domains in y direction (CUDA solver only).
- * @param blockSizeX The block size to use for 3D domains in z direction (CUDA solver only).
- * @param blockSizeX The block size to use for 1D domains  (CUDA solver only).
+ * @param blockSizeY The block size to use for 3D domains in y direction (CUDA solver only).
+ * @param blockSizeZ The block size to use for 3D domains in z direction (CUDA solver only).
+ * @param blockSize1D The block size to use for 1D domains (CUDA solver only).
  */
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName,

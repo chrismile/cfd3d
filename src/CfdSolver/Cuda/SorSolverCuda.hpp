@@ -37,6 +37,7 @@
 void sorSolverCuda(
         Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag);
 
 #endif //CFD3D_SORSOLVERCUDA_HPP

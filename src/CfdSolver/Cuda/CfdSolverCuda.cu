@@ -32,6 +32,13 @@
 #include "SorSolverCuda.hpp"
 #include "CfdSolverCuda.hpp"
 
+CfdSolverCuda::CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D) {
+    this->blockSizeX = blockSizeX;
+    this->blockSizeY = blockSizeY;
+    this->blockSizeZ = blockSizeZ;
+    this->blockSize1D = blockSize1D;
+}
+
 void CfdSolverCuda::initialize(
         const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType,
         Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
@@ -131,7 +138,9 @@ void CfdSolverCuda::calculateRs() {
 
 
 void CfdSolverCuda::executeSorSolver() {
-    sorSolverCuda(omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
+    sorSolverCuda(
+            omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax,
+            blockSizeX, blockSizeY, blockSizeZ, blockSize1D, P, P_temp, RS, Flag);
 }
 
 void CfdSolverCuda::calculateUvw() {
