@@ -26,32 +26,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_BOUNDARYVALUESSYCL_HPP
-#define CFD3D_BOUNDARYVALUESSYCL_HPP
+#ifndef CFD3D_BOUNDARYVALUESMPI_HPP
+#define CFD3D_BOUNDARYVALUESMPI_HPP
 
 #include <string>
 #include "Defines.hpp"
-#include "SyclDefines.hpp"
 
 /**
  * Sets the boundary condition values of U, V, W and T using the Flag array.
  */
-void setBoundaryValuesSycl(
-        cl::sycl::queue &queue,
+void setBoundaryValuesMpi(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
-        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &TBuffer,
-        cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
+        int il, int iu, int jl, int ju, int kl, int ku,
+        Real *U, Real *V, Real *W, Real *T,
+        FlagType *Flag);
 
 /**
  * Sets special boundary conditions (typically something like inflow) specific to the different scenarios.
  */
-void setBoundaryValuesScenarioSpecificSycl(
-        cl::sycl::queue &queue,
+void setBoundaryValuesScenarioSpecificMpi(
         const std::string &scenarioName,
         int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer, cl::sycl::buffer<Real, 1> &WBuffer,
-        cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
+        int il, int iu, int jl, int ju, int kl, int ku,
+        Real *U, Real *V, Real *W,
+        FlagType *Flag);
 
-#endif //CFD3D_BOUNDARYVALUESSYCL_HPP
+#endif //CFD3D_BOUNDARYVALUESMPI_HPP

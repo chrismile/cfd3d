@@ -88,6 +88,22 @@ public:
     void setLayersInObject(
             FlagType value, int layerStart, int layerEnd, std::function<bool(int,int,int)> membershipFunctor);
 
+    /**
+     * Removes invalid obstacle cells and replaces them with fluid cells.
+     */
+    void removeInvalidCells();
+
+    /**
+     * Returns the cell type of a certain cell.
+     * @param i Cell position in x direction.
+     * @param j Cell position in y direction.
+     * @param k Cell position in z direction.
+     * @return The cell type (for more details @see GeometryValues).
+     */
+    inline uint32_t getCellType(int i, int j, int k) {
+        return geometryValues.at(IDXFLAG(i,j,k));
+    }
+
 private:
     int imax, jmax, kmax;
     std::vector<uint32_t> geometryValues;

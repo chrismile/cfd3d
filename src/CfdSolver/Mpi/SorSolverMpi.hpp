@@ -26,38 +26,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-#include "SorSolverSycl.hpp"
+#ifndef CFD3D_SORSOLVERMPI_HPP
+#define CFD3D_SORSOLVERMPI_HPP
 
-void sorSolverIterationSycl(
-        cl::sycl::queue &queue,
-        Real omg, Real dx, Real dy, Real dz, Real coeff, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
-        cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer,
-        Real &residual) {
-    // TODO
-}
+#include "Defines.hpp"
 
-void sorSolverSycl(
-        cl::sycl::queue &queue,
-        Real omg, Real eps, int itermax,
+/**
+ * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
+ */
+void sorSolverMpi(
+        int myrank, Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<Real, 1> &P_tempBuffer,
-        cl::sycl::buffer<Real, 1> &RSBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer) {
-    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
-    Real residual = 1e9;
-    int it = 0;
-    while (it < itermax && residual > eps) {
-        queue.submit([&](cl::sycl::handler &cgh) {
-            ReadAccReal PRead = PBuffer.get_access<cl::sycl::access::mode::read>(cgh);
-            ReadAccReal P_tempWrite = P_tempBuffer.get_access<cl::sycl::access::mode::write>(cgh);
-            cgh.copy(PRead, P_tempWrite);
-        });
-        sorSolverIterationSycl(omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag, residual);
-        it++;
-    }
+        int il, int iu, int jl, int ju, int kl, int ku,
+        int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
+        Real *P, Real *P_temp, Real *RS, FlagType *Flag);
 
-    if (residual > eps && it == itermax) {
-        std::cerr << "\nSOR solver reached maximum number of iterations without converging." << std::endl;
-    }
-}
+#endif //CFD3D_SORSOLVERMPI_HPP

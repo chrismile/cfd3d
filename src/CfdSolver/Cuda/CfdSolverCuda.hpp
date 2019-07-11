@@ -35,8 +35,17 @@
 class CfdSolverCuda : public CfdSolver {
 public:
     /**
+     * @param blockSizeX The block size to use for 3D domains in x direction.
+     * @param blockSizeY The block size to use for 3D domains in y direction.
+     * @param blockSizeZ The block size to use for 3D domains in z direction.
+     * @param blockSize1D The block size to use for 1D domains.
+     */
+    CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
+
+    /**
      * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
      * @param scenarioName The name of the scenario as a short string.
+     * @param linearSystemSolverType The type of solver to use for solving the Pressure Poisson Equation (PPE).
      * @param Re The Reynolds number used for the simulation.
      * @param Pr The Prandtl number used for the simulation.
      * @param omg The over-relaxation factor of the SOR solver.
@@ -66,7 +75,8 @@ public:
      * @param T The temperature values.
      * @param Flag The flag values (@see Flag.hpp for more information).
      */
-    virtual void initialize(const std::string &scenarioName,
+    virtual void initialize(
+            const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType,
             Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
             Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
@@ -135,6 +145,7 @@ public:
 
 private:
     std::string scenarioName;
+    LinearSystemSolverType linearSystemSolverType;
     Real Re, Pr, omg, eps, alpha, beta, dt, tau, GX, GY, GZ, T_h, T_c;
     bool useTemperature;
     int itermax;
@@ -142,6 +153,7 @@ private:
     Real dx, dy, dz;
     Real *U, *V, *W , *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
     FlagType *Flag;
+    int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
 
     // For computing the maximum reduction of the absolute velocities and the sum reduction of the residual.
     Real *cudaReductionArrayU1, *cudaReductionArrayU2;

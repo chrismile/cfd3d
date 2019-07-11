@@ -27,6 +27,7 @@
  */
 
 #include "Intersection.hpp"
+#include <cmath>
 
 #define BIAS (Real(0.00001))
 

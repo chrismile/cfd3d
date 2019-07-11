@@ -40,12 +40,50 @@ inline bool isNoSlip(unsigned int flag) { return (flag >> 1) & 1; }
 inline bool isFreeSlip(unsigned int flag) { return (flag >> 2) & 1; }
 inline bool isOutflow(unsigned int flag) { return (flag >> 3) & 1; }
 inline bool isInflow(unsigned int flag) { return (flag >> 4) & 1; }
-inline bool B_L(unsigned int flag) { return (flag >> 5) & 1; }
-inline bool B_R(unsigned int flag) { return (flag >> 6) & 1; }
-inline bool B_D(unsigned int flag) { return (flag >> 7) & 1; }
-inline bool B_U(unsigned int flag) { return (flag >> 8) & 1; }
-inline bool B_B(unsigned int flag) { return (flag >> 9) & 1; }
-inline bool B_F(unsigned int flag) { return (flag >> 10) & 1; }
+
+inline bool B_L(unsigned int flag) { return (flag >> 5) & 1 ; }
+inline bool B_R(unsigned int flag) { return (flag >> 6) & 1 ; }
+inline bool B_D(unsigned int flag) { return (flag >> 7) & 1 ; }
+inline bool B_U(unsigned int flag) { return (flag >> 8) & 1 ; }
+inline bool B_B(unsigned int flag) { return (flag >> 9) & 1 ; }
+inline bool B_F(unsigned int flag) { return (flag >> 10) & 1 ; }
+
+/** 
+inline bool B_L(unsigned int flag) { return (flag >> 5) & 1 && !( ((flag >> 7) & 1) || ((flag >> 8) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_R(unsigned int flag) { return (flag >> 6) & 1 && !( ((flag >> 7) & 1) || ((flag >> 8) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_D(unsigned int flag) { return (flag >> 7) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_U(unsigned int flag) { return (flag >> 8) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_B(unsigned int flag) { return (flag >> 9) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 7) & 1) || ((flag >> 8) & 1) ) ; }
+inline bool B_F(unsigned int flag) { return (flag >> 10) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 7) & 1) || ((flag >> 8) & 1) ) ; }
+
+inline bool B_LD(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 7) & 1 && !( ((flag >> 8) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_LU(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 8) & 1 && !( ((flag >> 7) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_LB(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 9) & 1 && !( ((flag >> 7) & 1) || ((flag >> 8) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_LF(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 10) & 1 && !( ((flag >> 7) & 1) || ((flag >> 8) & 1) || ((flag >> 9) & 1) ) ; }
+
+inline bool B_RD(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 7) & 1 && !( ((flag >> 8) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_RU(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 8) & 1 && !( ((flag >> 7) & 1) || ((flag >> 9) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_RB(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 9) & 1 && !( ((flag >> 7) & 1) || ((flag >> 8) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_RF(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 10) & 1 && !( ((flag >> 7) & 1) || ((flag >> 8) & 1) || ((flag >> 9) & 1) ) ; }
+
+inline bool B_DB(unsigned int flag) { return (flag >> 7) & 1 && (flag >> 9) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_DF(unsigned int flag) { return (flag >> 7) & 1 && (flag >> 10) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 9) & 1) ) ; }
+
+inline bool B_UB(unsigned int flag) { return (flag >> 8) & 1 && (flag >> 9) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_UF(unsigned int flag) { return (flag >> 8) & 1 && (flag >> 10) & 1 && !( ((flag >> 5) & 1) || ((flag >> 6) & 1) || ((flag >> 9) & 1) ) ; }
+
+inline bool B_LDB(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 7) & 1 && ((flag >> 9) & 1) && !( ((flag >> 8) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_RDB(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 7) & 1 && ((flag >> 9) & 1) && !( ((flag >> 8) & 1) || ((flag >> 10) & 1) ) ; }
+
+inline bool B_LUB(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 8) & 1 && ((flag >> 9) & 1) && !( ((flag >> 7) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_RUB(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 8) & 1 && ((flag >> 9) & 1) && !( ((flag >> 7) & 1) || ((flag >> 10) & 1) ) ; }
+
+inline bool B_LDF(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 7) & 1 && ((flag >> 10) & 1) && !( ((flag >> 8) & 1) || ((flag >> 9) & 1) ) ; }
+inline bool B_RDF(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 7) & 1 && ((flag >> 10) & 1) && !( ((flag >> 8) & 1) || ((flag >> 9) & 1) ) ; }
+
+inline bool B_LUF(unsigned int flag) { return (flag >> 5) & 1 && (flag >> 8) & 1 && ((flag >> 10) & 1) && !( ((flag >> 7) & 1) || ((flag >> 10) & 1) ) ; }
+inline bool B_RUF(unsigned int flag) { return (flag >> 6) & 1 && (flag >> 8) & 1 && ((flag >> 10) & 1) && !( ((flag >> 7) & 1) || ((flag >> 10) & 1) ) ; }
+*/
 inline bool isHot(unsigned int flag) { return (flag >> 11) & 1; }
 inline bool isCold(unsigned int flag) { return (flag >> 12) & 1; }
 inline bool isCoupling(unsigned int flag) { return (flag >> 13) & 1; }

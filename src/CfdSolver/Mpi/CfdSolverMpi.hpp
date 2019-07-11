@@ -26,17 +26,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_CFDSOLVERSYCL_HPP
-#define CFD3D_CFDSOLVERSYCL_HPP
+#ifndef CFD3D_CFDSOLVERMPI_HPP
+#define CFD3D_CFDSOLVERMPI_HPP
 
 #include "CfdSolver/CfdSolver.hpp"
-#include "SyclDefines.hpp"
 
-class CfdSolverSycl : public CfdSolver {
+class CfdSolverMpi : public CfdSolver {
 public:
+    CfdSolverMpi(
+            int il, int iu, int jl, int ju, int kl, int ku,
+            int myrank, int rankL, int rankR, int rankD, int rankU, int rankB, int rankF);
+
     /**
-     * Initializes the solver.
+     * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
      * @param scenarioName The name of the scenario as a short string.
+     * @param linearSystemSolverType The type of solver to use for solving the Pressure Poisson Equation (PPE).
      * @param Re The Reynolds number used for the simulation.
      * @param Pr The Prandtl number used for the simulation.
      * @param omg The over-relaxation factor of the SOR solver.
@@ -66,34 +70,17 @@ public:
      * @param T The temperature values.
      * @param Flag The flag values (@see Flag.hpp for more information).
      */
-    virtual void initialize(const std::string &scenarioName,
+    virtual void initialize(
+            const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType,
             Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
             Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
             Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag);
 
     /**
-     * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
-     * This needs to be done in the constructor of the SYCL solver, as cl::sycl::buffer doesn't have a default
-     * constructor.
-     * @param imax Number of cells in x direction inside of the domain.
-     * @param jmax Number of cells in y direction inside of the domain.
-     * @param kmax Number of cells in z direction inside of the domain.
-     * @param U The velocities in x direction.
-     * @param V The velocities in y direction.
-     * @param W The velocities in z direction.
-     * @param P The pressure values.
-     * @param T The temperature values.
-     * @param Flag The flag values (@see Flag.hpp for more information).
-     */
-    CfdSolverSycl(
-        int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag);
-
-    /**
      * The destructor frees the memory of the internal representations of U, V, W, P, T and Flag.
      */
-    ~CfdSolverSycl();
+    ~CfdSolverMpi();
 
 
     /**
@@ -153,19 +140,18 @@ public:
 
 private:
     std::string scenarioName;
+    LinearSystemSolverType linearSystemSolverType;
     Real Re, Pr, omg, eps, alpha, beta, dt, tau, GX, GY, GZ, T_h, T_c;
     bool useTemperature;
     int itermax;
     int imax, jmax, kmax;
+    int il, iu, jl, ju, kl, ku;
+    int myrank, rankL, rankR, rankD, rankU, rankB, rankF;
     Real dx, dy, dz;
-
-    int timeStepNumber = 0;
-
-    cl::sycl::buffer<Real, 1> UBuffer, VBuffer, WBuffer, PBuffer, P_tempBuffer, TBuffer, T_tempBuffer,
-            FBuffer, GBuffer, HBuffer, RSBuffer;
-    cl::sycl::buffer<unsigned int, 1> FlagBuffer;
-    cl::sycl::queue queue;
+    Real *U, *V, *W, *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
+    FlagType *Flag;
+    Real *bufSend, *bufRecv;
 };
 
 
-#endif //CFD3D_CFDSOLVERSYCL_HPP
+#endif //CFD3D_CFDSOLVERMPI_HPP

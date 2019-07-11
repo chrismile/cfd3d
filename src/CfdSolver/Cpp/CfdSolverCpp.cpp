@@ -27,17 +27,20 @@
  */
 
 #include <cstring>
+#include <iostream>
 #include "BoundaryValuesCpp.hpp"
 #include "UvwCpp.hpp"
 #include "SorSolverCpp.hpp"
 #include "CfdSolverCpp.hpp"
 
-void CfdSolverCpp::initialize(const std::string &scenarioName,
+void CfdSolverCpp::initialize(
+        const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType,
         Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
         Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
         Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag) {
     this->scenarioName = scenarioName;
+    this->linearSystemSolverType = linearSystemSolverType;
     this->Re = Re;
     this->Pr = Pr;
     this->omg = omg;
@@ -73,6 +76,19 @@ void CfdSolverCpp::initialize(const std::string &scenarioName,
     this->H = new Real[(imax+1)*(jmax+1)*(kmax+1)];
     this->RS = new Real[(imax+1)*(jmax+1)*(kmax+1)];
     this->Flag = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
+
+    memset(this->U, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2));
+    memset(this->V, 0, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2));
+    memset(this->W, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+1));
+    memset(this->P, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->P_temp, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->T, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->T_temp, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
+    memset(this->F, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->G, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->H, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->RS, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1));
+    memset(this->Flag, 0, sizeof(FlagType)*(imax+2)*(jmax+2)*(kmax+2));
 
     // Copy the content of U, V, W, P, T and Flag to the internal representation.
     memcpy(this->U, U, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2));
@@ -125,11 +141,20 @@ void CfdSolverCpp::calculateFgh() {
 
 void CfdSolverCpp::calculateRs() {
     calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+
+    /*std::cout << std::endl;
+    for (int j = jmax; j >= 1; j--) {
+        for (int i = 1; i <= imax; i++) {
+            std::cout << RS[IDXRS(i,j,kmax/2)] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;*/
 }
 
 
 void CfdSolverCpp::executeSorSolver() {
-    sorSolverCpp(omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
+    sorSolverCpp(omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag);
 }
 
 void CfdSolverCpp::calculateUvw() {
@@ -143,5 +168,4 @@ void CfdSolverCpp::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T)
     memcpy(W, this->W, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1));
     memcpy(P, this->P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
     memcpy(T, this->T, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2));
-    memcpy(Flag, this->Flag, sizeof(unsigned int)*(imax+2)*(jmax+2)*(kmax+2));
 }

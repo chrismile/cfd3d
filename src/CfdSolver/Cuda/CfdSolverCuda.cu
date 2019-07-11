@@ -35,12 +35,21 @@
 #include "../../Defines.hpp"
 
 
-void CfdSolverCuda::initialize(const std::string &scenarioName,
+CfdSolverCuda::CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D) {
+    this->blockSizeX = blockSizeX;
+    this->blockSizeY = blockSizeY;
+    this->blockSizeZ = blockSizeZ;
+    this->blockSize1D = blockSize1D;
+}
+
+void CfdSolverCuda::initialize(
+        const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType,
         Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
         Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
         Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag) {
     this->scenarioName = scenarioName;
+    this->linearSystemSolverType = linearSystemSolverType;
     this->Re = Re;
     this->Pr = Pr;
     this->omg = omg;
@@ -170,7 +179,8 @@ void CfdSolverCuda::calculateRs() {
 
 void CfdSolverCuda::executeSorSolver() {
     sorSolverCuda(
-            omg, eps, itermax, dx, dy, dz, imax, jmax, kmax, P, P_temp, RS, Flag,
+            omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax,
+            blockSizeX, blockSizeY, blockSizeZ, blockSize1D, P, P_temp, RS, Flag,
             cudaReductionArrayResidual1, cudaReductionArrayResidual2,
             cudaReductionArrayNumCells1, cudaReductionArrayNumCells2);
 }
@@ -188,5 +198,4 @@ void CfdSolverCuda::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T
     cudaMemcpy(W, this->W, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), cudaMemcpyDeviceToHost);
     cudaMemcpy(P, this->P, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToHost);
     cudaMemcpy(T, this->T, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToHost);
-    cudaMemcpy(Flag, this->Flag, sizeof(unsigned int)*(imax+2)*(jmax+2)*(kmax+2), cudaMemcpyDeviceToHost);
 }

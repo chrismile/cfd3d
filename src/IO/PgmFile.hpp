@@ -35,11 +35,30 @@
 /**
  * Loads a .pgm (portable gray map) image file.
  * @param filename The name of the file.
- * @param width A pointer to the field where the width of the image should be stored.
+ * @param width A reference to the field where the width of the image should be stored.
  * @param height A pointer to the field where the height of the image should be stored.
+ * @param levels A reference to the field where the number of gray levels should be stored.
  * @return The grayscale values of the image stored as an array of 32-bit unsigned integer values.
  */
-std::vector<unsigned int> loadPgmFile(const std::string &filename, int *width, int *height);
+std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, int &height, int &levels);
+
+/**
+ * Upsamples (or downsamples if necessary) a passed bitmap to match a certain resolution.
+ * @param bitmapIn The bitmap to upscale.
+ * @param widthIn The width of the bitmap to upscale.
+ * @param heightIn The height of the bitmap to upscale.
+ * @param bitmapOut The result.
+ * @param widthOut The width of the resulting bitmap.
+ * @param heightOut The height of the resulting bitmap.
+ */
+void nearestNeighborUpsamplingPgm2D(
+        const std::vector<unsigned int> bitmapIn,
+        int widthIn,
+        int heightIn,
+        std::vector<unsigned int> &bitmapOut,
+        int widthOut,
+        int heightOut
+);
 
 /**
  * Upsamples (or downsamples if necessary) a passed bitmap to match a certain resolution.

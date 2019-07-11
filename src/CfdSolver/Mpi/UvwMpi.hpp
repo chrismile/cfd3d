@@ -26,64 +26,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_UVWSYCL_HPP
-#define CFD3D_UVWSYCL_HPP
+#ifndef CFD3D_UVWMPI_HPP
+#define CFD3D_UVWMPI_HPP
 
 #include "Defines.hpp"
-#include "SyclDefines.hpp"
 
 /*
  * Determines the value of F, H and H for computing RS.
  */
-void calculateFghSycl(
-        cl::sycl::queue &queue,
+void calculateFghMpi(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
-        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &TBuffer,
-        cl::sycl::buffer<Real, 1> &FBuffer, cl::sycl::buffer<Real, 1> &GBuffer,
-        cl::sycl::buffer<Real, 1> &HBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
+        int il, int iu, int jl, int ju, int kl, int ku,
+        Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag);
 
 /*
  * Computes the right hand side of the Pressure Poisson Equation (PPE).
  */
-void calculateRsSycl(
-        cl::sycl::queue &queue,
+void calculateRsMpi(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &FBuffer, cl::sycl::buffer<Real, 1> &GBuffer,
-        cl::sycl::buffer<Real, 1> &HBuffer, cl::sycl::buffer<Real, 1> &RSBuffer);
+        int il, int iu, int jl, int ju, int kl, int ku,
+        Real *F, Real *G, Real *H, Real *RS);
 
 /*
  * Determines the maximum time step size. The time step size is restricted according to the CFL theorem.
  */
-void calculateDtSycl(
-        cl::sycl::queue &queue,
+void calculateDtMpi(
         Real Re, Real Pr, Real tau,
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer, cl::sycl::buffer<Real, 1> &WBuffer,
+        int il, int iu, int jl, int ju, int kl, int ku,
+        Real *U, Real *V, Real *W,
         bool useTemperature);
 
 /*
  * Calculates the new velocity values.
  */
-void calculateUvwSycl(
-        cl::sycl::queue &queue,
+void calculateUvwMpi(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
-        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &FBuffer,
-        cl::sycl::buffer<Real, 1> &GBuffer, cl::sycl::buffer<Real, 1> &HBuffer,
-        cl::sycl::buffer<Real, 1> &PBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
+        int il, int iu, int jl, int ju, int kl, int ku,
+        int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
+        Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag);
 
 /*
  * Calculates the new temperature values.
  */
-void calculateTemperatureSycl(
-        cl::sycl::queue &queue,
+void calculateTemperatureMpi(
         Real Re, Real Pr, Real alpha,
         Real dt, Real dx, Real dy, Real dz,
         int imax, int jmax, int kmax,
-        cl::sycl::buffer<Real, 1> &UBuffer, cl::sycl::buffer<Real, 1> &VBuffer,
-        cl::sycl::buffer<Real, 1> &WBuffer, cl::sycl::buffer<Real, 1> &TBuffer,
-        cl::sycl::buffer<Real, 1> &T_tempBuffer, cl::sycl::buffer<unsigned int, 1> &FlagBuffer);
+        int il, int iu, int jl, int ju, int kl, int ku,
+        int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
+        Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag);
 
-#endif //CFD3D_UVWSYCL_HPP
+#endif //CFD3D_UVWMPI_HPP
