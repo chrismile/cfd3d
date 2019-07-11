@@ -464,7 +464,11 @@ void setInternalTBoundariesCpp(
                         numDirectFlag++;
                     }
 
-                    T[IDXT(i,j,k)] = T_temp/Real(numDirectFlag);
+                    if (numDirectFlag == 0) {
+                        T[IDXT(i,j,k)] = 0;
+                    } else {
+                        T[IDXT(i,j,k)] = T_temp / Real(numDirectFlag);
+                    }
                 }
             }     
         }
@@ -524,9 +528,11 @@ void setBoundaryValuesScenarioSpecificCpp(
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
                 // Left wall
-                U[IDXU(0,j,k)] = 1.0;
-                V[IDXV(0,j,k)] = 0.0;
-                W[IDXW(0,j,k)] = 0.0;
+                if (isInflow(Flag[IDXFLAG(0, j, k)])) {
+                    U[IDXU(0, j, k)] = 1.0;
+                    V[IDXV(0, j, k)] = 0.0;
+                    W[IDXW(0, j, k)] = 0.0;
+                }
             }
         }
     }

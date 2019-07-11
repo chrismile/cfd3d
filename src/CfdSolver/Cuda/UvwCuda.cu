@@ -32,9 +32,9 @@
 #include "CudaDefines.hpp"
 
 __global__ void calculateFghCudaKernel(
-    Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
-    Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-    Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
+        Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
+        Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
     int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
     int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
@@ -244,17 +244,17 @@ void calculateFghCuda(
 }
 
 __global__ void calculateRsCuda(
-    Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-    Real *F, Real *G, Real *H, Real *RS) {
-        int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
-        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
-        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+        Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real *F, Real *G, Real *H, Real *RS) {
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
-        if (i <= imax && j <= jmax && k <= kmax){
-            RS[IDXRS(i, j, k)] = ((F[IDXF(i, j, k)] - F[IDXF(i - 1, j, k)]) / dx +
-                    (G[IDXG(i, j, k)] - G[IDXG(i, j - 1, k)]) / dy +
-                    (H[IDXH(i, j, k)] - H[IDXH(i, j, k - 1)]) / dz) / dt;
-        }
+    if (i <= imax && j <= jmax && k <= kmax){
+        RS[IDXRS(i, j, k)] = ((F[IDXF(i, j, k)] - F[IDXF(i - 1, j, k)]) / dx +
+                (G[IDXG(i, j, k)] - G[IDXG(i, j - 1, k)]) / dy +
+                (H[IDXH(i, j, k)] - H[IDXH(i, j, k - 1)]) / dz) / dt;
+    }
 }
 
 /**
@@ -264,41 +264,41 @@ __global__ void calculateRsCuda(
  * @param sizeOfInput The number of input values.
  */
 __global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput) {
-        extern __shared__ Real sdata[];
+    extern __shared__ Real sdata[];
 
-        unsigned int threadID = threadIdx.x;
-        unsigned int i = blockIdx.x * blockDim.x * 2 + threadIdx.x;
+    unsigned int threadID = threadIdx.x;
+    unsigned int i = blockIdx.x * blockDim.x * 2 + threadIdx.x;
 
-        // Copy the data to the shared memory and do the first reduction step.
-        if (i + blockDim.x < sizeOfInput){
+    // Copy the data to the shared memory and do the first reduction step.
+    if (i + blockDim.x < sizeOfInput){
 #ifdef REAL_DOUBLE
-            sdata[threadID] = fmax(fabs(input[i]), fabs(input[i + blockDim.x]));
+    sdata[threadID] = fmax(fabs(input[i]), fabs(input[i + blockDim.x]));
 #else
-            sdata[threadID] = fmaxf(fabsf(input[i]), fabsf(input[i + blockDim.x]));
+    sdata[threadID] = fmaxf(fabsf(input[i]), fabsf(input[i + blockDim.x]));
 #endif
-        } else if (i < sizeOfInput){
-                sdata[threadID] = input[i];
-        } else{
-                sdata[threadID] = 0;
+    } else if (i < sizeOfInput){
+            sdata[threadID] = input[i];
+    } else{
+            sdata[threadID] = 0;
+    }
+    __syncthreads();
+
+    // Do the reduction in the shared memory.
+    for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (threadID < stride) {
+#ifdef REAL_DOUBLE
+        sdata[threadID] = fmax(fabs(sdata[threadID]), fabs(sdata[threadID + stride]));
+#else
+        sdata[threadID] = fmaxf(fabsf(sdata[threadID]), fabsf(sdata[threadID + stride]));
+#endif
         }
         __syncthreads();
+    }
 
-        // Do the reduction in the shared memory.
-        for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
-                if (threadID < stride) {
-#ifdef REAL_DOUBLE
-                    sdata[threadID] = fmax(fabs(sdata[threadID]), fabs(sdata[threadID + stride]));
-#else
-                    sdata[threadID] = fmaxf(fabsf(sdata[threadID]), fabsf(sdata[threadID + stride]));
-#endif
-                }
-                __syncthreads();
-        }
-
-        // Write the result for this block to global memory.
-        if (threadID == 0) {
-            output[blockIdx.x] = sdata[0];
-        }
+    // Write the result for this block to global memory.
+    if (threadID == 0) {
+        output[blockIdx.x] = sdata[0];
+    }
 }
 
 void calculateDtCuda(

@@ -47,7 +47,7 @@ __global__ void setXZPlanesPressureBoundaries(
     int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
     // Set the boundary values for the pressure on the x-z-planes.
-    if (i <= imax && k <= jmax) {
+    if (i <= imax && k <= kmax) {
         P[IDXP(i, 0, k)] = P[IDXP(i, 1, k)];
         P[IDXP(i, jmax + 1, k)] = P[IDXP(i, jmax, k)];
     }
@@ -58,7 +58,7 @@ __global__ void setYZPlanesPressureBoundaries(
     int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
     // Set the boundary values for the pressure on the y-z-planes.
-    if (j <= imax && k <= jmax) {
+    if (j <= jmax && k <= kmax) {
         P[IDXP(0, j, k)] = P[IDXP(1, j, k)];
         P[IDXP(imax + 1, j, k)] = P[IDXP(imax, j, k)];
     }
@@ -70,7 +70,7 @@ __global__ void setBoundaryConditionsPressureInDomainCuda(
     int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
-    if (j <= imax && k <= jmax && !isFluid(Flag[IDXFLAG(i, j, k)])) {
+    if (i <= imax && j <= jmax && k <= kmax && !isFluid(Flag[IDXFLAG(i, j, k)])) {
         int numDirectFlag = 0;
         Real P_temp = Real(0);
 
@@ -104,7 +104,11 @@ __global__ void setBoundaryConditionsPressureInDomainCuda(
             numDirectFlag++;
         }
 
-        P[IDXP(i, j, k)] = P_temp / Real(numDirectFlag);
+        if (numDirectFlag == 0) {
+            P[IDXP(i, j, k)] = 0;
+        } else {
+            P[IDXP(i, j, k)] = P_temp / Real(numDirectFlag);
+        }
     }
 }
 
@@ -198,11 +202,13 @@ __global__ void sorSolverIterationCuda(
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     if (i <= imax && j <= jmax && k <= kmax) {
-        P[IDXP(i, j, k)] = (Real(1.0) - omg) * P_temp[IDXP(i, j, k)] + coeff *
-                ((P_temp[IDXP(i + 1, j, k)] + P_temp[IDXP(i - 1, j, k)]) / (dx * dx)
-                 + (P_temp[IDXP(i, j + 1, k)] + P_temp[IDXP(i, j - 1, k)]) / (dy * dy)
-                 + (P_temp[IDXP(i, j, k + 1)] + P_temp[IDXP(i, j, k - 1)]) / (dz * dz)
-                 - RS[IDXRS(i, j, k)]);
+        if (isFluid(Flag[IDXFLAG(i,j,k)])) {
+            P[IDXP(i, j, k)] = (Real(1.0) - omg) * P_temp[IDXP(i, j, k)] + coeff *
+                    ((P_temp[IDXP(i + 1, j, k)] + P_temp[IDXP(i - 1, j, k)]) / (dx * dx)
+                     + (P_temp[IDXP(i, j + 1, k)] + P_temp[IDXP(i, j - 1, k)]) / (dy * dy)
+                     + (P_temp[IDXP(i, j, k + 1)] + P_temp[IDXP(i, j, k - 1)]) / (dz * dz)
+                     - RS[IDXRS(i, j, k)]);
+        }
     }
 }
 
@@ -229,7 +235,6 @@ __global__ void sorSolverComputeResidualArrayCuda(
         }
     }
 }
-
 
 void sorSolverCuda(
         Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
@@ -282,12 +287,8 @@ void sorSolverCuda(
     }
 
     if ((residual > eps && it == itermax) || std::isnan(residual)) {
-        std::cout << "\nSOR solver reached maximum number of iterations without converging (res: "
+        std::cerr << "\nSOR solver reached maximum number of iterations without converging (res: "
                   << residual << ")." << std::endl;
-    }
-    if (std::isnan(residual)) {
-        std::cout << "\nResidual in SOR solver is not a number." << std::endl;
-        exit(1);
     }
     if (std::isnan(residual)) {
         std::cerr << "\nResidual in SOR solver is not a number." << std::endl;

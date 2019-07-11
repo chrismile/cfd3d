@@ -125,7 +125,11 @@ void sorSolverIterationMpi(
                         numDirectFlag++;
                     }
 
-                    P[IDXP(i, j, k)] = P_temp / Real(numDirectFlag);
+                    if (numDirectFlag == 0) {
+                        P[IDXP(i, j, k)] = 0;
+                    } else {
+                        P[IDXP(i, j, k)] = P_temp / Real(numDirectFlag);
+                    }
                 }
             }     
         }

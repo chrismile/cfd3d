@@ -38,7 +38,7 @@ void parseArguments(
         int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
     // fuji_san, zugspitze, ...
-    scenarioName = "zugspitze";
+    scenarioName = "flow_over_step";
     solverName = "cpp";
     shallWriteOutput = true;
     outputFileWriterType = "vtk";

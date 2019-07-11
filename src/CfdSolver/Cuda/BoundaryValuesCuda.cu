@@ -31,15 +31,15 @@
 #include "CudaDefines.hpp"
 
 __global__ void setLeftRightBoundariesCuda(
-    Real T_h, Real T_c,
-    int imax, int jmax, int kmax,
-    Real *U, Real *V, Real *W, Real *T,
-    FlagType *Flag) {
-
+        Real T_h, Real T_c,
+        int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *T,
+        FlagType *Flag) {
     int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
     // Set the boundary values for the pressure on the y-z-planes.
-    if (j <= imax && k<= jmax){
+    if (j <= jmax && k <= kmax){
         // Left wall
         if (isNoSlip(Flag[IDXFLAG(0,j,k)])) {
             U[IDXU(0,j,k)] = 0.0;
@@ -94,14 +94,15 @@ __global__ void setLeftRightBoundariesCuda(
 }
 
 __global__ void setDownUpBoundariesCuda(
-    Real T_h, Real T_c,
-    int imax, int jmax, int kmax,
-    Real *U, Real *V, Real *W, Real *T,
-    FlagType *Flag) {
+        Real T_h, Real T_c,
+        int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *T,
+        FlagType *Flag) {
     int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
     // Set the boundary values for the pressure on the x-z-planes.
-    if (i <= imax && k<= jmax){
+    if (i <= imax && k <= kmax){
         // Down wall
         if (isNoSlip(Flag[IDXFLAG(i,0,k)])) {
             U[IDXU(i,0,k)] = -U[IDXU(i,1,k)];
@@ -152,10 +153,10 @@ __global__ void setDownUpBoundariesCuda(
 }
 
 __global__ void setFrontBackBoundariesCuda(
-    Real T_h, Real T_c,
-    int imax, int jmax, int kmax,
-    Real *U, Real *V, Real *W, Real *T,
-    FlagType *Flag) {
+        Real T_h, Real T_c,
+        int imax, int jmax, int kmax,
+        Real *U, Real *V, Real *W, Real *T,
+        FlagType *Flag) {
     int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int j = blockIdx.x * blockDim.x + threadIdx.x + 1;
     
@@ -219,9 +220,8 @@ __global__ void setFrontBackBoundariesCuda(
 }
 
 __global__ void setInternalUBoundariesCuda(
-    int imax, int jmax, int kmax,
-    Real *U,
-    FlagType *Flag) {
+        int imax, int jmax, int kmax,
+        Real *U, FlagType *Flag) {
     int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
     int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
@@ -465,7 +465,11 @@ __global__ void setInternalTBoundariesCuda(
                 numDirectFlag++;
             }
 
-            T[IDXT(i,j,k)] = T_temp/Real(numDirectFlag);
+            if (numDirectFlag == 0) {
+                T[IDXT(i,j,k)] = 0;
+            } else {
+                T[IDXT(i,j,k)] = T_temp / Real(numDirectFlag);
+            }
         }
     }    
 }
@@ -489,10 +493,10 @@ void setBoundaryValuesCuda(
     setLeftRightBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     dim3 dimGrid_internal(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
-    setInternalUBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, U,Flag);
-    setInternalVBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, V,Flag);
-    setInternalWBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, W,Flag);
-    setInternalTBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, T,Flag);
+    setInternalUBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, U, Flag);
+    setInternalVBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, V, Flag);
+    setInternalWBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, W, Flag);
+    setInternalTBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, T, Flag);
 }
 
 __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
@@ -501,7 +505,7 @@ __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
     int i = blockIdx.y * blockIdx.y + threadIdx.y;
     int k = blockIdx.x * blockIdx.x + threadIdx.x + 1;
 
-    if (i <= imax && k<= kmax){
+    if (i <= imax && k <= kmax){
         // Upper wall
         U[IDXU(i,jmax+1,k)] = 2.0-U[IDXU(i,jmax,k)];
     }
@@ -534,15 +538,17 @@ __global__ void setSingleTowerBoundariesCuda(int imax, int jmax, int kmax,
 }
 
 __global__ void setMountainBoundariesCuda(int imax, int jmax, int kmax,
-    Real *U, Real *V, Real *W){
+    Real *U, Real *V, Real *W, FlagType *Flag){
     int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     if(j <= jmax && k <= kmax){
         // Left wall
-        U[IDXU(0,j,k)] = 1.0;
-        V[IDXV(0,j,k)] = 0.0;
-        W[IDXW(0,j,k)] = 0.0;
+        if (isInflow(Flag[IDXFLAG(0, j, k)])) {
+            U[IDXU(0, j, k)] = 1.0;
+            V[IDXV(0, j, k)] = 0.0;
+            W[IDXW(0, j, k)] = 0.0;
+        }
     }
 }
 
@@ -565,6 +571,6 @@ void setBoundaryValuesScenarioSpecificCuda(
         setSingleTowerBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
     } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze") {
         dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
-        setMountainBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
+        setMountainBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W, Flag);
     }
 }
