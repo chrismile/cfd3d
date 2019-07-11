@@ -479,14 +479,14 @@ void setBoundaryValuesCuda(
         FlagType *Flag) {
     dim3 dimBlock(blockSize,blockSize);
 
-    dim3 dimGrid_x_y(iceil(jmax,dimBlock.x),iceil(kmax,dimBlock.x));
-    setFrontBackBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
+    setFrontBackBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     dim3 dimGrid_x_z(iceil(kmax,dimBlock.x),iceil(imax,dimBlock.y));
     setDownUpBoundariesCuda<<<dimGrid_x_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
-    dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
-    setLeftRightBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    dim3 dimGrid_x_y(iceil(jmax,dimBlock.x),iceil(imax,dimBlock.y));
+    setLeftRightBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     //TODO: DimGrid exactly?
     dim3 dimGrid_internal(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));

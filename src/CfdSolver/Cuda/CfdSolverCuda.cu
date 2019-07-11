@@ -158,10 +158,7 @@ void CfdSolverCuda::calculateTemperature() {
 }
 
 void CfdSolverCuda::calculateFgh() {
-    dim3 dimBlock(blockSize,blockSize);
-    dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
-    calculateFghCuda<<<dimGrid,dimBlock>>>(
-            Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
+    calculateFghCuda(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 }
 
 void CfdSolverCuda::calculateRs() {
