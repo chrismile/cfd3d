@@ -174,8 +174,8 @@ void sorSolverIterationMpi(
     }
 
 
-    MPI_Status *status = 0;
-    mpiExchangeCellData(P, il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, status);
+    MPI_Status status;
+    mpiExchangeCellData(P, il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, &status);
 
     // Compute the residual.
     residual = 0;

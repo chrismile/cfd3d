@@ -187,8 +187,8 @@ __global__ void calculateFghCudaKernel(
 
 __global__ void setFBoundariesCuda(int imax, int jmax, int kmax, Real *U, Real *F) {
 
-    int j = blockIdx.y + threadIdx.y + 1;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     // Set the boundary values for F on the y-z-planes.
     if (j <= jmax && k <= kmax){
@@ -199,8 +199,8 @@ __global__ void setFBoundariesCuda(int imax, int jmax, int kmax, Real *U, Real *
 
 __global__ void setGBoundariesCuda(int imax, int jmax, int kmax, Real *V, Real *G) {
 
-    int i = blockIdx.y + threadIdx.y + 1;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     // Set the boundary values for G on the x-z-planes.
     if (i <= imax && k <= kmax){
@@ -211,8 +211,8 @@ __global__ void setGBoundariesCuda(int imax, int jmax, int kmax, Real *V, Real *
 
 __global__ void setHBoundariesCuda(int imax, int jmax, int kmax, Real *W, Real *H) {
 
-    int i = blockIdx.y + threadIdx.y + 1;
-    int j = blockIdx.x + threadIdx.x + 1;
+    int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int j = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     // Set the boundary values for G on the x-z-planes.
     if (i <= imax && j <= jmax){

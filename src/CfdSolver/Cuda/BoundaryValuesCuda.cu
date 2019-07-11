@@ -36,8 +36,8 @@ __global__ void setLeftRightBoundariesCuda(
     Real *U, Real *V, Real *W, Real *T,
     FlagType *Flag) {
 
-    int j = blockIdx.y + threadIdx.y + 1;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
     // Set the boundary values for the pressure on the y-z-planes.
     if (j <= imax && k<= jmax){
         // Left wall
@@ -98,8 +98,8 @@ __global__ void setDownUpBoundariesCuda(
     int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W, Real *T,
     FlagType *Flag) {
-    int i = blockIdx.y + threadIdx.y + 1;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
     // Set the boundary values for the pressure on the x-z-planes.
     if (i <= imax && k<= jmax){
         // Down wall
@@ -156,8 +156,8 @@ __global__ void setFrontBackBoundariesCuda(
     int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W, Real *T,
     FlagType *Flag) {
-    int i = blockIdx.y + threadIdx.y + 1;
-    int j = blockIdx.x + threadIdx.x + 1;
+    int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int j = blockIdx.x * blockDim.x + threadIdx.x + 1;
     
     // Set the boundary values for the pressure on the x-y-planes.
     if (i <= imax && j <= jmax){
@@ -498,7 +498,7 @@ void setBoundaryValuesCuda(
 __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
         Real *U){
     
-    int i = blockIdx.y + threadIdx.y;
+    int i = blockIdx.y * blockIdx.y + threadIdx.y;
     int k = blockIdx.x + threadIdx.x + 1;
 
     if (i <= imax && k<= kmax){
@@ -509,8 +509,8 @@ __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
 
 __global__ void setFlowOverStepBoundariesCuda(int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W){
-    int j = blockIdx.y + threadIdx.y + jmax/2+1;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int j = blockIdx.y * blockDim.y + jmax/2+1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     if(j <= jmax && k <= kmax){
         // Left wall
@@ -522,8 +522,8 @@ __global__ void setFlowOverStepBoundariesCuda(int imax, int jmax, int kmax,
 
 __global__ void setSingleTowerBoundariesCuda(int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W){
-    int j = blockIdx.y + threadIdx.y + 1;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     if(j <= jmax && k <= kmax){
         // Left wall
@@ -535,8 +535,8 @@ __global__ void setSingleTowerBoundariesCuda(int imax, int jmax, int kmax,
 
 __global__ void setMountainBoundariesCuda(int imax, int jmax, int kmax,
     Real *U, Real *V, Real *W){
-    int j = blockIdx.y + threadIdx.y + 1;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
     if(j <= jmax && k <= kmax){
         // Left wall

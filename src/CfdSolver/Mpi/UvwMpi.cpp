@@ -353,8 +353,8 @@ void calculateUvwMpi(
         }
     }
 
-    MPI_Status *status = 0;
-    mpiExchangeUvw(U, V, W, il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, status);
+    MPI_Status status;
+    mpiExchangeUvw(U, V, W, il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, &status);
 }
 
 void calculateTemperatureMpi(
@@ -417,6 +417,6 @@ void calculateTemperatureMpi(
         }
     }
 
-    MPI_Status *status = 0;
-    mpiExchangeCellData(T, il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, status);
+    MPI_Status status;
+    mpiExchangeCellData(T, il, iu, jl, ju, kl, ku, rankL, rankR, rankD, rankU, rankB, rankF, bufSend, bufRecv, &status);
 }

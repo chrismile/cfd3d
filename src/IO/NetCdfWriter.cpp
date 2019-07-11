@@ -57,9 +57,9 @@ bool NetCdfWriter::initializeWriter(const std::string &filename,
         iu = imax;
         ju = jmax;
         ku = kmax;
-
+    } else {
         std::cerr << "Error: NetCdfWriter doesn't support the distributed MPI solver (yet). "
-                << "Please consider using the VtkWriter class instead." << std::endl;
+                  << "Please consider using the VtkWriter class instead." << std::endl;
         exit(1);
     }
 
