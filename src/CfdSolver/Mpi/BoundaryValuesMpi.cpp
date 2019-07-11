@@ -308,7 +308,7 @@ void setInternalUBoundariesMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
         Real *U,
         FlagType *Flag) {
-    for (int i = std::max(il-1, 1); i <= iu && i != imax; i++) {
+    for (int i = il; i <= iu-1; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 int R_check = 0;
@@ -378,7 +378,7 @@ void setInternalVBoundariesMpi(
         Real *V,
         FlagType *Flag) {
     for (int i = il; i <= iu; i++) {
-        for (int j = std::max(jl-1, 1); j <= ju && j != jmax; j++) {
+        for (int j = jl; j <= ju-1; j++) {
             for (int k = kl; k <= ku; k++) {
                 int U_check = 0;
                 int D_check = 0;
@@ -448,7 +448,7 @@ void setInternalWBoundariesMpi(
         FlagType *Flag) {
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
-            for (int k = std::max(kl-1, 1); k <= ku && k != kmax; k++) {
+            for (int k = kl; k <= ku-1; k++) {
                 int F_check = 0;
                 int B_check = 0;
                 int F1_check = 0;
@@ -587,8 +587,8 @@ void setBoundaryValuesScenarioSpecificMpi(
         FlagType *Flag) {
     if (scenarioName == "driven_cavity") {
         if (ju == jmax) {
-            for (int i = il-1; i <= iu; i++) {
-                for (int k = kl; k <= ku; k++) {
+            for (int i = il-2; i <= iu+1; i++) {
+                for (int k = kl-1; k <= ku+1; k++) {
                     // Upper wall
                     U[IDXU(i,jmax+1,k)] = 2.0 - U[IDXU(i,jmax,k)];
                 }
