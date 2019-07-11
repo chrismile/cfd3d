@@ -289,4 +289,8 @@ void sorSolverCuda(
         std::cout << "\nResidual in SOR solver is not a number." << std::endl;
         exit(1);
     }
+    if (std::isnan(residual)) {
+        std::cerr << "\nResidual in SOR solver is not a number." << std::endl;
+        exit(1);
+    }
 }
