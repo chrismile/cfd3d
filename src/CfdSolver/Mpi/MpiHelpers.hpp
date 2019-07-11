@@ -30,7 +30,7 @@
 #define CFD3D_MPIHELPERS_HPP
 
 //#include "mpi.h"
-#include "openmpi/mpi.h"
+#include "mpi.h"
 #include "Defines.hpp"
 
 void mpiInit(

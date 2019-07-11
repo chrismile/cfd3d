@@ -60,4 +60,8 @@ void sorSolverCuda(
     if (residual > eps && it == itermax) {
         std::cerr << "\nSOR solver reached maximum number of iterations without converging." << std::endl;
     }
+    if (std::isnan(residual)) {
+        std::cerr << "\nResidual in SOR solver is not a number." << std::endl;
+        exit(1);
+    }
 }
