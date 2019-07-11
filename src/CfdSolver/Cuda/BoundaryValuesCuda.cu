@@ -488,7 +488,6 @@ void setBoundaryValuesCuda(
     dim3 dimGrid_x_y(iceil(jmax,dimBlock.x),iceil(imax,dimBlock.y));
     setLeftRightBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
-    //TODO: DimGrid exactly?
     dim3 dimGrid_internal(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     setInternalUBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, U,Flag);
     setInternalVBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, V,Flag);

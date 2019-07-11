@@ -26,10 +26,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UvwCuda.hpp"
 #include <algorithm>
 #include <iostream>
-#include <unistd.h>
+#include "UvwCuda.hpp"
+#include "CudaDefines.hpp"
 
 __global__ void calculateFghCudaKernel(
     Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
@@ -49,7 +49,7 @@ __global__ void calculateFghCudaKernel(
         
     Real Dx = 1/dx, Dy = 1/dy, Dz = 1/dz;
     
-    if (i <= imax -1 && j <= jmax && k <= kmax){
+    if (i <= imax - 1 && j <= jmax && k <= kmax) {
         if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i+1,j,k)])){
             d2u_dx2 = (U[IDXU(i+1,j,k)] - 2*U[IDXU(i,j,k)] + U[IDXU(i-1,j,k)])/(dx*dx);
             d2u_dy2 = (U[IDXU(i,j+1,k)] - 2*U[IDXU(i,j,k)] + U[IDXU(i,j-1,k)])/(dy*dy);
@@ -139,8 +139,8 @@ __global__ void calculateFghCudaKernel(
         }        
     }
 
-    if (i <= imax && j <= jmax && k <= kmax-1){
-        if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i,j,k+1)])){
+    if (i <= imax && j <= jmax && k <= kmax - 1) {
+        if (isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i,j,k+1)])){
             d2w_dx2 = (W[IDXW(i+1,j,k)] - 2*W[IDXW(i,j,k)] + W[IDXW(i-1,j,k)])/(dx*dx);
             d2w_dy2 = (W[IDXW(i,j+1,k)] - 2*W[IDXW(i,j,k)] + W[IDXW(i,j-1,k)])/(dy*dy);
             d2w_dz2 = (W[IDXW(i,j,k+1)] - 2*W[IDXW(i,j,k)] + W[IDXW(i,j,k-1)])/(dz*dz);
@@ -185,40 +185,37 @@ __global__ void calculateFghCudaKernel(
     }
 }
 
-__global__ void setFBoundariesCuda{ int imax, int jmax, int kmax,
-    Real *U, Real *F) {
+__global__ void setFBoundariesCuda(int imax, int jmax, int kmax, Real *U, Real *F) {
 
     int j = blockIdx.y + threadIdx.y + 1;
     int k = blockIdx.x + threadIdx.x + 1;
 
     // Set the boundary values for F on the y-z-planes.
-    if (j <= jmax && k<= kmax){
+    if (j <= jmax && k <= kmax){
         F[IDXF(0,j,k)] = U[IDXU(0,j,k)];         
         F[IDXF(imax,j,k)] = U[IDXU(imax,j,k)];
     }
 }
 
-__global__ void setGBoundariesCuda{ int imax, int jmax, int kmax,
-    Real *V, Real *G) {
+__global__ void setGBoundariesCuda(int imax, int jmax, int kmax, Real *V, Real *G) {
 
     int i = blockIdx.y + threadIdx.y + 1;
     int k = blockIdx.x + threadIdx.x + 1;
 
     // Set the boundary values for G on the x-z-planes.
-    if (i <= imax && k<= kmax){
+    if (i <= imax && k <= kmax){
         G[IDXG(i,0,k)] = V[IDXV(i,0,k)];         
         G[IDXG(i,jmax,k)] = V[IDXV(i,jmax,k)];
     }
 }
 
-__global__ void setHBoundariesCuda{ int imax, int jmax, int kmax,
-    Real *W, Real *H) {
+__global__ void setHBoundariesCuda(int imax, int jmax, int kmax, Real *W, Real *H) {
 
     int i = blockIdx.y + threadIdx.y + 1;
     int j = blockIdx.x + threadIdx.x + 1;
 
     // Set the boundary values for G on the x-z-planes.
-    if (i <= imax && j<= jmax){
+    if (i <= imax && j <= jmax){
         H[IDXH(i,j,0)] = W[IDXW(i,j,0)];         
         H[IDXH(i,j,kmax)] = W[IDXW(i,j,kmax)];
     }
@@ -232,7 +229,7 @@ void calculateFghCuda(
     
     dim3 dimBlock(blockSize,blockSize);
     dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
-    calculateFghCuda<<<dimGrid,dimBlock>>>(
+    calculateFghCudaKernel<<<dimGrid,dimBlock>>>(
             Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 
     dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
@@ -450,7 +447,7 @@ __global__ void calculateTemperatureCuda(
 
         Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
 
-        if (i <= imax && j <= jmax && k <= kmax ){
+        if (i <= imax && j <= jmax && k <= kmax){
             if(isFluid(Flag[IDXFLAG(i,j,k)])){
                 duT_dx = 1 / dx * (
                         U[IDXU(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i + 1, j, k)]) / 2) -
