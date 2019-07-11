@@ -218,12 +218,267 @@ __global__ void setFrontBackBoundariesCuda(
     }
 }
 
+__global__ void setInternalUBoundariesCuda(
+    int imax, int jmax, int kmax,
+    Real *U,
+    FlagType *Flag) {
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
+    if (i <= imax - 1 && j <= jmax && k <= kmax){
+        int R_check = 0;
+        int L_check = 0;
+        int R1_check = 0;
+        int L1_check = 0;
+
+        if (!isFluid(Flag[IDXFLAG(i, j, k)])) {
+            if (B_R(Flag[IDXFLAG(i, j, k)])) {
+                U[IDXU(i, j, k)] = Real(0);
+                R_check = 1;
+            }
+
+            if (B_L(Flag[IDXFLAG(i, j, k)])) {
+                U[IDXU(i - 1, j, k)] = Real(0);
+                L_check = 1;
+            }
+
+            if (B_U(Flag[IDXFLAG(i, j, k)])) {
+                if (L_check == 0) {
+                    U[IDXU(i - 1, j, k)] = -U[IDXU(i - 1, j + 1, k)];
+                    L1_check = 1;
+                }
+                if (R_check == 0) {
+                    U[IDXU(i, j, k)] = -U[IDXU(i, j + 1, k)];
+                    R1_check = 1;
+                }
+            }
+
+            if (B_D(Flag[IDXFLAG(i, j, k)])) {
+                if (L_check == 0) {
+                    U[IDXU(i - 1, j, k)] = -U[IDXU(i - 1, j - 1, k)];
+                    L1_check = 1;
+                }
+                if (R_check == 0) {
+                    U[IDXU(i, j, k)] = -U[IDXU(i, j - 1, k)];
+                    R1_check = 1;
+                }
+            }
+
+            if (B_B(Flag[IDXFLAG(i, j, k)])) {
+                if (L_check == 0 && L1_check == 0) {
+                    U[IDXU(i - 1, j, k)] = -U[IDXU(i - 1, j, k - 1)];
+                }
+                if (R_check == 0 && R1_check == 0) {
+                    U[IDXU(i, j, k)] = -U[IDXU(i, j, k - 1)];
+                }
+            }
+
+            if (B_F(Flag[IDXFLAG(i, j, k)])) {
+                if (L_check == 0 && L1_check == 0) {
+                    U[IDXU(i - 1, j, k)] = -U[IDXU(i - 1, j, k + 1)];
+                }
+                if (R_check == 0 && R1_check == 0) {
+                    U[IDXU(i, j, k)] = -U[IDXU(i, j, k + 1)];
+                }
+            }
+        }
+    }
+}
+
+__global__ void setInternalVBoundariesCuda(
+    int imax, int jmax, int kmax,
+    Real *V,
+    FlagType *Flag) {
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
+    if (i <= imax && j <= jmax - 1 && k <= kmax){
+        int U_check = 0;
+        int D_check = 0;
+        int U1_check = 0;
+        int D1_check = 0;
+
+        if (!isFluid(Flag[IDXFLAG(i, j, k)])) {
+            if (B_U(Flag[IDXFLAG(i, j, k)])) {
+                V[IDXV(i, j, k)] = Real(0);
+                U_check = 1;
+            }
+
+            if (B_D(Flag[IDXFLAG(i, j, k)])) {
+                V[IDXV(i, j - 1, k)] = Real(0);
+                D_check = 1;
+            }
+
+            if (B_R(Flag[IDXFLAG(i, j, k)])) {
+                if (D_check == 0) {
+                    V[IDXV(i, j - 1, k)] = -V[IDXV(i + 1, j - 1, k)];
+                    D1_check = 0;
+                }
+                if (U_check == 0) {
+                    V[IDXV(i, j, k)] = -V[IDXV(i + 1, j, k)];
+                    U1_check = 0;
+                }
+            }
+
+            if (B_L(Flag[IDXFLAG(i, j, k)])) {
+                if (D_check == 0) {
+                    V[IDXV(i, j - 1, k)] = -V[IDXV(i - 1, j - 1, k)];
+                    D1_check = 0;
+                }
+                if (U_check == 0) {
+                    V[IDXV(i, j, k)] = -V[IDXV(i - 1, j, k)];
+                    U1_check = 0;
+                }
+            }
+
+            if (B_B(Flag[IDXFLAG(i, j, k)])) {
+                if (D_check == 0 && D1_check == 0) {
+                    V[IDXV(i, j - 1, k)] = -V[IDXV(i, j - 1, k - 1)];
+                }
+                if (U_check == 0 && U1_check == 0) {
+                    V[IDXV(i, j, k)] = -V[IDXV(i, j, k - 1)];
+                }
+            }
+
+            if (B_F(Flag[IDXFLAG(i, j, k)])) {
+                if (D_check == 0 && D1_check == 0) {
+                    V[IDXV(i, j - 1, k)] = -V[IDXV(i, j - 1, k + 1)];
+                }
+                if (U_check == 0 && U1_check == 0) {
+                    V[IDXV(i, j, k)] = -V[IDXV(i, j, k + 1)];
+                }
+            }
+        }
+    }
+}
+
+__global__ void setInternalWBoundariesCuda(
+    int imax, int jmax, int kmax,
+    Real *W,
+    FlagType *Flag) {
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
+    if (i <= imax && j <= jmax && k <= kmax - 1){        
+        int F_check = 0;
+        int B_check = 0;
+        int F1_check = 0;
+        int B1_check = 0;
+
+        if (!isFluid(Flag[IDXFLAG(i, j, k)])) {
+            if (B_B(Flag[IDXFLAG(i, j, k)])) {
+                W[IDXW(i, j, k - 1)] = Real(0);
+                B_check = 1;
+            }
+
+            if (B_F(Flag[IDXFLAG(i, j, k)])) {
+                W[IDXW(i, j, k)] = Real(0);
+                F_check = 1;
+            }
+
+            if (B_R(Flag[IDXFLAG(i, j, k)])) {
+                if (B_check == 0) {
+                    W[IDXW(i, j, k - 1)] = -W[IDXW(i + 1, j, k - 1)];
+                    B1_check = 1;
+                }
+                if (F_check == 0) {
+                    W[IDXW(i, j, k)] = -W[IDXW(i + 1, j, k)];
+                    F1_check = 1;
+                }
+            }
+
+            if (B_L(Flag[IDXFLAG(i, j, k)])) {
+                if (B_check == 0) {
+                    W[IDXW(i, j, k - 1)] = -W[IDXW(i - 1, j, k - 1)];
+                    B1_check = 1;
+                }
+                if (F_check == 0) {
+                    W[IDXW(i, j, k)] = -W[IDXW(i - 1, j, k)];
+                    F1_check = 1;
+                }
+            }
+
+            if (B_U(Flag[IDXFLAG(i, j, k)])) {
+                if (B_check == 0 && B1_check == 0) {
+                    W[IDXW(i, j, k - 1)] = -W[IDXW(i, j + 1, k - 1)];
+                }
+                if (F_check == 0 && F1_check == 0) {
+                    W[IDXW(i, j, k)] = -W[IDXW(i, j + 1, k)];
+                }
+            }
+
+            if (B_D(Flag[IDXFLAG(i, j, k)])) {
+                if (B_check == 0 && B1_check == 0) {
+                    W[IDXW(i, j, k - 1)] = -W[IDXW(i, j - 1, k - 1)];
+                }
+                if (F_check == 0 && F1_check == 0) {
+                    W[IDXW(i, j, k)] = -W[IDXW(i, j - 1, k)];
+                }
+            }
+        }
+    }
+}
+
+__global__ void setInternalTBoundariesCuda(
+    int imax, int jmax, int kmax,
+    Real *T,
+    FlagType *Flag) {
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+    
+    if (i <= imax && j <= jmax && k <= kmax){
+        int numDirectFlag = 0;
+        Real T_temp = Real(0);
+
+        if (!isFluid(Flag[IDXFLAG(i, j, k)])) {
+            if (B_R(Flag[IDXFLAG(i, j, k)])) {
+                T_temp = T[IDXT(i + 1, j, k)];
+                numDirectFlag++;
+            }
+
+            if (B_L(Flag[IDXFLAG(i, j, k)])) {
+                T_temp = T[IDXT(i - 1, j, k)];
+                numDirectFlag++;
+            }
+
+            if (B_U(Flag[IDXFLAG(i, j, k)])) {
+                T_temp = T[IDXT(i, j + 1, k)];
+                numDirectFlag++;
+            }
+
+            if (B_D(Flag[IDXFLAG(i, j, k)])) {
+                T_temp = T[IDXT(i, j - 1, k)];
+                numDirectFlag++;
+            }
+
+            if (B_B(Flag[IDXFLAG(i, j, k)])) {
+                T_temp = T[IDXT(i, j, k - 1)];
+                numDirectFlag++;
+            }
+
+            if (B_F(Flag[IDXFLAG(i, j, k)])) {
+                T_temp = T[IDXT(i, j, k + 1)];
+                numDirectFlag++;
+            }
+
+            T[IDXT(i,j,k)] = T_temp/Real(numDirectFlag);
+        }
+    }    
+}
+
+
+
 void setBoundaryValuesCuda(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
     dim3 dimBlock(blockSize,blockSize);
+
     dim3 dimGrid_x_y(iceil(jmax,dimBlock.x),iceil(kmax,dimBlock.x));
     setFrontBackBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
@@ -232,6 +487,13 @@ void setBoundaryValuesCuda(
 
     dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
     setLeftRightBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+
+    //TODO: DimGrid exactly?
+    dim3 dimGrid_internal(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
+    setInternalUBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, U,Flag);
+    setInternalVBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, V,Flag);
+    setInternalTBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, T,Flag);
+    setInternalWBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, W,Flag);
 }
 
 __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
