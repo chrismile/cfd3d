@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Scenario name: " << scenarioName << std::endl;
         std::cout << "Scenario file: " << scenarioFilename << std::endl;
         std::cout << "Geometry file: " << geometryFilename << std::endl;
-        std::cout << "Output file: " << geometryFilename << std::endl;
+        std::cout << "Output file: " << outputFilename << std::endl;
     }
 
     std::string outputFormatEnding = outputFileWriter->getOutputFormatEnding();
