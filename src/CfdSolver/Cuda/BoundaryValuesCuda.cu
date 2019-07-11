@@ -566,6 +566,6 @@ void setBoundaryValuesScenarioSpecificCuda(
         setSingleTowerBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
     } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze") {
         dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
-        setMountainsBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
+        setMountainBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
     }
 }
