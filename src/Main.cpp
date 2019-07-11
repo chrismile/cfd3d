@@ -175,13 +175,20 @@ int main(int argc, char *argv[]) {
 
 #ifdef USE_MPI
     if (solverName == "mpi") {
-        // Set range of the domain
-        il = imax/iproc * (threadIdxI) + 1;
-        iu = std::min(imax/iproc * (threadIdxI + 1), imax);
-        jl = jmax/jproc * (threadIdxJ) + 1;
-        ju = std::min(jmax/jproc * (threadIdxJ + 1), jmax);
-        kl = kmax/kproc * (threadIdxK) + 1;
-        ku = std::min(kmax/kproc * (threadIdxK + 1), kmax);
+        // Set the range of the domain.
+        mpiDomainDecompositionScheduling(imax, iproc, threadIdxI, il, iu);
+        mpiDomainDecompositionScheduling(jmax, jproc, threadIdxJ, jl, ju);
+        mpiDomainDecompositionScheduling(kmax, kproc, threadIdxK, kl, ku);
+
+        // For debugging: Print the domain decomposition.
+        /*for (int i = 0; i < nproc; i++) {
+            if (myrank == i) {
+                std::cout << "idx: " << threadIdxI << ", il: " << il << ", iu: " << iu << std::endl;
+                std::cout << "idx: " << threadIdxJ << ", jl: " << jl << ", ju: " << ju << std::endl;
+                std::cout << "idx: " << threadIdxK << ", kl: " << kl << ", ku: " << ku << std::endl;
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
+        }*/
 
         // Create all arrays for the simulation.
         U = new Real[(iu - il + 4)*(ju - jl + 3)*(ku - kl + 3)];

@@ -93,6 +93,40 @@ void mpiInit(
     threadIdxK = myrank / (iproc*jproc);
 }
 
+void mpiDomainDecompositionScheduling(int numElements, int numProcesses, int myrank, int &lower, int &upper) {
+    /**
+     * Compute fair scheduling for data. Idea:
+     * Assuming n is the number of elements, k the number of threads.
+     * We want to distribute our n elements to k threads.
+     *
+     * Assume n mod k != 0. Then we can separate the n elements into two
+     * sets (of size lambda1 and lambda2) where each element in lambda1
+     * has a = ceil(n/k) elements, and each element in lambda2 has
+     * b = floor(n/k) elements.
+     *
+     * I.e.: n = lambda1 * a + lambda2 * b
+     * We choose lambda1 + lambda2 = k, such that each thread gets either
+     * a or b elements to process.
+     *
+     * Therefore: lambda2 = k - lambda1,
+     * lambda1 = (n - kb) / (a - b)
+     */
+    const int k = numProcesses;
+    const int n = numElements;
+    const int a = n / k;
+    const int b = iceil(n, k);
+    const int lambda1 = a == b ? 0 : (n - k*b)/(a - b);
+    const int lambda2 = k - lambda1;
+
+    if (myrank < lambda1) {
+        lower = myrank * a + 1;
+        upper = (myrank + 1) * a;
+    } else {
+        lower = lambda1 * a + (myrank - lambda1) * b + 1;
+        upper = lambda1 * a + (myrank - lambda1 + 1) * b;
+    }
+}
+
 void mpiExchangeCellData(
         Real *PT, int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF,

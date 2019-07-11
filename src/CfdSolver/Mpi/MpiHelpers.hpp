@@ -40,6 +40,16 @@ void mpiInit(
         int &rankL, int &rankR, int &rankD, int &rankU, int &rankB, int &rankF,
         int &threadIdxI, int &threadIdxJ, int &threadIdxK, int &nproc);
 
+/**
+ * Computes a fair scheduling decomposition of the passed number of elements for a number of processes.
+ * @param numElements The total number of elements to decompose.
+ * @param numProcesses The total number of processes.
+ * @param myrank The index of the current process (starting at 0).
+ * @param lower The first element index of the decomposition set for this process (assumed to start at 1).
+ * @param upper The last element index of the decomposition set for this process (assumed to start at 1).
+ */
+void mpiDomainDecompositionScheduling(int numElements, int numProcesses, int myrank, int &lower, int &upper);
+
 void mpiExchangeCellData(
         Real *PT, int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF,
