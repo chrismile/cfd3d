@@ -23,9 +23,9 @@ zOrigin    0
 #             Number of cells
 #--------------------------------------------
 # Interesting according to Griebel et al. e.g.: 8:2:1, 8:2:2, 8:2:4
-imax		64
-jmax		16
-kmax		16
+imax		80
+jmax		20
+kmax		20
 
 #--------------------------------------------
 #                Time steps

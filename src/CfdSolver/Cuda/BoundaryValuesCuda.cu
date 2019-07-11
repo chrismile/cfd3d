@@ -499,7 +499,7 @@ __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
         Real *U){
     
     int i = blockIdx.y * blockIdx.y + threadIdx.y;
-    int k = blockIdx.x + threadIdx.x + 1;
+    int k = blockIdx.x * blockIdx.x + threadIdx.x + 1;
 
     if (i <= imax && k<= kmax){
         // Upper wall
