@@ -519,7 +519,7 @@ void setBoundaryValuesScenarioSpecificCpp(
                 W[IDXW(0,j,k)] = 0.0;
             }
         }
-    } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze") {
+    } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze" || scenarioName == "HK_Habor") {
         #pragma omp parallel for
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
