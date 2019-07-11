@@ -30,7 +30,7 @@
 #include "SorSolverCuda.hpp"
 #include "CudaDefines.hpp"
 
-__global__ void set_x_y_planes_pressure_boundaries(
+__global__ void setXYPlanesPressureBoundaries(
         int imax, int jmax, int kmax, Real *P) {
     int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int j = blockIdx.x * blockDim.x + threadIdx.x + 1;
@@ -42,7 +42,7 @@ __global__ void set_x_y_planes_pressure_boundaries(
     }
 }
 
-__global__ void set_x_z_planes_pressure_boundaries(
+__global__ void setXZPlanesPressureBoundaries(
         int imax, int jmax, int kmax, Real *P) {
     int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
@@ -53,7 +53,7 @@ __global__ void set_x_z_planes_pressure_boundaries(
     }
 }
 
-__global__ void set_y_z_planes_pressure_boundaries(
+__global__ void setYZPlanesPressureBoundaries(
         int imax, int jmax, int kmax, Real *P) {
     int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
@@ -61,6 +61,50 @@ __global__ void set_y_z_planes_pressure_boundaries(
     if (j <= imax && k <= jmax) {
         P[IDXP(0, j, k)] = P[IDXP(1, j, k)];
         P[IDXP(imax + 1, j, k)] = P[IDXP(imax, j, k)];
+    }
+}
+
+__global__ void setBoundaryConditionsPressureInDomainCuda(
+        int imax, int jmax, int kmax, Real *P, FlagType *Flag) {
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
+    if (j <= imax && k <= jmax && !isFluid(Flag[IDXFLAG(i, j, k)])) {
+        int numDirectFlag = 0;
+        Real P_temp = Real(0);
+
+        if (B_R(Flag[IDXFLAG(i, j, k)])) {
+            P_temp += P[IDXP(i + 1, j, k)];
+            numDirectFlag++;
+        }
+
+        if (B_L(Flag[IDXFLAG(i, j, k)])) {
+            P_temp += P[IDXP(i - 1, j, k)];
+            numDirectFlag++;
+        }
+
+        if (B_U(Flag[IDXFLAG(i, j, k)])) {
+            P_temp += P[IDXP(i, j + 1, k)];
+            numDirectFlag++;
+        }
+
+        if (B_D(Flag[IDXFLAG(i, j, k)])) {
+            P_temp += P[IDXP(i, j - 1, k)];
+            numDirectFlag++;
+        }
+
+        if (B_B(Flag[IDXFLAG(i, j, k)])) {
+            P_temp += P[IDXP(i, j, k - 1)];
+            numDirectFlag++;
+        }
+
+        if (B_F(Flag[IDXFLAG(i, j, k)])) {
+            P_temp += P[IDXP(i, j, k + 1)];
+            numDirectFlag++;
+        }
+
+        P[IDXP(i, j, k)] = P_temp / Real(numDirectFlag);
     }
 }
 
@@ -107,14 +151,6 @@ __global__ void reduceSumCudaKernel(T *input, T *output, int sizeOfInput) {
  */
 template<class T>
 T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray) {
-    /*cudaDeviceSynchronize();
-    T *arrayCpu = new T[numValues];
-    memset(arrayCpu, 0, sizeof(T)*numValues);
-    int n = sizeof(T)*numValues;
-    cudaMemcpy(arrayCpu, input, n, cudaMemcpyDeviceToHost);
-    cudaDeviceSynchronize();*/
-
-
     T sumValue = T(0);
 
     T *reductionInput = input;
@@ -123,8 +159,6 @@ T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray) {
     int numberOfBlocks = numValues;
     int inputSize;
     bool finished = false;
-
-    //const int blockSize1D = 256;
 
     int iteration = 0;
     while (!finished) {
@@ -151,19 +185,6 @@ T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray) {
     }
 
     cudaMemcpy(&sumValue, reductionInput, sizeof(T), cudaMemcpyDeviceToHost);
-
-
-    /*T sumValueCpu = T(0);
-
-    #pragma omp parallel for reduction(+: sumValueCpu)
-    for (int i = 0; i < numValues; i++) {
-        sumValueCpu += arrayCpu[i];
-    }
-
-    std::cout << "Sum GPU: " << sumValue << std::endl;
-    std::cout << "Sum CPU: " << sumValueCpu << std::endl;
-
-    delete[] arrayCpu;*/
 
     return sumValue;
 }
@@ -224,18 +245,20 @@ void sorSolverCuda(
     while (it < itermax && residual > eps) {
         dim3 dimBlock2D(blockSize, blockSize);
         dim3 dimGrid_x_y(iceil(jmax, dimBlock2D.x), iceil(imax, dimBlock2D.y));
-        set_x_y_planes_pressure_boundaries<<<dimGrid_x_y, dimBlock2D>>>(imax, jmax, kmax, P);
+        setXYPlanesPressureBoundaries<<<dimGrid_x_y, dimBlock2D>>>(imax, jmax, kmax, P);
 
         dim3 dimGrid_x_z(iceil(kmax, dimBlock2D.x), iceil(imax, dimBlock2D.y));
-        set_x_z_planes_pressure_boundaries<<<dimGrid_x_z, dimBlock2D>>>(imax, jmax, kmax, P);
+        setXZPlanesPressureBoundaries<<<dimGrid_x_z, dimBlock2D>>>(imax, jmax, kmax, P);
 
         dim3 dimGrid_y_z(iceil(kmax, dimBlock2D.x), iceil(jmax, dimBlock2D.y));
-        set_y_z_planes_pressure_boundaries<<<dimGrid_y_z, dimBlock2D>>>(imax, jmax, kmax, P);
-
-        cudaMemcpy(P_temp, P, sizeof(Real) * (imax + 2) * (jmax + 2) * (kmax + 2), cudaMemcpyDeviceToDevice);
+        setYZPlanesPressureBoundaries<<<dimGrid_y_z, dimBlock2D>>>(imax, jmax, kmax, P);
 
         dim3 dimBlock(blockSize, blockSize);
         dim3 dimGrid(iceil(kmax, dimBlock.x), iceil(jmax, dimBlock.y), iceil(imax, dimBlock.z));
+        setBoundaryConditionsPressureInDomainCuda<<<dimGrid, dimBlock>>>(imax, jmax, kmax, P, Flag);
+
+        cudaMemcpy(P_temp, P, sizeof(Real) * (imax + 2) * (jmax + 2) * (kmax + 2), cudaMemcpyDeviceToDevice);
+
         sorSolverIterationCuda<<<dimGrid, dimBlock>>>(
                 omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag);
 
