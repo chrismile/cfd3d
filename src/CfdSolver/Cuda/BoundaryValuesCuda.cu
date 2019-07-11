@@ -492,26 +492,61 @@ void setBoundaryValuesCuda(
     dim3 dimGrid_internal(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     setInternalUBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, U,Flag);
     setInternalVBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, V,Flag);
-    setInternalTBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, T,Flag);
     setInternalWBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, W,Flag);
+    setInternalTBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, T,Flag);
 }
 
 __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W,
-        FlagType *Flag){
+        Real *U){
     
-    int i = blockIdx.y + threadIdx.y + 1;
+    int i = blockIdx.y + threadIdx.y;
     int k = blockIdx.x + threadIdx.x + 1;
 
-    if (i <= imax && k<= jmax){
-        for (int i = 1; i <= imax; i++) {
-            for (int k = 1; k <= kmax; k++) {
-                // Upper wall
-                U[IDXU(i,jmax+1,k)] = 2.0-U[IDXU(i,jmax,k)];
-            }
-        }
+    if (i <= imax && k<= kmax){
+        // Upper wall
+        U[IDXU(i,jmax+1,k)] = 2.0-U[IDXU(i,jmax,k)];
     }
 }
+
+__global__ void setFlowOverStepBoundariesCuda(int imax, int jmax, int kmax,
+    Real *U, Real *V, Real *W){
+    int j = blockIdx.y + threadIdx.y + jmax/2+1;
+    int k = blockIdx.x + threadIdx.x + 1;
+
+    if(j <= jmax && k <= kmax){
+        // Left wall
+        U[IDXU(0,j,k)] = 1.0;
+        V[IDXV(0,j,k)] = 0.0;
+        W[IDXW(0,j,k)] = 0.0;
+    }
+}
+
+__global__ void setSingleTowerBoundariesCuda(int imax, int jmax, int kmax,
+    Real *U, Real *V, Real *W){
+    int j = blockIdx.y + threadIdx.y + 1;
+    int k = blockIdx.x + threadIdx.x + 1;
+
+    if(j <= jmax && k <= kmax){
+        // Left wall
+        U[IDXU(0,j,k)] = 1.0;
+        V[IDXV(0,j,k)] = 0.0;
+        W[IDXW(0,j,k)] = 0.0;
+    }
+}
+
+__global__ void setMountainBoundariesCuda(int imax, int jmax, int kmax,
+    Real *U, Real *V, Real *W){
+    int j = blockIdx.y + threadIdx.y + 1;
+    int k = blockIdx.x + threadIdx.x + 1;
+
+    if(j <= jmax && k <= kmax){
+        // Left wall
+        U[IDXU(0,j,k)] = 1.0;
+        V[IDXV(0,j,k)] = 0.0;
+        W[IDXW(0,j,k)] = 0.0;
+    }
+}
+
 
 void setBoundaryValuesScenarioSpecificCuda(
         const std::string &scenarioName,
@@ -521,7 +556,16 @@ void setBoundaryValuesScenarioSpecificCuda(
 
     dim3 dimBlock(blockSize,blockSize);
     if (scenarioName == "driven_cavity") {
-        dim3 dimGrid_x_z(iceil(kmax,dimBlock.x),iceil(imax,dimBlock.y));
-        setDrivenCavityBoundariesCuda<<<dimBlock, dimGrid_x_z>>>(imax, jmax, kmax, U, V, W, Flag);
-    }   
+        dim3 dimGrid_x_z(iceil(kmax,dimBlock.x),iceil(imax + 1,dimBlock.y));
+        setDrivenCavityBoundariesCuda<<<dimBlock, dimGrid_x_z>>>(imax, jmax, kmax, U);
+    } else if (scenarioName == "flow_over_step") {
+        dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax - (jmax / 2 + 1) + 1,dimBlock.y));
+        setFlowOverStepBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
+    } else if (scenarioName == "single_tower") {
+        dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
+        setSingleTowerBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
+    } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze") {
+        dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
+        setMountainsBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
+    }
 }
