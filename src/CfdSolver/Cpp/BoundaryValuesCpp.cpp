@@ -500,7 +500,7 @@ void setBoundaryValuesScenarioSpecificCpp(
         for (int i = 0; i <= imax; i++) {
             for (int k = 1; k <= kmax; k++) {
                 // Upper wall
-                U[IDXU(i,jmax+1,k)] = 2.0 - U[IDXU(i,jmax,k)];
+                U[IDXU(i,jmax+1,k)] = Real(2.0) - U[IDXU(i,jmax,k)];
             }
         }
     } else if (scenarioName == "flow_over_step") {
