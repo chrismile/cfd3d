@@ -407,7 +407,7 @@ void mpiExchangeUvw(
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
     for (int i = il - 1; i <= iu && rankF != MPI_PROC_NULL; i++) {
         for (int j = jl; j <= ju; j++) {
-            U[IDXU(i,j,ku + 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - kl)];
+            U[IDXU(i,j,ku + 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - jl)];
         }
     }
 
