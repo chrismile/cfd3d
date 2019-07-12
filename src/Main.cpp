@@ -259,6 +259,10 @@ int main(int argc, char *argv[]) {
 #endif
 #ifdef USE_CUDA
     else if (solverName == "cuda") {
+        if (linearSystemSolverType != LINEAR_SOLVER_JACOBI) {
+            std::cerr << "Warning: CUDA solver was selected, but a linear solver different from Jacobi. "
+                    << "Only the Jacobi solver is supported for CUDA." << std::endl;
+        }
         cfdSolver = new CfdSolverCuda(blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
     }
 #endif

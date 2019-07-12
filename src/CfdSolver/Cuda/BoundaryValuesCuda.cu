@@ -479,24 +479,26 @@ __global__ void setInternalTBoundariesCuda(
 void setBoundaryValuesCuda(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
+        int blockSizeX, int blockSizeY, int blockSizeZ,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
-    dim3 dimBlock(blockSize,blockSize);
+    dim3 dimBlock2D(blockSizeX, blockSizeY);
 
-    dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
-    setFrontBackBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    dim3 dimGrid_y_z(iceil(kmax,dimBlock2D.x),iceil(jmax,dimBlock2D.y));
+    setFrontBackBoundariesCuda<<<dimGrid_y_z,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
-    dim3 dimGrid_x_z(iceil(kmax,dimBlock.x),iceil(imax,dimBlock.y));
-    setDownUpBoundariesCuda<<<dimGrid_x_z,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    dim3 dimGrid_x_z(iceil(kmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
+    setDownUpBoundariesCuda<<<dimGrid_x_z,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
-    dim3 dimGrid_x_y(iceil(jmax,dimBlock.x),iceil(imax,dimBlock.y));
-    setLeftRightBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    dim3 dimGrid_x_y(iceil(jmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
+    setLeftRightBoundariesCuda<<<dimGrid_x_y,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
-    dim3 dimGrid_internal(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
-    setInternalUBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, U, Flag);
-    setInternalVBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, V, Flag);
-    setInternalWBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, W, Flag);
-    setInternalTBoundariesCuda<<<dimGrid_internal, dimBlock>>>(imax, jmax, kmax, T, Flag);
+    dim3 dimBlock3D(blockSizeX, blockSizeY, blockSizeZ);
+    dim3 dimGrid_internal(iceil(kmax,dimBlock3D.x),iceil(jmax,dimBlock3D.y),iceil(imax,dimBlock3D.z));
+    setInternalUBoundariesCuda<<<dimGrid_internal, dimBlock3D>>>(imax, jmax, kmax, U, Flag);
+    setInternalVBoundariesCuda<<<dimGrid_internal, dimBlock3D>>>(imax, jmax, kmax, V, Flag);
+    setInternalWBoundariesCuda<<<dimGrid_internal, dimBlock3D>>>(imax, jmax, kmax, W, Flag);
+    setInternalTBoundariesCuda<<<dimGrid_internal, dimBlock3D>>>(imax, jmax, kmax, T, Flag);
 }
 
 __global__ void setDrivenCavityBoundariesCuda(int imax, int jmax, int kmax,
@@ -555,20 +557,21 @@ __global__ void setMountainBoundariesCuda(int imax, int jmax, int kmax,
 void setBoundaryValuesScenarioSpecificCuda(
         const std::string &scenarioName,
         int imax, int jmax, int kmax,
+        int blockSizeX, int blockSizeY, int blockSizeZ,
         Real *U, Real *V, Real *W,
         FlagType *Flag) {
-    dim3 dimBlock(blockSize,blockSize);
+    dim3 dimBlock2D(blockSizeX, blockSizeY);
     if (scenarioName == "driven_cavity") {
-        dim3 dimGrid_x_z(iceil(kmax,dimBlock.x), iceil(imax + 1,dimBlock.y));
-        setDrivenCavityBoundariesCuda<<<dimBlock, dimGrid_x_z>>>(imax, jmax, kmax, U);
+        dim3 dimGrid_x_z(iceil(kmax,dimBlock2D.x), iceil(imax + 1,dimBlock2D.y));
+        setDrivenCavityBoundariesCuda<<<dimBlock2D, dimGrid_x_z>>>(imax, jmax, kmax, U);
     } else if (scenarioName == "flow_over_step") {
-        dim3 dimGrid_y_z(iceil(kmax,dimBlock.x), iceil(jmax - (jmax / 2 + 1) + 1,dimBlock.y));
-        setFlowOverStepBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
+        dim3 dimGrid_y_z(iceil(kmax,dimBlock2D.x), iceil(jmax - (jmax / 2 + 1) + 1,dimBlock2D.y));
+        setFlowOverStepBoundariesCuda<<<dimBlock2D, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
     } else if (scenarioName == "single_tower") {
-        dim3 dimGrid_y_z(iceil(kmax,dimBlock.x), iceil(jmax,dimBlock.y));
-        setSingleTowerBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
+        dim3 dimGrid_y_z(iceil(kmax,dimBlock2D.x), iceil(jmax,dimBlock2D.y));
+        setSingleTowerBoundariesCuda<<<dimBlock2D, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W);
     } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze") {
-        dim3 dimGrid_y_z(iceil(kmax,dimBlock.x), iceil(jmax,dimBlock.y));
-        setMountainBoundariesCuda<<<dimBlock, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W, Flag);
+        dim3 dimGrid_y_z(iceil(kmax,dimBlock2D.x), iceil(jmax,dimBlock2D.y));
+        setMountainBoundariesCuda<<<dimBlock2D, dimGrid_y_z>>>(imax, jmax, kmax, U, V, W, Flag);
     }
 }

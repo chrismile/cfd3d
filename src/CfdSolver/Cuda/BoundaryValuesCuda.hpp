@@ -38,6 +38,7 @@
 void setBoundaryValuesCuda(
         Real T_h, Real T_c,
         int imax, int jmax, int kmax,
+        int blockSizeX, int blockSizeY, int blockSizeZ,
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag);
 
@@ -47,6 +48,7 @@ void setBoundaryValuesCuda(
 void setBoundaryValuesScenarioSpecificCuda(
         const std::string &scenarioName,
         int imax, int jmax, int kmax,
+        int blockSizeX, int blockSizeY, int blockSizeZ,
         Real *U, Real *V, Real *W,
         FlagType *Flag);
 

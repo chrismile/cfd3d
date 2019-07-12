@@ -225,21 +225,23 @@ __global__ void setHBoundariesCuda(int imax, int jmax, int kmax, Real *W, Real *
 void calculateFghCuda(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        int blockSizeX, int blockSizeY, int blockSizeZ,
         Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
-    
-    dim3 dimBlock(blockSize,blockSize);
+
+    dim3 dimBlock(blockSizeX, blockSizeY, blockSizeZ);
     dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateFghCudaKernel<<<dimGrid,dimBlock>>>(
             Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 
-    dim3 dimGrid_y_z(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y));
-    setFBoundariesCuda<<<dimGrid_y_z,dimBlock>>>(imax, jmax, kmax, U, F);
+    dim3 dimBlock2D(blockSizeX, blockSizeY);
+    dim3 dimGrid_y_z(iceil(kmax,dimBlock2D.x),iceil(jmax,dimBlock2D.y));
+    setFBoundariesCuda<<<dimGrid_y_z,dimBlock2D>>>(imax, jmax, kmax, U, F);
 
-    dim3 dimGrid_x_z(iceil(kmax,dimBlock.x),iceil(imax,dimBlock.y));
-    setGBoundariesCuda<<<dimGrid_x_z,dimBlock>>>(imax, jmax, kmax, V, G);
+    dim3 dimGrid_x_z(iceil(kmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
+    setGBoundariesCuda<<<dimGrid_x_z,dimBlock2D>>>(imax, jmax, kmax, V, G);
 
-    dim3 dimGrid_x_y(iceil(jmax,dimBlock.x),iceil(imax,dimBlock.y));
-    setHBoundariesCuda<<<dimGrid_x_y,dimBlock>>>(imax, jmax, kmax, W, H);
+    dim3 dimGrid_x_y(iceil(jmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
+    setHBoundariesCuda<<<dimGrid_x_y,dimBlock2D>>>(imax, jmax, kmax, W, H);
         
 }
 
@@ -260,10 +262,10 @@ __global__ void calculateRsCuda(
 /**
  * Reference: Based on kernel 4 from https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
  * @param input The array of input values (of size 'sizeOfInput').
- * @param output The output array (of size iceil(numberOfBlocksI, blockSize*blockSize*2)).
+ * @param output The output array (of size iceil(numberOfBlocksI, blockSize1D*2)).
  * @param sizeOfInput The number of input values.
  */
-__global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput) {
+__global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput, int blockSize1D) {
     extern __shared__ Real sdata[];
 
     unsigned int threadID = threadIdx.x;
@@ -303,7 +305,7 @@ __global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput) {
 
 void calculateDtCuda(
         Real Re, Real Pr, Real tau,
-        Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax, int blockSize1D,
         Real *U, Real *V, Real *W,
         Real *cudaReductionArrayU1, Real *cudaReductionArrayU2,
         Real *cudaReductionArrayV1, Real *cudaReductionArrayV2,
@@ -333,14 +335,14 @@ void calculateDtCuda(
         inputSizeI = numberOfBlocksI;
         inputSizeJ = numberOfBlocksJ;
         inputSizeK = numberOfBlocksK;
-        numberOfBlocksI = iceil(numberOfBlocksI, blockSize*blockSize*2);
-        numberOfBlocksJ = iceil(numberOfBlocksJ, blockSize*blockSize*2);
-        numberOfBlocksK = iceil(numberOfBlocksK, blockSize*blockSize*2);
+        numberOfBlocksI = iceil(numberOfBlocksI, blockSize1D*2);
+        numberOfBlocksJ = iceil(numberOfBlocksJ, blockSize1D*2);
+        numberOfBlocksK = iceil(numberOfBlocksK, blockSize1D*2);
 
         if (inputSizeI != 1) {
-            int sharedMemorySize = blockSize*blockSize * sizeof(Real);
-            calculateMaximum<<<numberOfBlocksI, blockSize*blockSize, sharedMemorySize>>>(
-                    U_reductionInput, U_reductionOutput, inputSizeI);
+            int sharedMemorySize = blockSize1D * sizeof(Real);
+            calculateMaximum<<<numberOfBlocksI, blockSize1D, sharedMemorySize>>>(
+                    U_reductionInput, U_reductionOutput, inputSizeI, blockSize1D);
             if (iteration % 2 == 0) {
                 U_reductionInput = cudaReductionArrayU1;
                 U_reductionOutput = cudaReductionArrayU2;
@@ -350,9 +352,9 @@ void calculateDtCuda(
             }
         }
         if (inputSizeJ != 1) {
-            int sharedMemorySize = blockSize*blockSize * sizeof(Real);
-            calculateMaximum <<<numberOfBlocksJ, blockSize * blockSize, sharedMemorySize>>> (
-                    V_reductionInput, V_reductionOutput, inputSizeJ);
+            int sharedMemorySize = blockSize1D * sizeof(Real);
+            calculateMaximum <<<numberOfBlocksJ, blockSize1D, sharedMemorySize>>> (
+                    V_reductionInput, V_reductionOutput, inputSizeJ, blockSize1D);
             if (iteration % 2 == 0) {
                 V_reductionInput = cudaReductionArrayV1;
                 V_reductionOutput = cudaReductionArrayV2;
@@ -362,9 +364,9 @@ void calculateDtCuda(
             }
         }
         if (inputSizeK != 1) {
-            int sharedMemorySize = blockSize*blockSize * sizeof(Real);
-            calculateMaximum <<<numberOfBlocksK, blockSize * blockSize, sharedMemorySize>>> (
-                    W_reductionInput, W_reductionOutput, inputSizeK);
+            int sharedMemorySize = blockSize1D * sizeof(Real);
+            calculateMaximum <<<numberOfBlocksK, blockSize1D, sharedMemorySize>>> (
+                    W_reductionInput, W_reductionOutput, inputSizeK, blockSize1D);
             if (iteration % 2 == 0) {
                 W_reductionInput = cudaReductionArrayW1;
                 W_reductionOutput = cudaReductionArrayW2;

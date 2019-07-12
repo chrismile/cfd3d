@@ -86,11 +86,11 @@ void CfdSolverCuda::initialize(
     cudaMalloc(&this->RS, (imax+1)*(jmax+1)*(kmax+1)*sizeof(Real));
     cudaMalloc(&this->Flag, (imax+2)*(jmax+2)*(kmax+2)*sizeof(unsigned int));
 
-    int cudaReductionArrayUSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize*blockSize*2);
-    int cudaReductionArrayVSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize*blockSize*2);
-    int cudaReductionArrayWSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize*blockSize*2);
-    int cudaReductionArrayResidualSize1 = iceil(imax*jmax*kmax, blockSize*blockSize*2)*blockSize*blockSize*2;
-    int cudaReductionArrayResidualSize2 = iceil(imax*jmax*kmax, blockSize*blockSize*2);
+    int cudaReductionArrayUSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize1D*2);
+    int cudaReductionArrayVSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize1D*2);
+    int cudaReductionArrayWSize = iceil((imax+1)*(jmax+2)*(kmax+2), blockSize1D*2);
+    int cudaReductionArrayResidualSize1 = iceil(imax*jmax*kmax, blockSize1D*2)*blockSize1D*2;
+    int cudaReductionArrayResidualSize2 = iceil(imax*jmax*kmax, blockSize1D*2);
     cudaMalloc(&cudaReductionArrayU1, cudaReductionArrayUSize*sizeof(Real));
     cudaMalloc(&cudaReductionArrayU2, cudaReductionArrayUSize*sizeof(Real));
     cudaMalloc(&cudaReductionArrayV1, cudaReductionArrayVSize*sizeof(Real));
@@ -138,16 +138,18 @@ CfdSolverCuda::~CfdSolverCuda() {
 }
 
 void CfdSolverCuda::setBoundaryValues() {
-    setBoundaryValuesCuda(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setBoundaryValuesCuda(
+            T_h, T_c, imax, jmax, kmax, blockSizeX, blockSizeY, blockSizeZ, U, V, W, T, Flag);
 }
 
 void CfdSolverCuda::setBoundaryValuesScenarioSpecific() {
-    setBoundaryValuesScenarioSpecificCuda(scenarioName, imax, jmax, kmax, U, V, W, Flag);
+    setBoundaryValuesScenarioSpecificCuda(
+            scenarioName, imax, jmax, kmax, blockSizeX, blockSizeY, blockSizeZ, U, V, W, Flag);
 }
 
 Real CfdSolverCuda::calculateDt() {
     calculateDtCuda(
-            Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, U, V, W,
+            Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, blockSize1D, U, V, W,
             cudaReductionArrayU1, cudaReductionArrayU2,
             cudaReductionArrayV1, cudaReductionArrayV2,
             cudaReductionArrayW1, cudaReductionArrayW2,
@@ -160,18 +162,20 @@ void CfdSolverCuda::calculateTemperature() {
     Real *temp = T;
     T = T_temp;
     T_temp = temp;
-    dim3 dimBlock(blockSize,blockSize);
+    dim3 dimBlock(blockSizeX, blockSizeY, blockSizeZ);
     dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateTemperatureCuda<<<dimGrid,dimBlock>>>(
             Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
 void CfdSolverCuda::calculateFgh() {
-    calculateFghCuda(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
+    calculateFghCuda(
+            Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax,
+            blockSizeX, blockSizeY, blockSizeZ, U, V, W, T, F, G, H, Flag);
 }
 
 void CfdSolverCuda::calculateRs() {
-    dim3 dimBlock(blockSize,blockSize);
+    dim3 dimBlock(blockSizeX, blockSizeY, blockSizeZ);
     dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateRsCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
@@ -186,7 +190,7 @@ void CfdSolverCuda::executeSorSolver() {
 }
 
 void CfdSolverCuda::calculateUvw() {
-    dim3 dimBlock(blockSize,blockSize);
+    dim3 dimBlock(blockSizeX, blockSizeY, blockSizeZ);
     dim3 dimGrid(iceil(kmax,dimBlock.x),iceil(jmax,dimBlock.y),iceil(imax,dimBlock.z));
     calculateUvwCuda<<<dimGrid,dimBlock>>>(dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
 }

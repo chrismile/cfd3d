@@ -89,6 +89,4 @@ typedef glm::vec<3, Real, glm::defaultp> rvec3;
 
 inline int iceil(int x, int y) { return (x - 1) / y + 1; }
 
-#define blockSize 4
-
 #endif //CFD3D_DEFINES_HPP

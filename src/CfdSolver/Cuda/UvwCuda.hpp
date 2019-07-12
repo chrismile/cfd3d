@@ -37,6 +37,7 @@
 void calculateFghCuda(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        int blockSizeX, int blockSizeY, int blockSizeZ,
         Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag);
 
 /*
@@ -51,7 +52,7 @@ __global__ void calculateRsCuda(
  */
 void calculateDtCuda(
         Real Re, Real Pr, Real tau,
-        Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax, int blockSize1D,
         Real *U, Real *V, Real *W,
         Real *cudaReductionArrayU1, Real *cudaReductionArrayU2,
         Real *cudaReductionArrayV1, Real *cudaReductionArrayV2,

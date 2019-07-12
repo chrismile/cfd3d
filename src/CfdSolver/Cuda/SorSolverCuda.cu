@@ -115,7 +115,7 @@ __global__ void setBoundaryConditionsPressureInDomainCuda(
 /**
  * Reference: Based on kernel 4 from https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
  * @param input The array of input values (of size 'sizeOfInput').
- * @param output The output array (of size iceil(numberOfBlocksI, blockSize*blockSize*2)).
+ * @param output The output array (of size iceil(numberOfBlocksI, blockSize1D*2)).
  * @param sizeOfInput The number of input values.
  */
 template<class T>
@@ -154,7 +154,7 @@ __global__ void reduceSumCudaKernel(T *input, T *output, int sizeOfInput) {
  * Overwrites the contents of the passed reduction arrays.
  */
 template<class T>
-T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray) {
+T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray, int blockSize1D) {
     T sumValue = T(0);
 
     T *reductionInput = input;
@@ -167,11 +167,11 @@ T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray) {
     int iteration = 0;
     while (!finished) {
         inputSize = numberOfBlocks;
-        numberOfBlocks = iceil(numberOfBlocks, blockSize*blockSize*2);
+        numberOfBlocks = iceil(numberOfBlocks, blockSize1D*2);
 
         if (inputSize != 1) {
-            int sharedMemorySize = blockSize*blockSize * sizeof(T);
-            reduceSumCudaKernel<<<numberOfBlocks, blockSize*blockSize, sharedMemorySize>>>(
+            int sharedMemorySize = blockSize1D * sizeof(T);
+            reduceSumCudaKernel<<<numberOfBlocks, blockSize1D, sharedMemorySize>>>(
                     reductionInput, reductionOutput, inputSize);
             if (iteration % 2 == 0) {
                 reductionInput = cudaReductionHelperArray;
@@ -255,7 +255,7 @@ void sorSolverCuda(
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
-        dim3 dimBlock2D(blockSize, blockSize);
+        dim3 dimBlock2D(blockSizeX, blockSizeY);
         dim3 dimGrid_x_y(iceil(jmax, dimBlock2D.x), iceil(imax, dimBlock2D.y));
         setXYPlanesPressureBoundaries<<<dimGrid_x_y, dimBlock2D>>>(imax, jmax, kmax, P);
 
@@ -265,7 +265,7 @@ void sorSolverCuda(
         dim3 dimGrid_y_z(iceil(kmax, dimBlock2D.x), iceil(jmax, dimBlock2D.y));
         setYZPlanesPressureBoundaries<<<dimGrid_y_z, dimBlock2D>>>(imax, jmax, kmax, P);
 
-        dim3 dimBlock(blockSize, blockSize);
+        dim3 dimBlock(blockSizeX, blockSizeY, blockSizeZ);
         dim3 dimGrid(iceil(kmax, dimBlock.x), iceil(jmax, dimBlock.y), iceil(imax, dimBlock.z));
         setBoundaryConditionsPressureInDomainCuda<<<dimGrid, dimBlock>>>(imax, jmax, kmax, P, Flag);
 
@@ -278,9 +278,9 @@ void sorSolverCuda(
                 dx, dy, dz, imax, jmax, kmax, P, RS, Flag, cudaReductionArrayResidual1, cudaReductionArrayNumCells1);
 
         residual = reduceSumCuda(
-                cudaReductionArrayResidual1, imax*jmax*kmax, cudaReductionArrayResidual2);
+                cudaReductionArrayResidual1, imax*jmax*kmax, cudaReductionArrayResidual2, blockSize1D);
         unsigned int numFluidCells = reduceSumCuda(
-                cudaReductionArrayNumCells1, imax*jmax*kmax, cudaReductionArrayNumCells2);
+                cudaReductionArrayNumCells1, imax*jmax*kmax, cudaReductionArrayNumCells2, blockSize1D);
         residual = std::sqrt(residual / Real(numFluidCells));
 
         it++;

@@ -47,7 +47,8 @@ void parseArguments(
     traceStreamlines = false;
     traceStreaklines = false;
     iproc = jproc = kproc = 1;
-    blockSizeX = blockSizeY = blockSizeZ = 4;
+    blockSizeX = blockSizeY = 8;
+    blockSizeZ = 4;
     blockSize1D = blockSizeX * blockSizeY * blockSizeZ;
 
     // Go over command line arguments.
