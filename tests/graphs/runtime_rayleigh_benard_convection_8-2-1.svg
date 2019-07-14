@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 504.00 288.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    line, polyline, path, rect, circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpNTEuMTg0M3w0MDcuNDA2fDI1Ny40MjV8MjIuNTc0OQ=='>
+    <rect x='51.18' y='22.57' width='356.22' height='234.85' />
+  </clipPath>
+</defs>
+<rect x='67.38' y='106.97' width='210.19' height='22.02' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #0065BD;' clip-path='url(#cpNTEuMTg0M3w0MDcuNDA2fDI1Ny40MjV8MjIuNTc0OQ==)' />
+<rect x='67.38' y='128.99' width='228.27' height='22.02' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #E37222;' clip-path='url(#cpNTEuMTg0M3w0MDcuNDA2fDI1Ny40MjV8MjIuNTc0OQ==)' />
+<rect x='67.38' y='151.01' width='227.08' height='22.02' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #333333;' clip-path='url(#cpNTEuMTg0M3w0MDcuNDA2fDI1Ny40MjV8MjIuNTc0OQ==)' />
+<rect x='67.38' y='33.58' width='233.80' height='22.02' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #0065BD;' clip-path='url(#cpNTEuMTg0M3w0MDcuNDA2fDI1Ny40MjV8MjIuNTc0OQ==)' />
+<rect x='67.38' y='55.60' width='180.44' height='22.02' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #E37222;' clip-path='url(#cpNTEuMTg0M3w0MDcuNDA2fDI1Ny40MjV8MjIuNTc0OQ==)' />
+<rect x='67.38' y='77.62' width='323.84' height='22.02' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #333333;' clip-path='url(#cpNTEuMTg0M3w0MDcuNDA2fDI1Ny40MjV8MjIuNTc0OQ==)' />
+<defs>
+  <clipPath id='cpMHw1MDR8Mjg4fDA='>
+    <rect x='0.00' y='0.00' width='504.00' height='288.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='29.64' y='216.30' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='16.61px' lengthAdjust='spacingAndGlyphs'>cuda</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='32.56' y='142.91' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='13.69px' lengthAdjust='spacingAndGlyphs'>mpi</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='17.90' y='69.52' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='28.35px' lengthAdjust='spacingAndGlyphs'>openmp</text></g>
+<polyline points='48.44,213.39 51.18,213.39 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='48.44,140.00 51.18,140.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='48.44,66.61 51.18,66.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='67.38,260.17 67.38,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='146.00,260.17 146.00,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='224.62,260.17 224.62,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='303.25,260.17 303.25,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='381.87,260.17 381.87,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='65.18' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>0</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='137.20' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='17.60px' lengthAdjust='spacingAndGlyphs'>1000</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='215.82' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='17.60px' lengthAdjust='spacingAndGlyphs'>2000</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='294.45' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='17.60px' lengthAdjust='spacingAndGlyphs'>3000</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='373.07' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='17.60px' lengthAdjust='spacingAndGlyphs'>4000</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='210.51' y='280.12' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='37.58px' lengthAdjust='spacingAndGlyphs'>Time (s)</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text transform='translate(12.76,154.36) rotate(-90)' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='28.72px' lengthAdjust='spacingAndGlyphs'>Solver</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='423.84' y='114.98' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='25.65px' lengthAdjust='spacingAndGlyphs'>Order</text></g>
+<rect x='424.55' y='122.37' width='15.86' height='15.86' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #0065BD;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<rect x='424.55' y='139.65' width='15.86' height='15.86' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #E37222;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<rect x='424.55' y='156.93' width='15.86' height='15.86' style='stroke-width: 1.07; stroke: none; stroke-linecap: square; stroke-linejoin: miter; fill: #333333;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='446.60' y='133.21' style='font-size: 8.80px; font-family: TeX Gyre Termes;' textLength='46.44px' lengthAdjust='spacingAndGlyphs'>Gauss-Seidel</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='446.60' y='150.49' style='font-size: 8.80px; font-family: TeX Gyre Termes;' textLength='21.51px' lengthAdjust='spacingAndGlyphs'>jacobi</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='446.60' y='167.77' style='font-size: 8.80px; font-family: TeX Gyre Termes;' textLength='17.12px' lengthAdjust='spacingAndGlyphs'>SOR</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='127.19' y='14.22' style='font-size: 13.20px; font-family: TeX Gyre Termes;' textLength='204.22px' lengthAdjust='spacingAndGlyphs'>Runtime Rayleigh-Benard-Convection</text></g>
+</svg>

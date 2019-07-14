@@ -1,0 +1,4 @@
+solver,time
+jacobi, 
+sor, 
+gauss-seidel, 
