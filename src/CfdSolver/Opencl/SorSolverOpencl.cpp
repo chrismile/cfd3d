@@ -148,54 +148,55 @@ void sorSolverOpencl(
         omg = 1.0;
     }
 
+
+    cl::EnqueueArgs eargsXY(queue, cl::NullRange,
+            ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
+    cl::make_kernel<int, int, int, cl::Buffer> setXYPlanesPressureBoundariesOpencl(
+            setXYPlanesPressureBoundariesOpenclKernel);
+
+    cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
+            ClInterface::get()->rangePadding2D(kmax, imax, workGroupSize2D), workGroupSize2D);
+    cl::make_kernel<int, int, int, cl::Buffer> setXZPlanesPressureBoundariesOpencl(
+            setXZPlanesPressureBoundariesOpenclKernel);
+
+    cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
+            ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
+    cl::make_kernel<int, int, int, cl::Buffer> setYZPlanesPressureBoundariesOpencl(
+            setYZPlanesPressureBoundariesOpenclKernel);
+
+    cl::EnqueueArgs eargs3D(
+            queue, cl::NullRange,
+            ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
+    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
+            setBoundaryConditionsPressureInDomainOpencl(setBoundaryConditionsPressureInDomainOpenclKernel);
+
+    cl::EnqueueArgs eargsWholeDomain3D(
+            queue, cl::NullRange,
+            ClInterface::get()->rangePadding3D(kmax+2, jmax+2, imax+2, workGroupSize3D), workGroupSize3D);
+    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> copyPressureOpencl(copyPressureOpenclKernel);
+
+    cl::make_kernel<Real, Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
+            sorSolverIterationOpencl(sorSolverIterationOpenclKernel);
+
+    cl::make_kernel<Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
+            sorSolverComputeResidualArrayOpencl(sorSolverComputeResidualArrayOpenclKernel);
+
+
     const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {
-        cl::EnqueueArgs eargsXY(queue, cl::NullRange,
-                                ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
-        cl::make_kernel<int, int, int, cl::Buffer> setXYPlanesPressureBoundariesOpencl(
-                setXYPlanesPressureBoundariesOpenclKernel);
         setXYPlanesPressureBoundariesOpencl(eargsXY, imax, jmax, kmax, P);
-
-        cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
-                                ClInterface::get()->rangePadding2D(kmax, imax, workGroupSize2D), workGroupSize2D);
-        cl::make_kernel<int, int, int, cl::Buffer> setXZPlanesPressureBoundariesOpencl(
-                setXZPlanesPressureBoundariesOpenclKernel);
         setXZPlanesPressureBoundariesOpencl(eargsXZ, imax, jmax, kmax, P);
-
-        cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
-                                ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
-        cl::make_kernel<int, int, int, cl::Buffer> setYZPlanesPressureBoundariesOpencl(
-                setYZPlanesPressureBoundariesOpenclKernel);
         setYZPlanesPressureBoundariesOpencl(eargsYZ, imax, jmax, kmax, P);
-
-
-
-        cl::EnqueueArgs eargs3D(
-                queue, cl::NullRange,
-                ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
-        cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
-                setBoundaryConditionsPressureInDomainOpencl(setBoundaryConditionsPressureInDomainOpenclKernel);
         setBoundaryConditionsPressureInDomainOpencl(eargs3D, imax, jmax, kmax, P, Flag);
 
-        cl::EnqueueArgs eargsWholeDomain3D(
-                queue, cl::NullRange,
-                ClInterface::get()->rangePadding3D(kmax+2, jmax+2, imax+2, workGroupSize3D), workGroupSize3D);
-        cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> copyPressureOpencl(copyPressureOpenclKernel);
         copyPressureOpencl(eargsWholeDomain3D, imax, jmax, kmax, P, P_temp);
 
-
-        cl::make_kernel<Real, Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-                sorSolverIterationOpencl(sorSolverIterationOpenclKernel);
         sorSolverIterationOpencl(eargs3D, omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag);
-
-        cl::make_kernel<Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-                sorSolverComputeResidualArrayOpencl(sorSolverComputeResidualArrayOpenclKernel);
         sorSolverComputeResidualArrayOpencl(
                 eargs3D, dx, dy, dz, imax, jmax, kmax, P, RS, Flag,
                 openclReductionArrayResidual1, openclReductionArrayNumCells1);
-
 
         residual = reduceSumOpenclReal(
                 queue, workGroupSize1D, reduceSumOpenclKernelReal,

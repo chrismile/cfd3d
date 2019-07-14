@@ -147,11 +147,6 @@ public:
     virtual void getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T);
 
 private:
-    void debugToCpu();
-    void debugToGpu();
-    Real *Up, *Vp, *Wp, *Pp, *P_tempp, *Tp, *T_tempp, *Fp, *Gp, *Hp, *RSp;
-    FlagType *Flagp;
-
     std::string scenarioName;
     LinearSystemSolverType linearSystemSolverType;
     Real Re, Pr, omg, eps, alpha, beta, dt, tau, GX, GY, GZ, T_h, T_c;

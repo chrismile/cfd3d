@@ -193,42 +193,12 @@ void CfdSolverOpencl::initialize(
 
     localMemoryReductionReal = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(Real)*blockSize1D);
     localMemoryReductionUint = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(unsigned int)*blockSize1D);
-
-    this->Up = new Real[(imax+1)*(jmax+2)*(kmax+2)];
-    this->Vp = new Real[(imax+2)*(jmax+1)*(kmax+2)];
-    this->Wp = new Real[(imax+2)*(jmax+2)*(kmax+1)];
-    this->Pp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
-    this->P_tempp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
-    this->Tp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
-    this->T_tempp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
-    this->Fp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
-    this->Gp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
-    this->Hp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
-    this->RSp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
-    this->Flagp = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
-
 }
 
 CfdSolverOpencl::~CfdSolverOpencl() {
-    delete[] Up;
-    delete[] Vp;
-    delete[] Wp;
-    delete[] Pp;
-    delete[] P_tempp;
-    delete[] Tp;
-    delete[] T_tempp;
-    delete[] Fp;
-    delete[] Gp;
-    delete[] Hp;
-    delete[] RSp;
-    delete[] Flagp;
 }
 
 void CfdSolverOpencl::setBoundaryValues() {
-    /*debugToCpu();
-    setBoundaryValuesCpp(T_h, T_c, imax, jmax, kmax, Up, Vp, Wp, Tp, Flagp);
-    debugToGpu();*/
-
     cl::EnqueueArgs eargsYZ(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
     cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
@@ -266,10 +236,6 @@ void CfdSolverOpencl::setBoundaryValues() {
 }
 
 void CfdSolverOpencl::setBoundaryValuesScenarioSpecific() {
-    /*debugToCpu();
-    setBoundaryValuesScenarioSpecificCpp(scenarioName, imax, jmax, kmax, Up, Vp, Wp, Flagp);
-    debugToGpu();*/
-
     if (scenarioName == "driven_cavity") {
         cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
                 ClInterface::get()->rangePadding2D(kmax, imax + 1, workGroupSize2D), workGroupSize2D);
@@ -298,10 +264,6 @@ void CfdSolverOpencl::setBoundaryValuesScenarioSpecific() {
 }
 
 Real CfdSolverOpencl::calculateDt() {
-    /*debugToCpu();
-    calculateDtCpp(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, useTemperature);
-    debugToGpu();*/
-
     calculateDtOpencl(
             Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, blockSize1D,
             queue, workGroupSize1D, calculateMaximumKernel, U, V, W,
@@ -315,13 +277,6 @@ Real CfdSolverOpencl::calculateDt() {
 
 
 void CfdSolverOpencl::calculateTemperature() {
-    /*debugToCpu();
-    Real *tempp = Tp;
-    Tp = T_tempp;
-    T_tempp = tempp;
-    calculateTemperatureCpp(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Tp, T_tempp, Flagp);
-    debugToGpu();*/
-
     cl::Buffer temp = T;
     T = T_temp;
     T_temp = temp;
@@ -336,10 +291,6 @@ void CfdSolverOpencl::calculateTemperature() {
 }
 
 void CfdSolverOpencl::calculateFgh() {
-    /*debugToCpu();
-    calculateFghCpp(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Tp, Fp, Gp, Hp, Flagp);
-    debugToGpu();*/
-
     cl::EnqueueArgs eargs3D(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
@@ -366,10 +317,6 @@ void CfdSolverOpencl::calculateFgh() {
 }
 
 void CfdSolverOpencl::calculateRs() {
-    /*debugToCpu();
-    calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, Fp, Gp, Hp, RSp);
-    debugToGpu();*/
-
     cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
@@ -380,10 +327,6 @@ void CfdSolverOpencl::calculateRs() {
 
 
 void CfdSolverOpencl::executeSorSolver() {
-    /*debugToCpu();
-    sorSolverCpp(omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax, Pp, P_tempp, RSp, Flagp);
-    debugToGpu();*/
-
     sorSolverOpencl(
             omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax,
             blockSizeX, blockSizeY, blockSizeZ, blockSize1D,
@@ -400,11 +343,6 @@ void CfdSolverOpencl::executeSorSolver() {
 }
 
 void CfdSolverOpencl::calculateUvw() {
-    /*debugToCpu();
-    calculateUvwCpp(dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Fp, Gp, Hp, Pp, Flagp);
-    debugToGpu();*/
-
-
     cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
@@ -420,38 +358,5 @@ void CfdSolverOpencl::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real 
     queue.enqueueReadBuffer(this->W, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), (void*)W);
     queue.enqueueReadBuffer(this->P, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)P);
     queue.enqueueReadBuffer(this->T, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)T);
-    queue.finish();
-}
-
-void CfdSolverOpencl::debugToCpu()
-{
-    queue.enqueueReadBuffer(this->U, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), (void*)Up);
-    queue.enqueueReadBuffer(this->V, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2), (void*)Vp);
-    queue.enqueueReadBuffer(this->W, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), (void*)Wp);
-    queue.enqueueReadBuffer(this->P, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Pp);
-    queue.enqueueReadBuffer(this->P_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)P_tempp);
-    queue.enqueueReadBuffer(this->T, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Tp);
-    queue.enqueueReadBuffer(this->T_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)T_tempp);
-    queue.enqueueReadBuffer(this->F, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Fp);
-    queue.enqueueReadBuffer(this->G, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Gp);
-    queue.enqueueReadBuffer(this->H, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Hp);
-    queue.enqueueReadBuffer(this->RS, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)RSp);
-    queue.enqueueReadBuffer(this->Flag, CL_FALSE, 0, sizeof(FlagType)*(imax+2)*(jmax+2)*(kmax+2), (void*)Flagp);
-    queue.finish();
-}
-
-void CfdSolverOpencl::debugToGpu()
-{
-    queue.enqueueWriteBuffer(this->U, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), (void*)Up);
-    queue.enqueueWriteBuffer(this->V, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2), (void*)Vp);
-    queue.enqueueWriteBuffer(this->W, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), (void*)Wp);
-    queue.enqueueWriteBuffer(this->P, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Pp);
-    queue.enqueueWriteBuffer(this->P_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)P_tempp);
-    queue.enqueueWriteBuffer(this->T, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Tp);
-    queue.enqueueWriteBuffer(this->T_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)T_tempp);
-    queue.enqueueWriteBuffer(this->F, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Fp);
-    queue.enqueueWriteBuffer(this->G, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Gp);
-    queue.enqueueWriteBuffer(this->H, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Hp);
-    queue.enqueueWriteBuffer(this->RS, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)RSp);
     queue.finish();
 }
