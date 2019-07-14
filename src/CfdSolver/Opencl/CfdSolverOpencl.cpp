@@ -193,9 +193,35 @@ void CfdSolverOpencl::initialize(
 
     localMemoryReductionReal = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(Real)*blockSize1D);
     localMemoryReductionUint = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(unsigned int)*blockSize1D);
+
+    this->Up = new Real[(imax+1)*(jmax+2)*(kmax+2)];
+    this->Vp = new Real[(imax+2)*(jmax+1)*(kmax+2)];
+    this->Wp = new Real[(imax+2)*(jmax+2)*(kmax+1)];
+    this->Pp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
+    this->P_tempp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
+    this->Tp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
+    this->T_tempp = new Real[(imax+2)*(jmax+2)*(kmax+2)];
+    this->Fp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
+    this->Gp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
+    this->Hp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
+    this->RSp = new Real[(imax+1)*(jmax+1)*(kmax+1)];
+    this->Flagp = new FlagType[(imax+2)*(jmax+2)*(kmax+2)];
+
 }
 
 CfdSolverOpencl::~CfdSolverOpencl() {
+    delete[] Up;
+    delete[] Vp;
+    delete[] Wp;
+    delete[] Pp;
+    delete[] P_tempp;
+    delete[] Tp;
+    delete[] T_tempp;
+    delete[] Fp;
+    delete[] Gp;
+    delete[] Hp;
+    delete[] RSp;
+    delete[] Flagp;
 }
 
 void CfdSolverOpencl::setBoundaryValues() {
