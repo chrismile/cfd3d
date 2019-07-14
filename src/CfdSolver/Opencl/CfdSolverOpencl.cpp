@@ -33,6 +33,10 @@
 #include "CfdSolverOpencl.hpp"
 #include "../../Defines.hpp"
 
+#include "../Cpp/UvwCpp.hpp"
+#include "../Cpp/SorSolverCpp.hpp"
+#include "../Cpp/BoundaryValuesCpp.hpp"
+
 const std::string openclSourceDirectory = "../src/CfdSolver/Opencl/";
 
 CfdSolverOpencl::CfdSolverOpencl(int platformId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D) {
@@ -195,7 +199,11 @@ CfdSolverOpencl::~CfdSolverOpencl() {
 }
 
 void CfdSolverOpencl::setBoundaryValues() {
-    cl::EnqueueArgs eargsYZ(
+    debugToCpu();
+    setBoundaryValuesCpp(T_h, T_c, imax, jmax, kmax, Up, Vp, Wp, Tp, Flagp);
+    debugToGpu();
+
+    /*cl::EnqueueArgs eargsYZ(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
     cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
             setFrontBackBoundariesOpencl(setFrontBackBoundariesOpenclKernel);
@@ -227,11 +235,15 @@ void CfdSolverOpencl::setBoundaryValues() {
     setInternalWBoundariesOpencl(eargs3D, imax, jmax, kmax, W, Flag);
     cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
             setInternalTBoundariesOpencl(setInternalTBoundariesOpenclKernel);
-    setInternalTBoundariesOpencl(eargs3D, imax, jmax, kmax, T, Flag);
+    setInternalTBoundariesOpencl(eargs3D, imax, jmax, kmax, T, Flag);*/
 }
 
 void CfdSolverOpencl::setBoundaryValuesScenarioSpecific() {
-    if (scenarioName == "driven_cavity") {
+    debugToCpu();
+    setBoundaryValuesScenarioSpecificCpp(scenarioName, imax, jmax, kmax, Up, Vp, Wp, Flagp);
+    debugToGpu();
+
+    /*if (scenarioName == "driven_cavity") {
         cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
                 ClInterface::get()->rangePadding2D(kmax, imax + 1, workGroupSize2D), workGroupSize2D);
         cl::make_kernel<int, int, int, cl::Buffer>
@@ -255,23 +267,35 @@ void CfdSolverOpencl::setBoundaryValuesScenarioSpecific() {
         cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
                 setMountainBoundariesOpencl(setMountainBoundariesOpenclKernel);
         setMountainBoundariesOpencl(eargsYZ, imax, jmax, kmax, U, V, W, Flag);
-    }
+    }*/
 }
 
 Real CfdSolverOpencl::calculateDt() {
-    calculateDtOpencl(
+    debugToCpu();
+    calculateDtCpp(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, useTemperature);
+    debugToGpu();
+
+    /*calculateDtOpencl(
             Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, blockSize1D,
             queue, workGroupSize1D, calculateMaximumKernel, U, V, W,
             openclReductionArrayU1, openclReductionArrayU2,
             openclReductionArrayV1, openclReductionArrayV2,
             openclReductionArrayW1, openclReductionArrayW2,
-            localMemoryReductionReal, useTemperature);
+            localMemoryReductionReal, useTemperature);*/
+
     return dt;
 }
 
 
 void CfdSolverOpencl::calculateTemperature() {
-    cl::Buffer temp = T;
+    debugToCpu();
+    Real *tempp = Tp;
+    Tp = T_tempp;
+    T_tempp = tempp;
+    calculateTemperatureCpp(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Tp, T_tempp, Flagp);
+    debugToGpu();
+
+    /*cl::Buffer temp = T;
     T = T_temp;
     T_temp = temp;
 
@@ -281,11 +305,15 @@ void CfdSolverOpencl::calculateTemperature() {
     cl::make_kernel<Real, Real, Real, Real, Real, Real, Real, int, int, int,
         cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> calculateTemperatureOpencl(
             calculateTemperatureOpenclKernel);
-    calculateTemperatureOpencl(eargs, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
+    calculateTemperatureOpencl(eargs, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);*/
 }
 
 void CfdSolverOpencl::calculateFgh() {
-    cl::EnqueueArgs eargs3D(
+    debugToCpu();
+    calculateFghCpp(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Tp, Fp, Gp, Hp, Flagp);
+    debugToGpu();
+
+    /*cl::EnqueueArgs eargs3D(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
     cl::make_kernel<Real, Real, Real, Real, Real, Real, Real, Real, Real, Real, int, int, int,
@@ -307,21 +335,29 @@ void CfdSolverOpencl::calculateFgh() {
     cl::EnqueueArgs eargsXY(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
     cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> setHBoundariesOpencl(setHBoundariesOpenclKernel);
-    setHBoundariesOpencl(eargsXY, imax, jmax, kmax, W, H);
+    setHBoundariesOpencl(eargsXY, imax, jmax, kmax, W, H);*/
 }
 
 void CfdSolverOpencl::calculateRs() {
-    cl::EnqueueArgs eargs(
+    debugToCpu();
+    calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, Fp, Gp, Hp, RSp);
+    debugToGpu();
+
+    /*cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
     cl::make_kernel<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
         calculateRsOpencl(calculateRsOpenclKernel);
-    calculateRsOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
+    calculateRsOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);*/
 }
 
 
 void CfdSolverOpencl::executeSorSolver() {
-    sorSolverOpencl(
+    debugToCpu();
+    sorSolverCpp(omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax, Pp, P_tempp, RSp, Flagp);
+    debugToGpu();
+
+    /*sorSolverOpencl(
             omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax,
             blockSizeX, blockSizeY, blockSizeZ, blockSize1D,
             queue, workGroupSize1D, workGroupSize2D, workGroupSize3D,
@@ -333,16 +369,21 @@ void CfdSolverOpencl::executeSorSolver() {
             setYZPlanesPressureBoundariesOpenclKernel,
             setBoundaryConditionsPressureInDomainOpenclKernel, copyPressureOpenclKernel,
             reduceSumOpenclKernelReal, reduceSumOpenclKernelUint,
-            sorSolverIterationOpenclKernel, sorSolverComputeResidualArrayOpenclKernel);
+            sorSolverIterationOpenclKernel, sorSolverComputeResidualArrayOpenclKernel);*/
 }
 
 void CfdSolverOpencl::calculateUvw() {
-    cl::EnqueueArgs eargs(
+    debugToCpu();
+    calculateUvwCpp(dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Fp, Gp, Hp, Pp, Flagp);
+    debugToGpu();
+
+
+    /*cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
     cl::make_kernel<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
         cl::Buffer, cl::Buffer, cl::Buffer> calculateUvwOpencl(calculateUvwOpenclKernel);
-    calculateUvwOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
+    calculateUvwOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);*/
 }
 
 void CfdSolverOpencl::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T) {
@@ -352,5 +393,38 @@ void CfdSolverOpencl::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real 
     queue.enqueueReadBuffer(this->W, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), (void*)W);
     queue.enqueueReadBuffer(this->P, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)P);
     queue.enqueueReadBuffer(this->T, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)T);
+    queue.finish();
+}
+
+void CfdSolverOpencl::debugToCpu()
+{
+    queue.enqueueReadBuffer(this->U, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), (void*)Up);
+    queue.enqueueReadBuffer(this->V, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2), (void*)Vp);
+    queue.enqueueReadBuffer(this->W, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), (void*)Wp);
+    queue.enqueueReadBuffer(this->P, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Pp);
+    queue.enqueueReadBuffer(this->P_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)P_tempp);
+    queue.enqueueReadBuffer(this->T, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Tp);
+    queue.enqueueReadBuffer(this->T_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)T_tempp);
+    queue.enqueueReadBuffer(this->F, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Fp);
+    queue.enqueueReadBuffer(this->G, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Gp);
+    queue.enqueueReadBuffer(this->H, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Hp);
+    queue.enqueueReadBuffer(this->RS, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)RSp);
+    queue.enqueueReadBuffer(this->Flag, CL_FALSE, 0, sizeof(FlagType)*(imax+2)*(jmax+2)*(kmax+2), (void*)Flagp);
+    queue.finish();
+}
+
+void CfdSolverOpencl::debugToGpu()
+{
+    queue.enqueueWriteBuffer(this->U, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+2)*(kmax+2), (void*)Up);
+    queue.enqueueWriteBuffer(this->V, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+1)*(kmax+2), (void*)Vp);
+    queue.enqueueWriteBuffer(this->W, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+1), (void*)Wp);
+    queue.enqueueWriteBuffer(this->P, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Pp);
+    queue.enqueueWriteBuffer(this->P_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)P_tempp);
+    queue.enqueueWriteBuffer(this->T, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)Tp);
+    queue.enqueueWriteBuffer(this->T_temp, CL_FALSE, 0, sizeof(Real)*(imax+2)*(jmax+2)*(kmax+2), (void*)T_tempp);
+    queue.enqueueWriteBuffer(this->F, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Fp);
+    queue.enqueueWriteBuffer(this->G, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Gp);
+    queue.enqueueWriteBuffer(this->H, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)Hp);
+    queue.enqueueWriteBuffer(this->RS, CL_FALSE, 0, sizeof(Real)*(imax+1)*(jmax+1)*(kmax+1), (void*)RSp);
     queue.finish();
 }
