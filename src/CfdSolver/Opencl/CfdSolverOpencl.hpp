@@ -26,21 +26,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_CFDSOLVERCUDA_HPP
-#define CFD3D_CFDSOLVERCUDA_HPP
+#ifndef CFD3D_CFDSOLVEROPENCL_HPP
+#define CFD3D_CFDSOLVEROPENCL_HPP
 
-#include "CfdSolver/CfdSolver.hpp"
 #include <cmath>
+#include "CfdSolver/CfdSolver.hpp"
+#include "ClInterface.hpp"
 
-class CfdSolverCuda : public CfdSolver {
+class CfdSolverOpencl : public CfdSolver {
 public:
     /**
+     * @param platformId The ID of the OpenCL platform to use. Which platform corresponds to which ID can be found out
+     * with the command line tool 'clinfo'.
      * @param blockSizeX The block size to use for 3D domains in x direction.
      * @param blockSizeY The block size to use for 3D domains in y direction.
      * @param blockSizeZ The block size to use for 3D domains in z direction.
      * @param blockSize1D The block size to use for 1D domains.
      */
-    CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
+    CfdSolverOpencl(int platformId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
 
     /**
      * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
@@ -85,7 +88,7 @@ public:
     /**
      * The destructor frees the memory of the internal representations of U, V, W, P, T and Flag.
      */
-    ~CfdSolverCuda();
+    ~CfdSolverOpencl();
 
 
     /**
@@ -151,17 +154,40 @@ private:
     int itermax;
     int imax, jmax, kmax;
     Real dx, dy, dz;
-    Real *U, *V, *W , *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
-    FlagType *Flag;
+    cl::Buffer U, V, W, P, P_temp, T, T_temp, F, G, H, RS;
+    cl::Buffer Flag;
     int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
+    int platformId;
+
+    cl::Context context;
+    std::vector<cl::Device> devices;
+    cl::Program computeProgramBoundaryValues, computeProgramSor, computeProgramUvw;
+    cl::CommandQueue queue;
+    cl::NDRange workGroupSize1D, workGroupSize2D, workGroupSize3D;
+
+    cl::Kernel setLeftRightBoundariesOpenclKernel, setDownUpBoundariesOpenclKernel, setFrontBackBoundariesOpenclKernel,
+            setInternalUBoundariesOpenclKernel, setInternalVBoundariesOpenclKernel, setInternalWBoundariesOpenclKernel,
+            setInternalTBoundariesOpenclKernel, setDrivenCavityBoundariesOpenclKernel,
+            setFlowOverStepBoundariesOpenclKernel, setSingleTowerBoundariesOpenclKernel,
+            setMountainBoundariesOpenclKernel;
+
+    cl::Kernel setXYPlanesPressureBoundariesOpenclKernel, setXZPlanesPressureBoundariesOpenclKernel,
+            setYZPlanesPressureBoundariesOpenclKernel, setBoundaryConditionsPressureInDomainOpenclKernel,
+            copyPressureOpenclKernel, reduceSumOpenclKernelReal, reduceSumOpenclKernelUint,
+            sorSolverIterationOpenclKernel, sorSolverComputeResidualArrayOpenclKernel;
+
+    cl::Kernel calculateFghOpenclKernel, setFBoundariesOpenclKernel, setGBoundariesOpenclKernel,
+            setHBoundariesOpenclKernel, calculateRsOpenclKernel, calculateMaximumKernel, calculateUvwOpenclKernel,
+            calculateTemperatureOpenclKernel;
 
     // For computing the maximum reduction of the absolute velocities and the sum reduction of the residual.
-    Real *cudaReductionArrayU1, *cudaReductionArrayU2;
-    Real *cudaReductionArrayV1, *cudaReductionArrayV2;
-    Real *cudaReductionArrayW1, *cudaReductionArrayW2;
-    Real *cudaReductionArrayResidual1, *cudaReductionArrayResidual2;
-    unsigned int *cudaReductionArrayNumCells1, *cudaReductionArrayNumCells2;
+    cl::Buffer openclReductionArrayU1, openclReductionArrayU2;
+    cl::Buffer openclReductionArrayV1, openclReductionArrayV2;
+    cl::Buffer openclReductionArrayW1, openclReductionArrayW2;
+    cl::Buffer openclReductionArrayResidual1, openclReductionArrayResidual2;
+    cl::Buffer openclReductionArrayNumCells1, openclReductionArrayNumCells2;
+    cl::Buffer localMemoryReductionReal, localMemoryReductionUint;
 };
 
 
-#endif //CFD3D_CFDSOLVERCUDA_HPP
+#endif //CFD3D_CFDSOLVEROPENCL_HPP

@@ -279,9 +279,9 @@ __global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput, int
     sdata[threadID] = fmaxf(fabsf(input[i]), fabsf(input[i + blockDim.x]));
 #endif
     } else if (i < sizeOfInput){
-            sdata[threadID] = input[i];
+        sdata[threadID] = input[i];
     } else{
-            sdata[threadID] = 0;
+        sdata[threadID] = 0;
     }
     __syncthreads();
 
@@ -289,9 +289,9 @@ __global__ void calculateMaximum(Real *input, Real *output, int sizeOfInput, int
     for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
         if (threadID < stride) {
 #ifdef REAL_DOUBLE
-        sdata[threadID] = fmax(fabs(sdata[threadID]), fabs(sdata[threadID + stride]));
+            sdata[threadID] = fmax(fabs(sdata[threadID]), fabs(sdata[threadID + stride]));
 #else
-        sdata[threadID] = fmaxf(fabsf(sdata[threadID]), fabsf(sdata[threadID + stride]));
+            sdata[threadID] = fmaxf(fabsf(sdata[threadID]), fabsf(sdata[threadID + stride]));
 #endif
         }
         __syncthreads();
@@ -411,88 +411,88 @@ void calculateDtCuda(
 }
 
 __global__ void calculateUvwCuda(
-        Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
+    Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+    Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
 
-        int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
-        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
-        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
-        
-        if (i <= imax - 1 && j <= jmax && k <= kmax){
-            if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i+1,j,k)])){
-                U[IDXU(i, j, k)] = F[IDXF(i, j, k)] - dt / dx * (P[IDXP(i + 1, j, k)] - P[IDXP(i, j, k)]);
-            }
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
+    if (i <= imax - 1 && j <= jmax && k <= kmax){
+        if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i+1,j,k)])){
+            U[IDXU(i, j, k)] = F[IDXF(i, j, k)] - dt / dx * (P[IDXP(i + 1, j, k)] - P[IDXP(i, j, k)]);
         }
-    
-        if (i <= imax && j <= jmax - 1 && k <= kmax){
-            if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i,j+1,k)])){
-                V[IDXV(i, j, k)] = G[IDXG(i, j, k)] - dt / dy * (P[IDXP(i, j + 1, k)] - P[IDXP(i, j, k)]);
-            }
+    }
+
+    if (i <= imax && j <= jmax - 1 && k <= kmax){
+        if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i,j+1,k)])){
+            V[IDXV(i, j, k)] = G[IDXG(i, j, k)] - dt / dy * (P[IDXP(i, j + 1, k)] - P[IDXP(i, j, k)]);
         }
-    
-        if (i <= imax && j <= jmax && k <= kmax - 1){
-            if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i,j,k+1)])){
-                W[IDXW(i, j, k)] = H[IDXH(i, j, k)] - dt / dz * (P[IDXP(i, j, k + 1)] - P[IDXP(i, j, k)]);
-            }
+    }
+
+    if (i <= imax && j <= jmax && k <= kmax - 1){
+        if(isFluid(Flag[IDXFLAG(i,j,k)]) && isFluid(Flag[IDXFLAG(i,j,k+1)])){
+            W[IDXW(i, j, k)] = H[IDXH(i, j, k)] - dt / dz * (P[IDXP(i, j, k + 1)] - P[IDXP(i, j, k)]);
         }
+    }
 }
 
 __global__ void calculateTemperatureCuda(
-        Real Re, Real Pr, Real alpha,
-        Real dt, Real dx, Real dy, Real dz,
-        int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
+    Real Re, Real Pr, Real alpha,
+    Real dt, Real dx, Real dy, Real dz,
+    int imax, int jmax, int kmax,
+    Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
 
-        int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
-        int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
-        int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
+    int i = blockIdx.z * blockDim.z + threadIdx.z + 1;
+    int j = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int k = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
-        Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
+    Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
 
-        if (i <= imax && j <= jmax && k <= kmax){
-            if(isFluid(Flag[IDXFLAG(i,j,k)])){
-                duT_dx = 1 / dx * (
-                        U[IDXU(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i + 1, j, k)]) / 2) -
-                        U[IDXU(i - 1, j, k)] * ((T_temp[IDXT(i - 1, j, k)] + T_temp[IDXT(i, j, k)]) / 2) +
-                        alpha * (
-                                std::abs(U[IDXU(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i + 1, j, k)]) / 2) -
-                                std::abs(U[IDXU(i - 1, j, k)])*((T_temp[IDXT(i - 1, j, k)] - T_temp[IDXT(i, j, k)]) / 2)
-                        )
-                );
+    if (i <= imax && j <= jmax && k <= kmax){
+        if(isFluid(Flag[IDXFLAG(i,j,k)])){
+            duT_dx = 1 / dx * (
+                    U[IDXU(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i + 1, j, k)]) / 2) -
+                    U[IDXU(i - 1, j, k)] * ((T_temp[IDXT(i - 1, j, k)] + T_temp[IDXT(i, j, k)]) / 2) +
+                    alpha * (
+                            std::abs(U[IDXU(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i + 1, j, k)]) / 2) -
+                            std::abs(U[IDXU(i - 1, j, k)])*((T_temp[IDXT(i - 1, j, k)] - T_temp[IDXT(i, j, k)]) / 2)
+                    )
+            );
 
-                dvT_dy = 1 / dy * (
-                        V[IDXV(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j + 1, k)]) / 2) -
-                        V[IDXV(i, j - 1, k)] * ((T_temp[IDXT(i, j - 1, k)] + T_temp[IDXT(i, j, k)]) / 2) +
-                        alpha * (
-                                std::abs(V[IDXV(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i, j + 1, k)]) / 2) -
-                                std::abs(V[IDXV(i, j - 1, k)])*((T_temp[IDXT(i, j - 1, k)] - T_temp[IDXT(i, j, k)]) / 2)
-                        )
-                );
+            dvT_dy = 1 / dy * (
+                    V[IDXV(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j + 1, k)]) / 2) -
+                    V[IDXV(i, j - 1, k)] * ((T_temp[IDXT(i, j - 1, k)] + T_temp[IDXT(i, j, k)]) / 2) +
+                    alpha * (
+                            std::abs(V[IDXV(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i, j + 1, k)]) / 2) -
+                            std::abs(V[IDXV(i, j - 1, k)])*((T_temp[IDXT(i, j - 1, k)] - T_temp[IDXT(i, j, k)]) / 2)
+                    )
+            );
 
-                dwT_dz = 1 / dz * (
-                        W[IDXW(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j, k + 1)]) / 2) -
-                        W[IDXW(i, j, k - 1)] * ((T_temp[IDXT(i, j, k - 1)] + T_temp[IDXT(i, j, k)]) / 2) +
-                        alpha * (
-                                std::abs(W[IDXW(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i, j, k + 1)]) / 2) -
-                                std::abs(W[IDXW(i, j, k - 1)])*((T_temp[IDXT(i, j, k - 1)] - T_temp[IDXT(i, j, k)]) / 2)
-                        )
-                );
+            dwT_dz = 1 / dz * (
+                    W[IDXW(i, j, k)] * ((T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j, k + 1)]) / 2) -
+                    W[IDXW(i, j, k - 1)] * ((T_temp[IDXT(i, j, k - 1)] + T_temp[IDXT(i, j, k)]) / 2) +
+                    alpha * (
+                            std::abs(W[IDXW(i, j, k)])*((T_temp[IDXT(i, j, k)] - T_temp[IDXT(i, j, k + 1)]) / 2) -
+                            std::abs(W[IDXW(i, j, k - 1)])*((T_temp[IDXT(i, j, k - 1)] - T_temp[IDXT(i, j, k)]) / 2)
+                    )
+            );
 
-                d2T_dx2 =
-                        (T_temp[IDXT(i + 1, j, k)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i - 1, j, k)]) / (dx*dx);
+            d2T_dx2 =
+                    (T_temp[IDXT(i + 1, j, k)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i - 1, j, k)]) / (dx*dx);
 
-                d2T_dy2 =
-                        (T_temp[IDXT(i, j + 1, k)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j - 1, k)]) / (dy*dy);
+            d2T_dy2 =
+                    (T_temp[IDXT(i, j + 1, k)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j - 1, k)]) / (dy*dy);
 
-                d2T_dz2 =
-                        (T_temp[IDXT(i, j, k + 1)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j, k - 1)]) / (dz*dz);
+            d2T_dz2 =
+                    (T_temp[IDXT(i, j, k + 1)] - 2 * T_temp[IDXT(i, j, k)] + T_temp[IDXT(i, j, k - 1)]) / (dz*dz);
 
-                T[IDXT(i, j, k)] = T_temp[IDXT(i, j, k)] + dt * (
-                        (1 / (Re*Pr))*(d2T_dx2 + d2T_dy2 + d2T_dz2) -
-                        duT_dx -
-                        dvT_dy -
-                        dwT_dz
-                );
-            }
+            T[IDXT(i, j, k)] = T_temp[IDXT(i, j, k)] + dt * (
+                    (1 / (Re*Pr))*(d2T_dx2 + d2T_dy2 + d2T_dz2) -
+                    duT_dx -
+                    dvT_dy -
+                    dwT_dz
+            );
         }
+    }
 }

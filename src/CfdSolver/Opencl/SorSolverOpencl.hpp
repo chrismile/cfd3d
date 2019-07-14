@@ -26,20 +26,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_SORSOLVERCUDA_HPP
-#define CFD3D_SORSOLVERCUDA_HPP
+#ifndef CFD3D_SORSOLVEROPENCL_HPP
+#define CFD3D_SORSOLVEROPENCL_HPP
 
 #include "Defines.hpp"
+#include "ClInterface.hpp"
 
 /**
  * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
  */
-void sorSolverCuda(
+void sorSolverOpencl(
         Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D,
-        Real *P, Real *P_temp, Real *RS, FlagType *Flag,
-        Real *cudaReductionArrayResidual1, Real *cudaReductionArrayResidual2,
-        unsigned int *cudaReductionArrayNumCells1, unsigned int *cudaReductionArrayNumCells2);
+        cl::CommandQueue &queue, cl::NDRange workGroupSize1D, cl::NDRange workGroupSize2D, cl::NDRange workGroupSize3D,
+        cl::Buffer &P, cl::Buffer &P_temp, cl::Buffer &RS, cl::Buffer &Flag,
+        cl::Buffer &openclReductionArrayResidual1, cl::Buffer &openclReductionArrayResidual2,
+        cl::Buffer &openclReductionArrayNumCells1, cl::Buffer &openclReductionArrayNumCells2,
+        cl::Buffer &localMemoryReductionReal, cl::Buffer &localMemoryReductionUint,
+        cl::Kernel &setXYPlanesPressureBoundariesOpenclKernel, cl::Kernel &setXZPlanesPressureBoundariesOpenclKernel,
+        cl::Kernel &setYZPlanesPressureBoundariesOpenclKernel,
+        cl::Kernel &setBoundaryConditionsPressureInDomainOpenclKernel, cl::Kernel &copyPressureOpenclKernel,
+        cl::Kernel &reduceSumOpenclKernelReal, cl::Kernel &reduceSumOpenclKernelUint,
+        cl::Kernel &sorSolverIterationOpenclKernel, cl::Kernel &sorSolverComputeResidualArrayOpenclKernel);
 
-#endif //CFD3D_SORSOLVERCUDA_HPP
+#endif //CFD3D_SORSOLVEROPENCL_HPP

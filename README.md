@@ -17,6 +17,24 @@ For CUDA support, additionally the following packages are necessary.
 sudo apt-get install nvidia-cuda-dev nvidia-cuda-toolkit
 ```
 
+For OpenCL support, additionally the following packages are necessary.
+
+```
+sudo apt-get install ocl-icd-opencl-dev opencl-headers clinfo
+```
+
+The application was tested using NVIDIA's OpenCL implementation, Intel NEO and POCL. However, it should also run with different implementations. Depending on the OpenCL implementation you want to use, install one of the following packages.
+
+
+```
+sudo apt-get install nvidia-opencl-dev intel-opencl-icd beignet-opencl-icd pocl-opencl-icd
+```
+
+intel-opencl-icd is the new OpenCL implementation of Intel that was added in Ubuntu 19.04 to the distribution repositories. For previous distributions, please use Beignet. POCL is an OpenCL implementation using the user's CPU.
+
+
+
+
 Then, to build the program, execute the following commands in the repository directory.
 
 ```
@@ -42,7 +60,13 @@ For CUDA support:
 cmake .. -DUSE_CUDA=ON
 ```
 
-The program can also be built with both solvers enabled at the same time.
+For OpenCL support:
+
+```
+cmake .. -DUSE_OPENCL=ON
+```
+
+The program can also be built with all solvers enabled at the same time.
 
 ## Running the program
 
@@ -71,7 +95,7 @@ The valid values for all possible arguments are:
 * scenario: driven_cavity, flow_over_step, natural_convection, rayleigh_benard_convection_8-2-1,
 rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4, rayleigh_benard_convection_2d,
 single_tower, terrain_1
-* solver: cpp, mpi, cuda, sycl
+* solver: cpp, mpi, cuda, opencl
 * outputformat: netcdf, vtk (= vtk-binary), vtk-binary, vtk-ascii
 * output: true, false (whether to write an output file)
 * linsolver: jacobi, sor, gauss-seidel
@@ -95,8 +119,14 @@ Additionally, for the MPI solver, the user MUST also specify the number of proce
 match the total number of MPI processes):
 * numproc: integer x integer x integer
 
-For the CUDA solver, the user CAN also specify the block size in x, y and z direction:
+For the CUDA and OpenCL solvers, the user CAN also specify the block size in x, y and z direction:
 * blocksize: integer x integer x integer
 
-The standard values for the CUDA solver are:
+The standard values for the solvers are:
 * blocksize: 8 x 8 x 4
+
+For the OpenCL solver, additonally to the block size, the user can also specify the ID of the OpenCL platform to use.
+If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found outwith the command
+line tool 'clinfo'.
+
+* platformid: integer

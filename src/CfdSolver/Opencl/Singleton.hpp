@@ -26,20 +26,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_SORSOLVERCUDA_HPP
-#define CFD3D_SORSOLVERCUDA_HPP
+#ifndef SINGLETON_HPP_
+#define SINGLETON_HPP_
 
-#include "Defines.hpp"
+#include <memory>
 
-/**
- * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
- */
-void sorSolverCuda(
-        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
-        Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D,
-        Real *P, Real *P_temp, Real *RS, FlagType *Flag,
-        Real *cudaReductionArrayResidual1, Real *cudaReductionArrayResidual2,
-        unsigned int *cudaReductionArrayNumCells1, unsigned int *cudaReductionArrayNumCells2);
+/// Singleton instance of classes T derived from Singleton<T> can be accessed using T::get().
 
-#endif //CFD3D_SORSOLVERCUDA_HPP
+template <class T>
+class Singleton
+{
+public:
+	virtual ~Singleton () { }
+	inline static void deleteSingleton() { singleton = std::unique_ptr<T>(); }
+
+	/// Creates static instance if necessary and returns the pointer to it
+	inline static T *get()
+	{
+		if (!singleton.get())
+			singleton = std::unique_ptr<T>(new T);
+		return singleton.get();
+	}
+
+protected:
+	static std::unique_ptr<T> singleton;
+};
+
+template <class T>
+std::unique_ptr<T> Singleton<T>::singleton;
+
+#endif /* SINGLETON_HPP_ */

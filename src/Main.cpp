@@ -41,8 +41,8 @@
 #ifdef USE_CUDA
 #include "CfdSolver/Cuda/CfdSolverCuda.hpp"
 #endif
-#ifdef USE_SYCL
-#include "CfdSolver/Sycl/CfdSolverSycl.hpp"
+#ifdef USE_OPENCL
+#include "CfdSolver/Opencl/CfdSolverOpencl.hpp"
 #endif
 #include "IO/IOUtils.hpp"
 #include "IO/ArgumentParser.hpp"
@@ -82,8 +82,11 @@ int main(int argc, char *argv[]) {
     // MPI data
     int iproc = 1, jproc = 1, kproc = 1;
 
-    // CUDA data
+    // CUDA & OpenCL data
     int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
+
+    // OpenCL data
+    int openclPlatformId = 0;
 
     int imax, jmax, kmax, itermax, numParticles;
     Real Re, Pr, UI, VI, WI, PI, TI, GX, GY, GZ, tEnd, dtWrite, xLength, yLength, zLength, xOrigin, yOrigin, zOrigin,
@@ -93,7 +96,7 @@ int main(int argc, char *argv[]) {
     parseArguments(
             argc, argv, scenarioName, solverName, outputFileWriterType, shallWriteOutput, linearSystemSolverType,
             numParticles, traceStreamlines, traceStreaklines, tracePathlines, iproc, jproc, kproc,
-            blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
+            blockSizeX, blockSizeY, blockSizeZ, blockSize1D, openclPlatformId);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
 #ifdef USE_MPI
@@ -266,9 +269,13 @@ int main(int argc, char *argv[]) {
         cfdSolver = new CfdSolverCuda(blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
     }
 #endif
-#ifdef USE_SYCL
-    else if (solverName == "sycl") {
-        cfdSolver = new CfdSolverSycl(imax, jmax, kmax, U, V, W, P, T, Flag);
+#ifdef USE_OPENCL
+    else if (solverName == "opencl") {
+        if (linearSystemSolverType != LINEAR_SOLVER_JACOBI) {
+            std::cerr << "Warning: OpenCL solver was selected, but a linear solver different from Jacobi. "
+                      << "Only the Jacobi solver is supported for OpenCL." << std::endl;
+        }
+        cfdSolver = new CfdSolverOpencl(openclPlatformId, blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
     }
 #endif
     else {

@@ -49,16 +49,19 @@ class OutputFileWriter;
  * @param iproc The number of processes in x direction (MPI solver only).
  * @param jproc The number of processes in y direction (MPI solver only).
  * @param kproc The number of processes in z direction (MPI solver only).
- * @param blockSizeX The block size to use for 3D domains in x direction (CUDA solver only).
- * @param blockSizeY The block size to use for 3D domains in y direction (CUDA solver only).
- * @param blockSizeZ The block size to use for 3D domains in z direction (CUDA solver only).
- * @param blockSize1D The block size to use for 1D domains (CUDA solver only).
+ * @param blockSizeX The block size to use for 3D domains in x direction (CUDA and OpenCL solver only).
+ * @param blockSizeY The block size to use for 3D domains in y direction (CUDA and OpenCL solver only).
+ * @param blockSizeZ The block size to use for 3D domains in z direction (CUDA and OpenCL solver only).
+ * @param blockSize1D The block size to use for 1D domains (CUDA and OpenCL solver only).
+ * @param openclPlatformId The ID of the OpenCL platform to use for computations (OpenCL solver only).
+ * Which platform corresponds to which ID can be found outwith the command line tool 'clinfo'.
  */
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName,
         std::string &outputFileWriterType, bool &shallWriteOutput, LinearSystemSolverType &linearSystemSolverType,
         int &numParticles, bool &traceStreamlines, bool &traceStreaklines, bool &tracePathlines,
         int &iproc, int &jproc, int &kproc,
-        int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D);
+        int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D,
+        int &openclPlatformId);
 
 #endif //CFD3D_ARGUMENTPARSER_HPP

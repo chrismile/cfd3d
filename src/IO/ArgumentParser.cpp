@@ -35,7 +35,8 @@ void parseArguments(
         std::string &outputFileWriterType, bool &shallWriteOutput, LinearSystemSolverType &linearSystemSolverType,
         int &numParticles, bool &traceStreamlines, bool &traceStreaklines, bool &tracePathlines,
         int &iproc, int &jproc, int &kproc,
-        int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D) {
+        int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D,
+        int &openclPlatformId) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
     // fuji_san, zugspitze, ...
     scenarioName = "flow_over_step";
@@ -91,6 +92,8 @@ void parseArguments(
             blockSizeY = std::stoi(argv[i+2]);
             blockSizeZ = std::stoi(argv[i+3]);
             blockSize1D = blockSizeX*blockSizeY*blockSizeZ;
+        } else if (strcmp(argv[i], "--platformid") == 0 && i < argc - 1) {
+            openclPlatformId = std::stoi(argv[i+1]);
         }
     }
 }

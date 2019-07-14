@@ -26,20 +26,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_SORSOLVERCUDA_HPP
-#define CFD3D_SORSOLVERCUDA_HPP
+#ifndef CFD3D_UVWOPENCL_HPP
+#define CFD3D_UVWOPENCL_HPP
 
 #include "Defines.hpp"
+#include "ClInterface.hpp"
 
-/**
- * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
+/*
+ * Determines the maximum time step size. The time step size is restricted according to the CFL theorem.
  */
-void sorSolverCuda(
-        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
-        Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
-        int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D,
-        Real *P, Real *P_temp, Real *RS, FlagType *Flag,
-        Real *cudaReductionArrayResidual1, Real *cudaReductionArrayResidual2,
-        unsigned int *cudaReductionArrayNumCells1, unsigned int *cudaReductionArrayNumCells2);
+void calculateDtOpencl(
+        Real Re, Real Pr, Real tau,
+        Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax, int blockSize1D,
+        cl::CommandQueue &queue, cl::NDRange workGroupSize1D, cl::Kernel &calculateMaximumKernel,
+        cl::Buffer &U, cl::Buffer &V, cl::Buffer &W,
+        cl::Buffer &cudaReductionArrayU1, cl::Buffer &cudaReductionArrayU2,
+        cl::Buffer &cudaReductionArrayV1, cl::Buffer &cudaReductionArrayV2,
+        cl::Buffer &cudaReductionArrayW1, cl::Buffer &cudaReductionArrayW2,
+        cl::Buffer &localMemoryReductionReal,
+        bool useTemperature);
 
-#endif //CFD3D_SORSOLVERCUDA_HPP
+#endif //CFD3D_UVWOPENCL_HPP
