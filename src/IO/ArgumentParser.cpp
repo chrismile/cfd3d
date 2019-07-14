@@ -40,7 +40,7 @@ void parseArguments(
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
     // fuji_san, zugspitze, ...
     scenarioName = "flow_over_step";
-    solverName = "opencl";
+    solverName = "cpp";
     shallWriteOutput = true;
     outputFileWriterType = "vtk";
     linearSystemSolverType = LINEAR_SOLVER_JACOBI;

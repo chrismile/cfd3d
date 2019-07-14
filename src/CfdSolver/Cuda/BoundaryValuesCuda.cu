@@ -485,13 +485,13 @@ void setBoundaryValuesCuda(
     dim3 dimBlock2D(blockSizeX, blockSizeY);
 
     dim3 dimGrid_y_z(iceil(kmax,dimBlock2D.x),iceil(jmax,dimBlock2D.y));
-    setFrontBackBoundariesCuda<<<dimGrid_y_z,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setLeftRightBoundariesCuda<<<dimGrid_y_z,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     dim3 dimGrid_x_z(iceil(kmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
     setDownUpBoundariesCuda<<<dimGrid_x_z,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     dim3 dimGrid_x_y(iceil(jmax,dimBlock2D.x),iceil(imax,dimBlock2D.y));
-    setLeftRightBoundariesCuda<<<dimGrid_x_y,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+    setFrontBackBoundariesCuda<<<dimGrid_x_y,dimBlock2D>>>(T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     dim3 dimBlock3D(blockSizeX, blockSizeY, blockSizeZ);
     dim3 dimGrid_internal(iceil(kmax,dimBlock3D.x),iceil(jmax,dimBlock3D.y),iceil(imax,dimBlock3D.z));

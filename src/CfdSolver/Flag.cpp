@@ -115,8 +115,10 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
     int width, height, depth;
     std::vector<uint32_t> geometryValuesRead = loadValuesFromGeometryFile(geometryFilename, width, height, depth);
     std::vector<uint32_t> geometryValues;
-    if (imax != width || jmax != height || kmax != depth) {
+    if (imax+2 != width || jmax+2 != height || kmax+2 != depth) {
         nearestNeighborUpsampling(geometryValuesRead, width, height, depth, geometryValues, imax+2, jmax+2, kmax+2);
+    } else {
+        geometryValues = geometryValuesRead;
     }
 
     // For an explanation of bit values, please see docs/BitfieldFlags.pdf.

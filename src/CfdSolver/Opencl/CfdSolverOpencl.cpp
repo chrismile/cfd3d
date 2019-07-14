@@ -232,8 +232,8 @@ void CfdSolverOpencl::setBoundaryValues() {
     cl::EnqueueArgs eargsYZ(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
     cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            setFrontBackBoundariesOpencl(setFrontBackBoundariesOpenclKernel);
-    setFrontBackBoundariesOpencl(eargsYZ, T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+            setLeftRightBoundariesOpencl(setLeftRightBoundariesOpenclKernel);
+    setLeftRightBoundariesOpencl(eargsYZ, T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     cl::EnqueueArgs eargsXZ(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(kmax, imax, workGroupSize2D), workGroupSize2D);
@@ -244,8 +244,9 @@ void CfdSolverOpencl::setBoundaryValues() {
     cl::EnqueueArgs eargsXY(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
     cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            setLeftRightBoundariesOpencl(setLeftRightBoundariesOpenclKernel);
-    setLeftRightBoundariesOpencl(eargsXY, T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+            setFrontBackBoundariesOpencl(setFrontBackBoundariesOpenclKernel);
+    setFrontBackBoundariesOpencl(eargsXY, T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
+
 
     cl::EnqueueArgs eargs3D(
             queue, cl::NullRange,
