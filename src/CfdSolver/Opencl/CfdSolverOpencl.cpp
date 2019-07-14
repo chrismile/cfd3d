@@ -225,11 +225,11 @@ CfdSolverOpencl::~CfdSolverOpencl() {
 }
 
 void CfdSolverOpencl::setBoundaryValues() {
-    debugToCpu();
+    /*debugToCpu();
     setBoundaryValuesCpp(T_h, T_c, imax, jmax, kmax, Up, Vp, Wp, Tp, Flagp);
-    debugToGpu();
+    debugToGpu();*/
 
-    /*cl::EnqueueArgs eargsYZ(
+    cl::EnqueueArgs eargsYZ(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
     cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
             setFrontBackBoundariesOpencl(setFrontBackBoundariesOpenclKernel);
@@ -261,15 +261,15 @@ void CfdSolverOpencl::setBoundaryValues() {
     setInternalWBoundariesOpencl(eargs3D, imax, jmax, kmax, W, Flag);
     cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
             setInternalTBoundariesOpencl(setInternalTBoundariesOpenclKernel);
-    setInternalTBoundariesOpencl(eargs3D, imax, jmax, kmax, T, Flag);*/
+    setInternalTBoundariesOpencl(eargs3D, imax, jmax, kmax, T, Flag);
 }
 
 void CfdSolverOpencl::setBoundaryValuesScenarioSpecific() {
-    debugToCpu();
+    /*debugToCpu();
     setBoundaryValuesScenarioSpecificCpp(scenarioName, imax, jmax, kmax, Up, Vp, Wp, Flagp);
-    debugToGpu();
+    debugToGpu();*/
 
-    /*if (scenarioName == "driven_cavity") {
+    if (scenarioName == "driven_cavity") {
         cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
                 ClInterface::get()->rangePadding2D(kmax, imax + 1, workGroupSize2D), workGroupSize2D);
         cl::make_kernel<int, int, int, cl::Buffer>
@@ -293,35 +293,35 @@ void CfdSolverOpencl::setBoundaryValuesScenarioSpecific() {
         cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
                 setMountainBoundariesOpencl(setMountainBoundariesOpenclKernel);
         setMountainBoundariesOpencl(eargsYZ, imax, jmax, kmax, U, V, W, Flag);
-    }*/
+    }
 }
 
 Real CfdSolverOpencl::calculateDt() {
-    debugToCpu();
+    /*debugToCpu();
     calculateDtCpp(Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, useTemperature);
-    debugToGpu();
+    debugToGpu();*/
 
-    /*calculateDtOpencl(
+    calculateDtOpencl(
             Re, Pr, tau, dt, dx, dy, dz, imax, jmax, kmax, blockSize1D,
             queue, workGroupSize1D, calculateMaximumKernel, U, V, W,
             openclReductionArrayU1, openclReductionArrayU2,
             openclReductionArrayV1, openclReductionArrayV2,
             openclReductionArrayW1, openclReductionArrayW2,
-            localMemoryReductionReal, useTemperature);*/
+            localMemoryReductionReal, useTemperature);
 
     return dt;
 }
 
 
 void CfdSolverOpencl::calculateTemperature() {
-    debugToCpu();
+    /*debugToCpu();
     Real *tempp = Tp;
     Tp = T_tempp;
     T_tempp = tempp;
     calculateTemperatureCpp(Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Tp, T_tempp, Flagp);
-    debugToGpu();
+    debugToGpu();*/
 
-    /*cl::Buffer temp = T;
+    cl::Buffer temp = T;
     T = T_temp;
     T_temp = temp;
 
@@ -331,15 +331,15 @@ void CfdSolverOpencl::calculateTemperature() {
     cl::make_kernel<Real, Real, Real, Real, Real, Real, Real, int, int, int,
         cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> calculateTemperatureOpencl(
             calculateTemperatureOpenclKernel);
-    calculateTemperatureOpencl(eargs, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);*/
+    calculateTemperatureOpencl(eargs, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
 
 void CfdSolverOpencl::calculateFgh() {
-    debugToCpu();
+    /*debugToCpu();
     calculateFghCpp(Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Tp, Fp, Gp, Hp, Flagp);
-    debugToGpu();
+    debugToGpu();*/
 
-    /*cl::EnqueueArgs eargs3D(
+    cl::EnqueueArgs eargs3D(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
     cl::make_kernel<Real, Real, Real, Real, Real, Real, Real, Real, Real, Real, int, int, int,
@@ -361,29 +361,29 @@ void CfdSolverOpencl::calculateFgh() {
     cl::EnqueueArgs eargsXY(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
     cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> setHBoundariesOpencl(setHBoundariesOpenclKernel);
-    setHBoundariesOpencl(eargsXY, imax, jmax, kmax, W, H);*/
+    setHBoundariesOpencl(eargsXY, imax, jmax, kmax, W, H);
 }
 
 void CfdSolverOpencl::calculateRs() {
-    debugToCpu();
+    /*debugToCpu();
     calculateRsCpp(dt, dx, dy, dz, imax, jmax, kmax, Fp, Gp, Hp, RSp);
-    debugToGpu();
+    debugToGpu();*/
 
-    /*cl::EnqueueArgs eargs(
+    cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
     cl::make_kernel<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
         calculateRsOpencl(calculateRsOpenclKernel);
-    calculateRsOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);*/
+    calculateRsOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
 
 
 void CfdSolverOpencl::executeSorSolver() {
-    debugToCpu();
+    /*debugToCpu();
     sorSolverCpp(omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax, Pp, P_tempp, RSp, Flagp);
-    debugToGpu();
+    debugToGpu();*/
 
-    /*sorSolverOpencl(
+    sorSolverOpencl(
             omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax,
             blockSizeX, blockSizeY, blockSizeZ, blockSize1D,
             queue, workGroupSize1D, workGroupSize2D, workGroupSize3D,
@@ -395,21 +395,21 @@ void CfdSolverOpencl::executeSorSolver() {
             setYZPlanesPressureBoundariesOpenclKernel,
             setBoundaryConditionsPressureInDomainOpenclKernel, copyPressureOpenclKernel,
             reduceSumOpenclKernelReal, reduceSumOpenclKernelUint,
-            sorSolverIterationOpenclKernel, sorSolverComputeResidualArrayOpenclKernel);*/
+            sorSolverIterationOpenclKernel, sorSolverComputeResidualArrayOpenclKernel);
 }
 
 void CfdSolverOpencl::calculateUvw() {
-    debugToCpu();
+    /*debugToCpu();
     calculateUvwCpp(dt, dx, dy, dz, imax, jmax, kmax, Up, Vp, Wp, Fp, Gp, Hp, Pp, Flagp);
-    debugToGpu();
+    debugToGpu();*/
 
 
-    /*cl::EnqueueArgs eargs(
+    cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
     cl::make_kernel<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
         cl::Buffer, cl::Buffer, cl::Buffer> calculateUvwOpencl(calculateUvwOpenclKernel);
-    calculateUvwOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);*/
+    calculateUvwOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
 }
 
 void CfdSolverOpencl::getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T) {

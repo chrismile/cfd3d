@@ -40,9 +40,9 @@ void calculateDtOpencl(
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax, int blockSize1D,
         cl::CommandQueue &queue, cl::NDRange workGroupSize1D, cl::Kernel &calculateMaximumKernel,
         cl::Buffer &U, cl::Buffer &V, cl::Buffer &W,
-        cl::Buffer &cudaReductionArrayU1, cl::Buffer &cudaReductionArrayU2,
-        cl::Buffer &cudaReductionArrayV1, cl::Buffer &cudaReductionArrayV2,
-        cl::Buffer &cudaReductionArrayW1, cl::Buffer &cudaReductionArrayW2,
+        cl::Buffer &openclReductionArrayU1, cl::Buffer &openclReductionArrayU2,
+        cl::Buffer &openclReductionArrayV1, cl::Buffer &openclReductionArrayV2,
+        cl::Buffer &openclReductionArrayW1, cl::Buffer &openclReductionArrayW2,
         cl::Buffer &localMemoryReductionReal,
         bool useTemperature);
 

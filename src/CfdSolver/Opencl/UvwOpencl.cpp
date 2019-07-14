@@ -35,9 +35,9 @@ void calculateDtOpencl(
         Real &dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax, int blockSize1D,
         cl::CommandQueue &queue, cl::NDRange workGroupSize1D, cl::Kernel &calculateMaximumKernel,
         cl::Buffer &U, cl::Buffer &V, cl::Buffer &W,
-        cl::Buffer &OpenclReductionArrayU1, cl::Buffer &OpenclReductionArrayU2,
-        cl::Buffer &OpenclReductionArrayV1, cl::Buffer &OpenclReductionArrayV2,
-        cl::Buffer &OpenclReductionArrayW1, cl::Buffer &OpenclReductionArrayW2,
+        cl::Buffer &openclReductionArrayU1, cl::Buffer &openclReductionArrayU2,
+        cl::Buffer &openclReductionArrayV1, cl::Buffer &openclReductionArrayV2,
+        cl::Buffer &openclReductionArrayW1, cl::Buffer &openclReductionArrayW2,
         cl::Buffer &localMemoryReductionReal,
         bool useTemperature) {
     Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
@@ -47,9 +47,9 @@ void calculateDtOpencl(
     cl::Buffer U_reductionInput = U;
     cl::Buffer V_reductionInput = V;
     cl::Buffer W_reductionInput = W;
-    cl::Buffer U_reductionOutput = OpenclReductionArrayU1;
-    cl::Buffer V_reductionOutput = OpenclReductionArrayV1;
-    cl::Buffer W_reductionOutput = OpenclReductionArrayW1;
+    cl::Buffer U_reductionOutput = openclReductionArrayU1;
+    cl::Buffer V_reductionOutput = openclReductionArrayV1;
+    cl::Buffer W_reductionOutput = openclReductionArrayW1;
 
     int numberOfBlocksI = (imax+1)*(jmax+2)*(kmax+2);
     int numberOfBlocksJ = (imax+2)*(jmax+1)*(kmax+2);
@@ -69,39 +69,39 @@ void calculateDtOpencl(
         numberOfBlocksK = iceil(numberOfBlocksK, blockSize1D*2);
 
         if (inputSizeI != 1) {
-            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksI), workGroupSize1D);
+            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksI*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
                     eargs, U_reductionInput, U_reductionOutput, localMemoryReductionReal, inputSizeI);
             if (iteration % 2 == 0) {
-                U_reductionInput = OpenclReductionArrayU1;
-                U_reductionOutput = OpenclReductionArrayU2;
+                U_reductionInput = openclReductionArrayU1;
+                U_reductionOutput = openclReductionArrayU2;
             } else {
-                U_reductionInput = OpenclReductionArrayU2;
-                U_reductionOutput = OpenclReductionArrayU1;
+                U_reductionInput = openclReductionArrayU2;
+                U_reductionOutput = openclReductionArrayU1;
             }
         }
         if (inputSizeJ != 1) {
-            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksJ), workGroupSize1D);
+            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksJ*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
                     eargs, V_reductionInput, V_reductionOutput, localMemoryReductionReal, inputSizeJ);
             if (iteration % 2 == 0) {
-                V_reductionInput = OpenclReductionArrayV1;
-                V_reductionOutput = OpenclReductionArrayV2;
+                V_reductionInput = openclReductionArrayV1;
+                V_reductionOutput = openclReductionArrayV2;
             } else {
-                V_reductionInput = OpenclReductionArrayV2;
-                V_reductionOutput = OpenclReductionArrayV1;
+                V_reductionInput = openclReductionArrayV2;
+                V_reductionOutput = openclReductionArrayV1;
             }
         }
         if (inputSizeK != 1) {
-            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksK), workGroupSize1D);
+            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksK*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
                     eargs, W_reductionInput, W_reductionOutput, localMemoryReductionReal, inputSizeK);
             if (iteration % 2 == 0) {
-                W_reductionInput = OpenclReductionArrayW1;
-                W_reductionOutput = OpenclReductionArrayW2;
+                W_reductionInput = openclReductionArrayW1;
+                W_reductionOutput = openclReductionArrayW2;
             } else {
-                W_reductionInput = OpenclReductionArrayW2;
-                W_reductionOutput = OpenclReductionArrayW1;
+                W_reductionInput = openclReductionArrayW2;
+                W_reductionOutput = openclReductionArrayW1;
             }
         }
 

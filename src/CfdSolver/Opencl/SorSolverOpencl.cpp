@@ -54,7 +54,7 @@ Real reduceSumOpenclReal(
         numberOfBlocks = iceil(numberOfBlocks, blockSize1D*2);
 
         if (inputSize != 1) {
-            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks), workGroupSize1D);
+            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks*blockSize1D*2), workGroupSize1D);
             calculateSum(eargs, reductionInput, reductionOutput, localMemoryReductionReal, inputSize);
             if (iteration % 2 == 0) {
                 reductionInput = openclReductionHelperArray;
@@ -101,7 +101,7 @@ unsigned int reduceSumOpenclUint(
         numberOfBlocks = iceil(numberOfBlocks, blockSize1D*2);
 
         if (inputSize != 1) {
-            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks), workGroupSize1D);
+            cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks*blockSize1D*2), workGroupSize1D);
             calculateSum(eargs, reductionInput, reductionOutput, localMemoryReductionUint, inputSize);
             if (iteration % 2 == 0) {
                 reductionInput = openclReductionHelperArray;
@@ -162,13 +162,13 @@ void sorSolverOpencl(
                                 ClInterface::get()->rangePadding2D(kmax, imax, workGroupSize2D), workGroupSize2D);
         cl::make_kernel<int, int, int, cl::Buffer> setXZPlanesPressureBoundariesOpencl(
                 setXZPlanesPressureBoundariesOpenclKernel);
-        setXZPlanesPressureBoundariesOpencl(eargsXY, imax, jmax, kmax, P);
+        setXZPlanesPressureBoundariesOpencl(eargsXZ, imax, jmax, kmax, P);
 
         cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
                                 ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
         cl::make_kernel<int, int, int, cl::Buffer> setYZPlanesPressureBoundariesOpencl(
                 setYZPlanesPressureBoundariesOpenclKernel);
-        setYZPlanesPressureBoundariesOpencl(eargsXY, imax, jmax, kmax, P);
+        setYZPlanesPressureBoundariesOpencl(eargsYZ, imax, jmax, kmax, P);
 
 
 
@@ -179,8 +179,11 @@ void sorSolverOpencl(
                 setBoundaryConditionsPressureInDomainOpencl(setBoundaryConditionsPressureInDomainOpenclKernel);
         setBoundaryConditionsPressureInDomainOpencl(eargs3D, imax, jmax, kmax, P, Flag);
 
+        cl::EnqueueArgs eargsWholeDomain3D(
+                queue, cl::NullRange,
+                ClInterface::get()->rangePadding3D(kmax+2, jmax+2, imax+2, workGroupSize3D), workGroupSize3D);
         cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> copyPressureOpencl(copyPressureOpenclKernel);
-        copyPressureOpencl(eargs3D, imax, jmax, kmax, P, P_temp);
+        copyPressureOpencl(eargsWholeDomain3D, imax, jmax, kmax, P, P_temp);
 
 
         cl::make_kernel<Real, Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>

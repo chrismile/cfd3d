@@ -109,12 +109,12 @@ kernel void setBoundaryConditionsPressureInDomainOpencl(
 }
 
 kernel void copyPressureOpencl(int imax, int jmax, int kmax, global Real *P, global Real *P_temp) {
-    int i = get_global_id(2) + 1;
-    int j = get_global_id(1) + 1;
-    int k = get_global_id(0) + 1;
+    int i = get_global_id(2);
+    int j = get_global_id(1);
+    int k = get_global_id(0);
 
-    if (i <= imax && j <= jmax && k <= kmax) {
-        P[IDXP(i, j, k)] = P_temp[IDXP(i, j, k)];
+    if (i <= imax + 1 && j <= jmax + 1 && k <= kmax + 1) {
+        P_temp[IDXP(i, j, k)] = P[IDXP(i, j, k)];
     }
 }
 
