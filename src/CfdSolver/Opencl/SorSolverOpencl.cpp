@@ -40,8 +40,8 @@ Real reduceSumOpenclReal(
 
     cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateSum(calculateSumKernel);
 
-    cl::Buffer reductionInput = input;
-    cl::Buffer reductionOutput = openclReductionHelperArray;
+    cl::Buffer *reductionInput = &input;
+    cl::Buffer *reductionOutput = &openclReductionHelperArray;
 
     int numberOfBlocks = numValues;
     int inputSize;
@@ -55,13 +55,13 @@ Real reduceSumOpenclReal(
         if (inputSize != 1) {
             int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks*blockSize1D*2), workGroupSize1D);
-            calculateSum(eargs, reductionInput, reductionOutput, cl::Local(localMemorySize), inputSize);
+            calculateSum(eargs, *reductionInput, *reductionOutput, cl::Local(localMemorySize), inputSize);
             if (iteration % 2 == 0) {
-                reductionInput = openclReductionHelperArray;
-                reductionOutput = input;
+                reductionInput = &openclReductionHelperArray;
+                reductionOutput = &input;
             } else {
-                reductionInput = input;
-                reductionOutput = openclReductionHelperArray;
+                reductionInput = &input;
+                reductionOutput = &openclReductionHelperArray;
             }
         }
 
@@ -71,7 +71,7 @@ Real reduceSumOpenclReal(
         iteration++;
     }
 
-    queue.enqueueReadBuffer(reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&sumValue);
+    queue.enqueueReadBuffer(*reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&sumValue);
     queue.finish();
 
     return sumValue;
@@ -87,8 +87,8 @@ unsigned int reduceSumOpenclUint(
 
     cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateSum(calculateSumKernel);
 
-    cl::Buffer reductionInput = input;
-    cl::Buffer reductionOutput = openclReductionHelperArray;
+    cl::Buffer *reductionInput = &input;
+    cl::Buffer *reductionOutput = &openclReductionHelperArray;
 
     int numberOfBlocks = numValues;
     int inputSize;
@@ -102,13 +102,13 @@ unsigned int reduceSumOpenclUint(
         if (inputSize != 1) {
             int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks*blockSize1D*2), workGroupSize1D);
-            calculateSum(eargs, reductionInput, reductionOutput, cl::Local(localMemorySize), inputSize);
+            calculateSum(eargs, *reductionInput, *reductionOutput, cl::Local(localMemorySize), inputSize);
             if (iteration % 2 == 0) {
-                reductionInput = openclReductionHelperArray;
-                reductionOutput = input;
+                reductionInput = &openclReductionHelperArray;
+                reductionOutput = &input;
             } else {
-                reductionInput = input;
-                reductionOutput = openclReductionHelperArray;
+                reductionInput = &input;
+                reductionOutput = &openclReductionHelperArray;
             }
         }
 
@@ -118,7 +118,7 @@ unsigned int reduceSumOpenclUint(
         iteration++;
     }
 
-    queue.enqueueReadBuffer(reductionInput, CL_FALSE, 0, sizeof(unsigned int), (void*)&sumValue);
+    queue.enqueueReadBuffer(*reductionInput, CL_FALSE, 0, sizeof(unsigned int), (void*)&sumValue);
     queue.finish();
 
     return sumValue;

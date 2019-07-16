@@ -43,12 +43,12 @@ void calculateDtOpencl(
 
     cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateMaximum(calculateMaximumKernel);
 
-    cl::Buffer U_reductionInput = U;
-    cl::Buffer V_reductionInput = V;
-    cl::Buffer W_reductionInput = W;
-    cl::Buffer U_reductionOutput = openclReductionArrayU1;
-    cl::Buffer V_reductionOutput = openclReductionArrayV1;
-    cl::Buffer W_reductionOutput = openclReductionArrayW1;
+    cl::Buffer *U_reductionInput = &U;
+    cl::Buffer *V_reductionInput = &V;
+    cl::Buffer *W_reductionInput = &W;
+    cl::Buffer *U_reductionOutput = &openclReductionArrayU1;
+    cl::Buffer *V_reductionOutput = &openclReductionArrayV1;
+    cl::Buffer *W_reductionOutput = &openclReductionArrayW1;
 
     int numberOfBlocksI = (imax+1)*(jmax+2)*(kmax+2);
     int numberOfBlocksJ = (imax+2)*(jmax+1)*(kmax+2);
@@ -71,39 +71,39 @@ void calculateDtOpencl(
             int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksI*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
-                    eargs, U_reductionInput, U_reductionOutput, cl::Local(localMemorySize), inputSizeI);
+                    eargs, *U_reductionInput, *U_reductionOutput, cl::Local(localMemorySize), inputSizeI);
             if (iteration % 2 == 0) {
-                U_reductionInput = openclReductionArrayU1;
-                U_reductionOutput = openclReductionArrayU2;
+                U_reductionInput = &openclReductionArrayU1;
+                U_reductionOutput = &openclReductionArrayU2;
             } else {
-                U_reductionInput = openclReductionArrayU2;
-                U_reductionOutput = openclReductionArrayU1;
+                U_reductionInput = &openclReductionArrayU2;
+                U_reductionOutput = &openclReductionArrayU1;
             }
         }
         if (inputSizeJ != 1) {
             int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksJ*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
-                    eargs, V_reductionInput, V_reductionOutput, cl::Local(localMemorySize), inputSizeJ);
+                    eargs, *V_reductionInput, *V_reductionOutput, cl::Local(localMemorySize), inputSizeJ);
             if (iteration % 2 == 0) {
-                V_reductionInput = openclReductionArrayV1;
-                V_reductionOutput = openclReductionArrayV2;
+                V_reductionInput = &openclReductionArrayV1;
+                V_reductionOutput = &openclReductionArrayV2;
             } else {
-                V_reductionInput = openclReductionArrayV2;
-                V_reductionOutput = openclReductionArrayV1;
+                V_reductionInput = &openclReductionArrayV2;
+                V_reductionOutput = &openclReductionArrayV1;
             }
         }
         if (inputSizeK != 1) {
             int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksK*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
-                    eargs, W_reductionInput, W_reductionOutput, cl::Local(localMemorySize), inputSizeK);
+                    eargs, *W_reductionInput, *W_reductionOutput, cl::Local(localMemorySize), inputSizeK);
             if (iteration % 2 == 0) {
-                W_reductionInput = openclReductionArrayW1;
-                W_reductionOutput = openclReductionArrayW2;
+                W_reductionInput = &openclReductionArrayW1;
+                W_reductionOutput = &openclReductionArrayW2;
             } else {
-                W_reductionInput = openclReductionArrayW2;
-                W_reductionOutput = openclReductionArrayW1;
+                W_reductionInput = &openclReductionArrayW2;
+                W_reductionOutput = &openclReductionArrayW1;
             }
         }
 
@@ -114,9 +114,9 @@ void calculateDtOpencl(
         iteration++;
     }
 
-    queue.enqueueReadBuffer(U_reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&uMaxAbs);
-    queue.enqueueReadBuffer(V_reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&vMaxAbs);
-    queue.enqueueReadBuffer(W_reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&wMaxAbs);
+    queue.enqueueReadBuffer(*U_reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&uMaxAbs);
+    queue.enqueueReadBuffer(*V_reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&vMaxAbs);
+    queue.enqueueReadBuffer(*W_reductionInput, CL_FALSE, 0, sizeof(Real), (void*)&wMaxAbs);
     queue.finish();
 
     if (tau < Real(0.0)) {
