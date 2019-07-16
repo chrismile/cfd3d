@@ -44,6 +44,8 @@ public:
      * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
      * @param scenarioName The name of the scenario as a short string.
      * @param linearSystemSolverType The type of solver to use for solving the Pressure Poisson Equation (PPE).
+     * @param shallWriteOutput False if the user has disabled (excessive) output from the application for performance
+     * measurement purposes.
      * @param Re The Reynolds number used for the simulation.
      * @param Pr The Prandtl number used for the simulation.
      * @param omg The over-relaxation factor of the SOR solver.
@@ -74,7 +76,7 @@ public:
      * @param Flag The flag values (@see Flag.hpp for more information).
      */
     virtual void initialize(
-            const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType,
+            const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType, bool shallWriteOutput,
             Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
             Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz,

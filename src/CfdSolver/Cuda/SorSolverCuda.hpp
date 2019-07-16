@@ -35,7 +35,7 @@
  * Uses an SOR solver to compute the updated pressure values using the pressure poisson equation (PPE).
  */
 void sorSolverCuda(
-        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
+        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType, bool shallWriteOutput,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag,

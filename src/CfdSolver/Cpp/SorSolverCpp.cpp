@@ -214,7 +214,7 @@ void sorSolverIterationCpp(
 }
 
 void sorSolverCpp(
-        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
+        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType, bool shallWriteOutput,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
     if (linearSystemSolverType == LINEAR_SOLVER_SOR || linearSystemSolverType == LINEAR_SOLVER_SOR_PARALLEL) {
@@ -237,7 +237,7 @@ void sorSolverCpp(
         it++;
     }
 
-    if ((residual > eps && it == itermax) || std::isnan(residual)) {
+    if (((residual > eps && it == itermax) || std::isnan(residual)) && shallWriteOutput) {
         std::cerr << "\nSOR solver reached maximum number of iterations without converging (res: "
                 << residual << ")." << std::endl;
     }

@@ -50,6 +50,9 @@ public:
      * @param max The amount of # used in progress bar to overwrite it.
      */
     void printOutput(int n, Real t, size_t max);
+
+private:
+    int lastProgressPercent = -1;
 };
 
 

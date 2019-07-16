@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "Fatal error: Unsupported solver name \"" << solverName << "\"." << std::endl;
         exit(1);
     }
-    cfdSolver->initialize(scenarioName, linearSystemSolverType,
+    cfdSolver->initialize(scenarioName, linearSystemSolverType, shallWriteOutput,
             Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T, Flag);
 

@@ -42,17 +42,23 @@ void ProgressBar::printOutput(int n, Real t, std::size_t max) {
     std::cout << "\r" << buffer;
     std::cout.flush();
 
-    //std::cout << "\rWrote file at " << "n: " << n << " t: " << t;
     printf(output, "n: ", n, "t:", t);
     std::cout.flush();
 }
 
 void ProgressBar::printProgress(Real t, Real tEnd, std::size_t max) {
+    int currentProgressPercent = (int)((t / tEnd) * 100);
+    if (lastProgressPercent == currentProgressPercent) {
+        // Don't print anything if the percentage hasn't changed.
+        return;
+    }
+    lastProgressPercent = currentProgressPercent;
+
     const size_t suffix_length = sizeof(suffix) - 1;
     size_t progressChars = ((t / tEnd) * max);
     std::string buffer = prefix + std::string(progressChars, '#') + std::string(max - progressChars, ' ') + suffix;
 
     std::cout << "\r" << char(27) << "[2K\r" << buffer;
-    std::cout << (int)((t / tEnd) * 100) << "%\tt = " << t;
+    std::cout << currentProgressPercent << "%\tt = " << t;
     std::cout.flush();
 }

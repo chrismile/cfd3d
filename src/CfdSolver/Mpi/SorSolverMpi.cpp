@@ -208,7 +208,7 @@ void sorSolverIterationMpi(
 
 void sorSolverMpi(
         int myrank, Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
-        Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
+        bool shallWriteOutput, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
@@ -234,7 +234,7 @@ void sorSolverMpi(
     }
 
     if (myrank == 0) {
-        if ((residual > eps && it == itermax) || std::isnan(residual)) {
+        if (((residual > eps && it == itermax) || std::isnan(residual)) && shallWriteOutput) {
             std::cerr << "\nSOR solver reached maximum number of iterations without converging (res: "
                       << residual << ")." << std::endl;
         }

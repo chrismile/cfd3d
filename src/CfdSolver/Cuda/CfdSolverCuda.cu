@@ -43,13 +43,14 @@ CfdSolverCuda::CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int
 }
 
 void CfdSolverCuda::initialize(
-        const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType,
+        const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType, bool shallWriteOutput,
         Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
         Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
         Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag) {
     this->scenarioName = scenarioName;
     this->linearSystemSolverType = linearSystemSolverType;
+    this->shallWriteOutput = shallWriteOutput;
     this->Re = Re;
     this->Pr = Pr;
     this->omg = omg;
@@ -183,7 +184,8 @@ void CfdSolverCuda::calculateRs() {
 
 void CfdSolverCuda::executeSorSolver() {
     sorSolverCuda(
-            omg, eps, itermax, linearSystemSolverType, dx, dy, dz, imax, jmax, kmax,
+            omg, eps, itermax, linearSystemSolverType, shallWriteOutput,
+            dx, dy, dz, imax, jmax, kmax,
             blockSizeX, blockSizeY, blockSizeZ, blockSize1D, P, P_temp, RS, Flag,
             cudaReductionArrayResidual1, cudaReductionArrayResidual2,
             cudaReductionArrayNumCells1, cudaReductionArrayNumCells2);

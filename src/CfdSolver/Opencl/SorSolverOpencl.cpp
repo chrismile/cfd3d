@@ -127,7 +127,7 @@ unsigned int reduceSumOpenclUint(
 
 
 void sorSolverOpencl(
-        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType,
+        Real omg, Real eps, int itermax, LinearSystemSolverType linearSystemSolverType, bool shallWriteOutput,
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D,
         cl::CommandQueue &queue, cl::NDRange workGroupSize1D, cl::NDRange workGroupSize2D, cl::NDRange workGroupSize3D,
@@ -208,7 +208,7 @@ void sorSolverOpencl(
         it++;
     }
 
-    if ((residual > eps && it == itermax) || std::isnan(residual)) {
+    if (((residual > eps && it == itermax) || std::isnan(residual)) && shallWriteOutput) {
         std::cerr << "\nSOR solver reached maximum number of iterations without converging (res: "
                   << residual << ")." << std::endl;
     }
