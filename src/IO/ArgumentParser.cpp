@@ -51,6 +51,7 @@ void parseArguments(
     blockSizeX = blockSizeY = 8;
     blockSizeZ = 4;
     blockSize1D = blockSizeX * blockSizeY * blockSizeZ;
+    openclPlatformId = 0;
 
     // Go over command line arguments.
     for (int i = 1; i < argc; i += 2) {

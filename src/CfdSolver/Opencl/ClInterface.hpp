@@ -30,8 +30,8 @@
 #define CLINTERFACE_HPP_
 
 #define CL_TARGET_OPENCL_VERSION 120
-//#define CL_HPP_ENABLE_EXCEPTIONS
-//#define __CL_ENABLE_EXCEPTIONS
+#define CL_HPP_ENABLE_EXCEPTIONS
+#define __CL_ENABLE_EXCEPTIONS
 
 #include <vector>
 #include <string>

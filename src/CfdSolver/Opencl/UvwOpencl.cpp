@@ -38,11 +38,10 @@ void calculateDtOpencl(
         cl::Buffer &openclReductionArrayU1, cl::Buffer &openclReductionArrayU2,
         cl::Buffer &openclReductionArrayV1, cl::Buffer &openclReductionArrayV2,
         cl::Buffer &openclReductionArrayW1, cl::Buffer &openclReductionArrayW2,
-        cl::Buffer &localMemoryReductionReal,
         bool useTemperature) {
     Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
 
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, int> calculateMaximum(calculateMaximumKernel);
+    cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateMaximum(calculateMaximumKernel);
 
     cl::Buffer U_reductionInput = U;
     cl::Buffer V_reductionInput = V;
@@ -69,9 +68,10 @@ void calculateDtOpencl(
         numberOfBlocksK = iceil(numberOfBlocksK, blockSize1D*2);
 
         if (inputSizeI != 1) {
+            int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksI*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
-                    eargs, U_reductionInput, U_reductionOutput, localMemoryReductionReal, inputSizeI);
+                    eargs, U_reductionInput, U_reductionOutput, cl::Local(localMemorySize), inputSizeI);
             if (iteration % 2 == 0) {
                 U_reductionInput = openclReductionArrayU1;
                 U_reductionOutput = openclReductionArrayU2;
@@ -81,9 +81,10 @@ void calculateDtOpencl(
             }
         }
         if (inputSizeJ != 1) {
+            int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksJ*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
-                    eargs, V_reductionInput, V_reductionOutput, localMemoryReductionReal, inputSizeJ);
+                    eargs, V_reductionInput, V_reductionOutput, cl::Local(localMemorySize), inputSizeJ);
             if (iteration % 2 == 0) {
                 V_reductionInput = openclReductionArrayV1;
                 V_reductionOutput = openclReductionArrayV2;
@@ -93,9 +94,10 @@ void calculateDtOpencl(
             }
         }
         if (inputSizeK != 1) {
+            int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocksK*blockSize1D*2), workGroupSize1D);
             calculateMaximum(
-                    eargs, W_reductionInput, W_reductionOutput, localMemoryReductionReal, inputSizeK);
+                    eargs, W_reductionInput, W_reductionOutput, cl::Local(localMemorySize), inputSizeK);
             if (iteration % 2 == 0) {
                 W_reductionInput = openclReductionArrayW1;
                 W_reductionOutput = openclReductionArrayW2;

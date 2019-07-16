@@ -43,7 +43,6 @@ void calculateDtOpencl(
         cl::Buffer &openclReductionArrayU1, cl::Buffer &openclReductionArrayU2,
         cl::Buffer &openclReductionArrayV1, cl::Buffer &openclReductionArrayV2,
         cl::Buffer &openclReductionArrayW1, cl::Buffer &openclReductionArrayW2,
-        cl::Buffer &localMemoryReductionReal,
         bool useTemperature);
 
 #endif //CFD3D_UVWOPENCL_HPP

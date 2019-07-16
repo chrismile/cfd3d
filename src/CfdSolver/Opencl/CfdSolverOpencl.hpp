@@ -186,7 +186,6 @@ private:
     cl::Buffer openclReductionArrayW1, openclReductionArrayW2;
     cl::Buffer openclReductionArrayResidual1, openclReductionArrayResidual2;
     cl::Buffer openclReductionArrayNumCells1, openclReductionArrayNumCells2;
-    cl::Buffer localMemoryReductionReal, localMemoryReductionUint;
 };
 
 

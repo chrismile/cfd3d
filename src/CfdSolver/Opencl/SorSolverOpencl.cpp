@@ -35,11 +35,10 @@
  */
 Real reduceSumOpenclReal(
         cl::CommandQueue &queue, cl::NDRange workGroupSize1D, cl::Kernel &calculateSumKernel,
-        cl::Buffer &input, unsigned int numValues, cl::Buffer &openclReductionHelperArray,
-        cl::Buffer &localMemoryReductionReal, int blockSize1D) {
+        cl::Buffer &input, unsigned int numValues, cl::Buffer &openclReductionHelperArray, int blockSize1D) {
     Real sumValue = Real(0);
 
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, int> calculateSum(calculateSumKernel);
+    cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateSum(calculateSumKernel);
 
     cl::Buffer reductionInput = input;
     cl::Buffer reductionOutput = openclReductionHelperArray;
@@ -54,8 +53,9 @@ Real reduceSumOpenclReal(
         numberOfBlocks = iceil(numberOfBlocks, blockSize1D*2);
 
         if (inputSize != 1) {
+            int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks*blockSize1D*2), workGroupSize1D);
-            calculateSum(eargs, reductionInput, reductionOutput, localMemoryReductionReal, inputSize);
+            calculateSum(eargs, reductionInput, reductionOutput, cl::Local(localMemorySize), inputSize);
             if (iteration % 2 == 0) {
                 reductionInput = openclReductionHelperArray;
                 reductionOutput = input;
@@ -82,11 +82,10 @@ Real reduceSumOpenclReal(
  */
 unsigned int reduceSumOpenclUint(
         cl::CommandQueue &queue, cl::NDRange workGroupSize1D, cl::Kernel &calculateSumKernel,
-        cl::Buffer &input, unsigned int numValues, cl::Buffer &openclReductionHelperArray,
-        cl::Buffer &localMemoryReductionUint, int blockSize1D) {
+        cl::Buffer &input, unsigned int numValues, cl::Buffer &openclReductionHelperArray, int blockSize1D) {
     unsigned int sumValue = 0u;
 
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, int> calculateSum(calculateSumKernel);
+    cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateSum(calculateSumKernel);
 
     cl::Buffer reductionInput = input;
     cl::Buffer reductionOutput = openclReductionHelperArray;
@@ -101,8 +100,9 @@ unsigned int reduceSumOpenclUint(
         numberOfBlocks = iceil(numberOfBlocks, blockSize1D*2);
 
         if (inputSize != 1) {
+            int localMemorySize = blockSize1D * sizeof(Real);
             cl::EnqueueArgs eargs(queue, cl::NullRange, cl::NDRange(numberOfBlocks*blockSize1D*2), workGroupSize1D);
-            calculateSum(eargs, reductionInput, reductionOutput, localMemoryReductionUint, inputSize);
+            calculateSum(eargs, reductionInput, reductionOutput, cl::Local(localMemorySize), inputSize);
             if (iteration % 2 == 0) {
                 reductionInput = openclReductionHelperArray;
                 reductionOutput = input;
@@ -134,7 +134,6 @@ void sorSolverOpencl(
         cl::Buffer &P, cl::Buffer &P_temp, cl::Buffer &RS, cl::Buffer &Flag,
         cl::Buffer &openclReductionArrayResidual1, cl::Buffer &openclReductionArrayResidual2,
         cl::Buffer &openclReductionArrayNumCells1, cl::Buffer &openclReductionArrayNumCells2,
-        cl::Buffer &localMemoryReductionReal, cl::Buffer &localMemoryReductionUint,
         cl::Kernel &setXYPlanesPressureBoundariesOpenclKernel, cl::Kernel &setXZPlanesPressureBoundariesOpenclKernel,
         cl::Kernel &setYZPlanesPressureBoundariesOpenclKernel,
         cl::Kernel &setBoundaryConditionsPressureInDomainOpenclKernel, cl::Kernel &copyPressureOpenclKernel,
@@ -199,13 +198,11 @@ void sorSolverOpencl(
                 openclReductionArrayResidual1, openclReductionArrayNumCells1);
 
         residual = reduceSumOpenclReal(
-                queue, workGroupSize1D, reduceSumOpenclKernelReal,
-                openclReductionArrayResidual1, imax*jmax*kmax, openclReductionArrayResidual2,
-                localMemoryReductionReal, blockSize1D);
+                queue, workGroupSize1D, reduceSumOpenclKernelReal, openclReductionArrayResidual1,
+                imax*jmax*kmax, openclReductionArrayResidual2, blockSize1D);
         unsigned int numFluidCells = reduceSumOpenclUint(
-                queue, workGroupSize1D, reduceSumOpenclKernelUint,
-                openclReductionArrayNumCells1, imax*jmax*kmax, openclReductionArrayNumCells2,
-                localMemoryReductionUint, blockSize1D);
+                queue, workGroupSize1D, reduceSumOpenclKernelUint, openclReductionArrayNumCells1,
+                imax*jmax*kmax, openclReductionArrayNumCells2, blockSize1D);
         residual = std::sqrt(residual / Real(numFluidCells));
 
         it++;

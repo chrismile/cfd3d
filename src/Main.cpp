@@ -155,6 +155,10 @@ int main(int argc, char *argv[]) {
         TI = 0.0;
     }
 
+#ifdef REAL_FLOAT
+    eps *= 2.0f;
+#endif
+
     geometryFilename = geometryDirectory + geometryName;
     outputFilename = outputDirectory + scenarioName;
     if (myrank == 0) {

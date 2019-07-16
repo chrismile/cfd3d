@@ -190,9 +190,6 @@ void CfdSolverOpencl::initialize(
             context, CL_MEM_READ_WRITE, openclReductionArrayResidualSize1*sizeof(unsigned int));
     this->openclReductionArrayNumCells2 = cl::Buffer(
             context, CL_MEM_READ_WRITE, openclReductionArrayResidualSize2*sizeof(unsigned int));
-
-    localMemoryReductionReal = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(Real)*blockSize1D);
-    localMemoryReductionUint = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(unsigned int)*blockSize1D);
 }
 
 CfdSolverOpencl::~CfdSolverOpencl() {
@@ -270,7 +267,7 @@ Real CfdSolverOpencl::calculateDt() {
             openclReductionArrayU1, openclReductionArrayU2,
             openclReductionArrayV1, openclReductionArrayV2,
             openclReductionArrayW1, openclReductionArrayW2,
-            localMemoryReductionReal, useTemperature);
+            useTemperature);
 
     return dt;
 }
@@ -334,7 +331,6 @@ void CfdSolverOpencl::executeSorSolver() {
             P, P_temp, RS, Flag,
             openclReductionArrayResidual1, openclReductionArrayResidual2,
             openclReductionArrayNumCells1, openclReductionArrayNumCells2,
-            localMemoryReductionReal, localMemoryReductionUint,
             setXYPlanesPressureBoundariesOpenclKernel, setXZPlanesPressureBoundariesOpenclKernel,
             setYZPlanesPressureBoundariesOpenclKernel,
             setBoundaryConditionsPressureInDomainOpenclKernel, copyPressureOpenclKernel,

@@ -43,7 +43,6 @@ void sorSolverOpencl(
         cl::Buffer &P, cl::Buffer &P_temp, cl::Buffer &RS, cl::Buffer &Flag,
         cl::Buffer &openclReductionArrayResidual1, cl::Buffer &openclReductionArrayResidual2,
         cl::Buffer &openclReductionArrayNumCells1, cl::Buffer &openclReductionArrayNumCells2,
-        cl::Buffer &localMemoryReductionReal, cl::Buffer &localMemoryReductionUint,
         cl::Kernel &setXYPlanesPressureBoundariesOpenclKernel, cl::Kernel &setXZPlanesPressureBoundariesOpenclKernel,
         cl::Kernel &setYZPlanesPressureBoundariesOpenclKernel,
         cl::Kernel &setBoundaryConditionsPressureInDomainOpenclKernel, cl::Kernel &copyPressureOpenclKernel,
