@@ -1,4 +1,4 @@
 solver,time
-jacobi, 2294.92s
-sor, 4118.83s
-gauss-seidel, 2973.65s
+jacobi, 2075.86s
+sor, 3887.84s
+gauss-seidel, 2975.62s

@@ -4,18 +4,18 @@ Scenario file: ../scenarios/rayleigh_benard_convection_8-2-1.dat
 Geometry file: geometry/rayleigh_benard_convection_8-2-1.bingeo
 Output file: output/rayleigh_benard_convection_8-2-1
 Solver name: cpp
-System time elapsed: 2294.92s
+System time elapsed: 2075.86s
 sor
 Scenario name: rayleigh_benard_convection_8-2-1
 Scenario file: ../scenarios/rayleigh_benard_convection_8-2-1.dat
 Geometry file: geometry/rayleigh_benard_convection_8-2-1.bingeo
 Output file: output/rayleigh_benard_convection_8-2-1
 Solver name: cpp
-System time elapsed: 4118.83s
+System time elapsed: 3887.84s
 gauss-seidel
 Scenario name: rayleigh_benard_convection_8-2-1
 Scenario file: ../scenarios/rayleigh_benard_convection_8-2-1.dat
 Geometry file: geometry/rayleigh_benard_convection_8-2-1.bingeo
 Output file: output/rayleigh_benard_convection_8-2-1
 Solver name: cpp
-System time elapsed: 2973.65s
+System time elapsed: 2975.62s
