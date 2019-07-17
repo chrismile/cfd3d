@@ -1,0 +1,16 @@
+solver,precision,time
+cuda,float,"408,271"
+opencl,float,"843,147"
+cpp,float,"4241,72"
+mpi,float,"6495,03"
+cuda,double,"784,252"
+opencl,double,"1161,51"
+cpp,double,"4328,2"
+mpi,double,"6576,36"
+,,
+,,
+,,
+Scenario:,rayleigh_benard_convection_8-2-1,
+Resolution:,80x20x10,
+CPU:,"Intel Core i7-8700 (6C, 12T)",
+GPU:,NVIDIA GeForce GTX 1070,
