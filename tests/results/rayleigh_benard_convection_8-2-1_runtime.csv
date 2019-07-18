@@ -1,4 +1,0 @@
-solver,SOR,jacobi,Gauss-Seidel
-openmp,3887.84,2075.86,2975.62
-mpi,2800.14,2700.35,2672.43
-cuda,,,

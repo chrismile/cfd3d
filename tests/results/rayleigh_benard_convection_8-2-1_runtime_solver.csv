@@ -1,0 +1,7 @@
+platform,precision,time
+openmp,SOR,3887.84
+mpi,SOR,2800.14
+openmp,jacobi,2075.86
+mpi,jacobi,2700.35
+openmp,Gauss-Seidel,2975.62
+mpi,Gauss-Seidel,2672.43
