@@ -52,7 +52,7 @@ p <- p + labs(x = "Threads", y = "Speedup")
 p <- p + guides(color = guide_legend(reverse=TRUE))
 p <- p + geom_line()
 p <- p + geom_point()
-p <- p + scale_x_continuous(breaks=c(4,8,16,28))
+p <- p + scale_x_continuous(breaks=c(1,2,4,8,16,28))
 p <- p + scale_y_continuous(breaks=c(2,4,6,8,10,12,14,16))
 p <- p + theme_tufte()
 p <- p + theme(plot.title = element_text(hjust = 0.5))
@@ -61,3 +61,32 @@ p
 
 ggsave('graphs/speedup_OpenMP_double.svg', p, width=7, height=4, units='in')
 ggsave('graphs/speedup_OpenMP_double.pdf', p, width=7, height=4, units='in')
+
+#Speedup Graph MPI
+data <- read.csv("results/speedup_MPI.csv", check.names=FALSE, header=TRUE, sep=',')
+
+for(i in 1:nrow(data)) 
+{
+  data[i, "speedup"] <- data[data$threads == 1, "time"]/data[i, "time"]
+}
+levels(data$group)
+#data$group <- factor(data$group, levels = rev(levels(data$group)))
+data
+
+p <- ggplot(data=data, mapping=aes(x=threads, y=speedup))
+p <- p + scale_colour_manual(values=c("#333333","#E37222","#0065BD", "#A2AD00"))
+p <- p + labs(title = "Speedup MPI")
+p <- p + labs(subtitle = "Rayleigh Benard Convection (80x20x10)")
+p <- p + labs(x = "Threads", y = "Speedup")
+p <- p + guides(color = guide_legend(reverse=TRUE))
+p <- p + geom_line()
+p <- p + geom_point()
+p <- p + scale_x_continuous(breaks=c(1,27,56))
+p <- p + scale_y_continuous(breaks=c(2,4,6,8,10,12,14,16,18,20))
+p <- p + theme_tufte()
+p <- p + theme(plot.title = element_text(hjust = 0.5))
+p <- p + theme(plot.subtitle = element_text(hjust = 0.5))
+p
+
+ggsave('graphs/speedup_MPI.svg', p, width=7, height=4, units='in')
+ggsave('graphs/speedup_MPI.pdf', p, width=7, height=4, units='in')
