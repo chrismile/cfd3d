@@ -5,8 +5,8 @@ openmp (i7-8700),float,4241.72
 mpi (i7-8700),float,6495.03
 cuda (GTX 1070),float,408.271
 opencl (GTX 1070),float,843.147
-openmp (E5-2697),double,
-mpi (E5-2697),double,
+openmp (E5-2697),double,1993.86
+mpi (E5-2697),double,2793.78
 openmp (i7-8700),double,4328.2
 mpi (i7-8700),double,6576.36
 cuda (GTX 1070),double,784.252

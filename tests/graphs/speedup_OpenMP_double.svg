@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 504.00 288.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    line, polyline, path, rect, circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ=='>
+    <rect x='31.63' y='22.57' width='466.89' height='234.85' />
+  </clipPath>
+</defs>
+<polyline points='52.85,246.75 68.57,244.14 100.01,33.25 162.89,231.66 288.66,220.24 477.30,211.41 ' style='stroke-width: 1.07; stroke-linecap: butt;' clip-path='url(#cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ==)' />
+<circle cx='52.85' cy='246.75' r='1.95pt' style='stroke-width: 0.71; fill: #000000;' clip-path='url(#cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ==)' />
+<circle cx='68.57' cy='244.14' r='1.95pt' style='stroke-width: 0.71; fill: #000000;' clip-path='url(#cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ==)' />
+<circle cx='100.01' cy='33.25' r='1.95pt' style='stroke-width: 0.71; fill: #000000;' clip-path='url(#cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ==)' />
+<circle cx='162.89' cy='231.66' r='1.95pt' style='stroke-width: 0.71; fill: #000000;' clip-path='url(#cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ==)' />
+<circle cx='288.66' cy='220.24' r='1.95pt' style='stroke-width: 0.71; fill: #000000;' clip-path='url(#cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ==)' />
+<circle cx='477.30' cy='211.41' r='1.95pt' style='stroke-width: 0.71; fill: #000000;' clip-path='url(#cpMzEuNjMwN3w0OTguNTIxfDI1Ny40MjV8MjIuNTc0OQ==)' />
+<defs>
+  <clipPath id='cpMHw1MDR8Mjg4fDA='>
+    <rect x='0.00' y='0.00' width='504.00' height='288.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='22.30' y='246.96' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>2</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='22.30' y='241.54' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>4</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='22.30' y='236.13' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>6</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='22.30' y='230.72' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>8</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='17.90' y='225.31' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>10</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='17.90' y='219.89' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>12</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='17.90' y='214.48' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>14</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='17.90' y='209.07' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>16</text></g>
+<polyline points='28.89,244.04 31.63,244.04 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='28.89,238.63 31.63,238.63 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='28.89,233.22 31.63,233.22 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='28.89,227.81 31.63,227.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='28.89,222.39 31.63,222.39 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='28.89,216.98 31.63,216.98 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='28.89,211.57 31.63,211.57 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='28.89,206.15 31.63,206.15 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='100.01,260.17 100.01,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='162.89,260.17 162.89,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='288.66,260.17 288.66,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<polyline points='477.30,260.17 477.30,257.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MDR8Mjg4fDA=)' />
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='97.81' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>4</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='160.69' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>8</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='284.26' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>16</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='472.90' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>28</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='247.36' y='280.12' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='35.43px' lengthAdjust='spacingAndGlyphs'>Threads</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text transform='translate(12.76,158.94) rotate(-90)' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='37.88px' lengthAdjust='spacingAndGlyphs'>Speedup</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='216.86' y='14.22' style='font-size: 13.20px; font-family: TeX Gyre Termes;' textLength='96.43px' lengthAdjust='spacingAndGlyphs'>Speedup OpenMP</text></g>
+</svg>
