@@ -206,7 +206,7 @@ The boundary conditions for the pressure derived from momentum equation, resulti
 \subsection{CUDA}
 First of all, on consumer hardware, the CUDA solver and the OpenCL solver had considerable advantages over the CPU solvers. They can be seen in figure~\ref{fig:platforms} which where run on on a NVIDIA GeForce GTX 1070, a 6-core Intel Core i7-8700 and on a 28-core Intel Xeon E5-2697 from the Linux Cluster of the LRZ. Graphics cards offer a much higher number of cores available for applications to utilize compared to similar prized-processors. However, GPUs execute workloads in a SIMD-fashion in lockstep, which means that a thread warp (that usually consists of 32 or 64 individual threads) would need to go the same route in the code without any diverging branches to reach the maximum possible performance. Furthermore, another problem is that especially NVIDIA limits their double-precision performance on consumer-level graphics cards to create an additional sales rationale for their high-priced workstation cards.\\
 \\
-In theory, according to [1], the throughput of arithmetic double-precision floating point instructions on the GTX 1070 would be 1 : 32. However, the CUDA solver proved to be only approximately 48\text{\%} slower in our test case for double-precision floating points values compared to single-precision floating point values, which can be seen in figure .... This can be probably attributed to the application being memory throughput limited for floating point operations rather than being limited by the throughput of arithmetic instructions.\\
+In theory, according to \cite{cuda-guide}, the throughput of arithmetic double-precision floating point instructions on the GTX 1070 would be 1 : 32. However, the CUDA solver proved to be only approximately 48\text{\%} slower in our test case for double-precision floating points values compared to single-precision floating point values, which can be seen in figure .... This can be probably attributed to the application being memory throughput limited for floating point operations rather than being limited by the throughput of arithmetic instructions.\\
 \\
 On modern CPU architectures, the floating point units (FPUs) don’t offer separate modules for single-precision and double-precision instructions anymore. Thus, as expected, the CPU solvers were only approximately 2\text{\%} slower for double-precision floating-point numbers compared to single-precision floating-point numbers. The slight reduce in performance can probably also be attributed to the higher memory throughput of 64-bit wide double-precision floating-point numbers.\\
 \\
@@ -229,7 +229,7 @@ For the parallel solvers, we decided to implement and compare a Jacobi, Gauss-Se
 \\
 Jacobi is the solver to converge slowest (measured by the number of iterations, not the runtime on multiple cores). However, its greatest advantage is that it can be easily parallelized, as it has no data dependencies within one iteration.\\
 \\
-Gauss-Seidel converges in less iterations than Jacobi, but is harder to parallelize. The vanilla SOR algorithm without any adaptions generally cannot run in parallel. Thus, Gauss-Seidel only has an advantage over Jacobi when using a low number of cores. We tested the parallel SOR solver by Cunha and Hopkins [2], but for sparse system matrices like in our case, the sequential update step in the end of the algorithm quickly becomes limiting for a high number of cores due to Amdahl’s law.\\
+Gauss-Seidel converges in less iterations than Jacobi, but is harder to parallelize. The vanilla SOR algorithm without any adaptions generally cannot run in parallel. Thus, Gauss-Seidel only has an advantage over Jacobi when using a low number of cores. We tested the parallel SOR solver by Cunha and Hopkins \cite{parallel-sor}, but for sparse system matrices like in our case, the sequential update step in the end of the algorithm quickly becomes limiting for a high number of cores due to Amdahl’s law.\\
 \\
 SOR is an algorithm based on Gauss-Seidel that couples the algorithm with an over-relaxation factor that can increase the convergence speed. In our program, we tested multiple values, and got the best results for an over-relaxation factor of 1.5. In our tests, which can be seen in figure~\ref{fig:solver}, Gauss-Seidel was faster than SOR, which we didn't expect. Again, SOR suffers from the same weakness as Gauss-Seidel that it can’t be parallelized easily. Thus, again, for a high number of cores, the Jacobi solver was able to beat the SOR solver.\\
 \\
@@ -290,12 +290,12 @@ We observed that we could set velocity to zero lying right on the boundary. More
 
 \begin{thebibliography}{999}
 
+\bibitem{cuda-guide}
+NVIDIA. 2019. CUDA C Programming Guide. \url{https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#arithmetic-instructions} visited on 2019-07-18.
 \bibitem{parallel-sor}
 Rudnei Dias da Cunha, Tim Hopkins. 1991. Parallel Overrelaxation Algorithms for Systems of Linear Equations.
 \bibitem{griebel}
 M. Griebel, T. Dornseifer, and T. Neunhoeffer. SIAM, Philadelphia, 1998. Numerical Simulation in Fluid Dynamics, a Practical Introduction.
-\bibitem{cuda-guide}
-NVIDIA. 2019. CUDA C Programming Guide. \url{https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#arithmetic-instructions} visited on 2019-07-18.
 \end{thebibliography}
 \end{document}
 The boundary conditions for the pressure derived from momentum equation, resulting in discrete Neumann conditions. The boundary conditions for temperature derived from energy equation, resulting in discrete Dirichlet Condition for cold wall and hot wall separately. For example, left wall case: $P_{0,j,k}$ = $P_{1,j,k}$.  $T_{0,j,k}$ = 2*T_c/T_h – $T_{1,j\end{document}
