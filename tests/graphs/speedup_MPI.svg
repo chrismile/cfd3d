@@ -52,7 +52,7 @@
 <g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='50.65' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='4.40px' lengthAdjust='spacingAndGlyphs'>1</text></g>
 <g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='249.10' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>27</text></g>
 <g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='472.90' y='268.18' style='font-size: 8.80px; fill: #4D4D4D; font-family: TeX Gyre Termes;' textLength='8.80px' lengthAdjust='spacingAndGlyphs'>56</text></g>
-<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='247.36' y='280.12' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='35.43px' lengthAdjust='spacingAndGlyphs'>Threads</text></g>
+<g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='243.69' y='280.12' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='42.77px' lengthAdjust='spacingAndGlyphs'>Processes</text></g>
 <g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text transform='translate(12.76,166.52) rotate(-90)' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='37.88px' lengthAdjust='spacingAndGlyphs'>Speedup</text></g>
 <g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='174.18' y='29.86' style='font-size: 11.00px; font-family: TeX Gyre Termes;' textLength='181.79px' lengthAdjust='spacingAndGlyphs'>Rayleigh Benard Convection (80x20x10)</text></g>
 <g clip-path='url(#cpMHw1MDR8Mjg4fDA=)'><text x='228.96' y='14.22' style='font-size: 13.20px; font-family: TeX Gyre Termes;' textLength='72.23px' lengthAdjust='spacingAndGlyphs'>Speedup MPI</text></g>
