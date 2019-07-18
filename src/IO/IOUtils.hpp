@@ -41,6 +41,6 @@
  */
 void prepareOutputDirectory(
         const std::string &outputDirectory, const std::string &outputFilename, const std::string &outputFormatEnding,
-        const std::string &lineDirectory, const std::string &geometryDirectory);
+        const std::string &lineDirectory, const std::string &geometryDirectory, bool shallWriteOutput);
 
 #endif //CFD3D_IOUTILS_HPP

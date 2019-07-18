@@ -34,7 +34,7 @@
 
 void prepareOutputDirectory(
         const std::string &outputDirectory, const std::string &outputFilename, const std::string &outputFormatEnding,
-        const std::string &lineDirectory, const std::string &geometryDirectory) {
+        const std::string &lineDirectory, const std::string &geometryDirectory, bool shallWriteOutput) {
     // Create the directories.
     if (!boost::filesystem::exists(outputDirectory)) {
         if (!boost::filesystem::create_directory(outputDirectory)) {
@@ -56,17 +56,19 @@ void prepareOutputDirectory(
     }
 
     // Delete all previous output files for the selected scenario.
-    boost::filesystem::path dir(outputDirectory);
-    boost::filesystem::directory_iterator end;
-    for (boost::filesystem::directory_iterator it(dir); it != end; ++it) {
-        std::string filename = it->path().string();
+    if (shallWriteOutput) {
+        boost::filesystem::path dir(outputDirectory);
+        boost::filesystem::directory_iterator end;
+        for (boost::filesystem::directory_iterator it(dir); it != end; ++it) {
+            std::string filename = it->path().string();
 #ifdef WIN32
-        for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
-            if (*it == '\\') *it = '/';
-        }
+            for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
+                if (*it == '\\') *it = '/';
+            }
 #endif
-        if (boost::ends_with(filename, outputFormatEnding) && boost::starts_with(filename, outputFilename)) {
-            boost::filesystem::remove(it->path());
+            if (boost::ends_with(filename, outputFormatEnding) && boost::starts_with(filename, outputFilename)) {
+                boost::filesystem::remove(it->path());
+            }
         }
     }
 }
