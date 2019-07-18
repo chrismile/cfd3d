@@ -6,12 +6,13 @@
 \usepackage{mathtools, nccmath}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
+\usepackage{hyperref}
 
 \title{3-Dimensional Navier-Stokes in C++ Framework and Parallelization Techniques Comparison }
-\date{2019\\ May}
-\author{Christoph Neuhauser\\ Computer Science , Technical University of Munich 
-\and Stefan Haas\\ Computer Science , Technical University of Munich
-\and Kwok Ping Ng\\ Data Engineering and Analytics , Technical University of Munich}
+\date{July 22, 2019}
+\author{Christoph Neuhauser\\ Computer Science, Technical University of Munich 
+\and Stefan Haas\\ Computer Science, Technical University of Munich
+\and Kwok Ping Ng\\ Data Engineering and Analytics, Technical University of Munich}
 \begin{document}
 \maketitle
 
@@ -289,10 +290,12 @@ We observed that we could set velocity to zero lying right on the boundary. More
 
 \begin{thebibliography}{999}
 
-\bibitem{lamport94}
-Nvidia,https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html\text{\#}arithmetic-instructions,5.4.1. Arithmetic Instructions
-\bibitem{lamport94}
-Rudnei Dias da Cunha, Tim Hopkins: “Parallel Overrelaxation Algorithms for Systems of Linear Equations” (1991)
+\bibitem{parallel-sor}
+Rudnei Dias da Cunha, Tim Hopkins. 1991. Parallel Overrelaxation Algorithms for Systems of Linear Equations.
+\bibitem{griebel}
+M. Griebel, T. Dornseifer, and T. Neunhoeffer. SIAM, Philadelphia, 1998. Numerical Simulation in Fluid Dynamics, a Practical Introduction.
+\bibitem{cuda-guide}
+NVIDIA. 2019. CUDA C Programming Guide. \url{https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#arithmetic-instructions} visited on 2019-07-18.
 \end{thebibliography}
 \end{document}
 The boundary conditions for the pressure derived from momentum equation, resulting in discrete Neumann conditions. The boundary conditions for temperature derived from energy equation, resulting in discrete Dirichlet Condition for cold wall and hot wall separately. For example, left wall case: $P_{0,j,k}$ = $P_{1,j,k}$.  $T_{0,j,k}$ = 2*T_c/T_h – $T_{1,j\end{document}
