@@ -171,7 +171,8 @@ int main(int argc, char *argv[]) {
 
     std::string outputFormatEnding = outputFileWriter->getOutputFormatEnding();
 
-    prepareOutputDirectory(outputDirectory, outputFilename, outputFormatEnding, lineDirectory, geometryDirectory);
+    prepareOutputDirectory(
+            outputDirectory, outputFilename, outputFormatEnding, lineDirectory, geometryDirectory, shallWriteOutput);
 
     Real n = 0;
     Real t = 0;
