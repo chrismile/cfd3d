@@ -1,13 +1,31 @@
-\documentclass[10pt]{article}
+\documentclass{article}%
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 
 \usepackage[fleqn]{amsmath}
 \usepackage{xcolor}
+\usepackage{mathtools, nccmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{graphicx}
+\graphicspath{ {./images/}  }
 
+\title{3-Dimensional Navier-Stokes in C++ Framework and Parallelization Techniques Comparison }
+\date{2019\\ May}
+\author{Christoph Neuhauser\\ Computer Science , Technical University of Munich 
+\and Stefan Haas\\ Computer Science , Technical University of Munich
+\and Kwok Ping Ng\\ Data Engineering and Analytics , Technical University of Munich}
 \begin{document}
+\maketitle
 
-\section{Momentum equations}
+\section{Introduction}
 
+After experiencing 2D Navier-Stokes Equation, Navier-Stokes Equation in 3D has been implemented in our group project.  C++ framework was replacing the traditional C programming. Then 3D calculation for velocity(u,v,w), force(F,G,H) ,pressure, residual and temperature has been reformed.  Due to increase in the complexity of arbitrary geometry in 3D, a new algorithm was implemented.\\
+Our another goal was to elaborate how the CFD solver could be parallelized in a very efficient way. For this, we chose to compare a solver written in C++ with OpenMP (short: cpp solver), a solver using MPI for distributed-memory parallelism, a solver using CUDA on NVIDIA GPUs and a solver using OpenCL, which can be run on NVIDIA GPUs, Intel iGPUs and AMD GPUs. In the following section, we will compare these solvers regarding their best performance results, their scalability and their parallel efficiency.
+
+\section{3D incompressible Navier-Stokes equation}
+Non-stationary incompressible viscous fluid flow is described in 3-dimensional Navier-Stokes Equation. The analysis was carried out in Cartesian coordinates. The quantities are computed as u,v,w and F,G,H as x,y,z directions.
+
+\subsection{3D Momentum equations}
 \begin{equation}
 \frac{\partial u}{\partial t} + \frac{\partial p}{\partial x} = 
 \frac{1}{Re} \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} + \frac{\partial^2 u}{\partial z^2} \right) - 
@@ -32,25 +50,15 @@ g_y
 g_z
 \end{equation}
 
-\section{Continuity equation}
-
+\subsection{3D Continuity equation}
 \begin{equation}
 \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} + \frac{\partial w}{\partial z} = 0
 \end{equation}
 
-\section{Energy equation}
-
-\begin{equation}
-\frac{\partial T}{\partial t} = 
-\frac{1}{Re} \frac{1}{Pr} \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} + \frac{\partial^2 T}{\partial z^2} \right) - 
-\frac{\partial(uT)}{\partial x} -\frac{\partial (vT)}{\partial y} - 
-\frac{\partial (wT)}{\partial z}
-\end{equation}
-
-\section{F, G, H}
-
-\subsection{Equations}
-
+\subsection{Force F and velocity u calculation in x direction}
+Velocity w is essentially considered into the calculation then, the discretization for derivatives of u,v and w has to be with respect to directions x,y and z respectively.\\
+\\
+F:
 \begin{equation}
 \begin{split}
 F_{i,j,k} =
@@ -58,38 +66,20 @@ u_{i,j,k} & + \delta t \Bigl(
 \frac{1}{Re} \left( \left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 u}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 u}{\partial z^2}\right]_{i,j,k} \right) - 
 \left[\frac{\partial(u^2)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (uv)}{\partial y}\right]_{i,j,k} - 
 \left[\frac{\partial (uw)}{\partial z}\right]_{i,j,k}\\
-& + \textcolor{red}{g_x} - \frac{\beta}{2} \left( T^{(n+1)}_{i,j,k} + T^{(n+1)}_{i+1,j,k} \right) g_x \Bigr)\\
+& + {g_x} - \frac{\beta}{2} \left( T^{(n+1)}_{i,j,k} + T^{(n+1)}_{i+1,j,k} \right) g_x \Bigr)\\
+& i = 1,\ldots,imax-1; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax
+\end{split}
+\end{equation}
+u:\\
+\begin{equation}
+\begin{split}
+u^{(n+1)}_{i,j,k} = & F^{(n)}_{i,j,k} - \frac{\delta t}{\delta x}\left(p^{(n+1)}_{i+1,j,k} - p^{(n+1)}_{i,j,k}\right)\\
 & i = 1,\ldots,imax-1; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax
 \end{split}
 \end{equation}
 
-\begin{equation}
-\begin{split}
-G_{i,j,k} = 
-v_{i,j,k} & + \delta t \Bigl(
-\frac{1}{Re} \left( \left[\frac{\partial^2 v}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 v}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 v}{\partial z^2}\right]_{i,j,k} \right) - 
-\left[\frac{\partial(uv)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (v^2)}{\partial y}\right]_{i,j,k} - 
-\left[\frac{\partial (vw)}{\partial z}\right]_{i,j,k}\\
-& + \textcolor{red}{g_y} - \frac{\beta}{2} \left( T^{(n+1)}_{i,j,k} + T^{(n+1)}_{i,j+1,k} \right) g_y \Bigr)\\
-& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax-1; \quad k = 1,\ldots,kmax
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-H_{i,j,k} = 
-w_{i,j,k} & + \delta t \Bigl(
-\frac{1}{Re} \left( \left[\frac{\partial^2 w}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 w}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 w}{\partial z^2}\right]_{i,j,k} \right) - 
-\left[\frac{\partial(uw)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (vw)}{\partial y}\right]_{i,j,k} - 
-\left[\frac{\partial (w^2)}{\partial z}\right]_{i,j,k}\\
-& + \textcolor{red}{g_z} - \frac{\beta}{2} \left( T^{(n+1)}_{i,j,k} + T^{(n+1)}_{i,j,k+1} \right) g_y \Bigr)\\
-& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax-1
-\end{split}
-\end{equation}
-
-\subsection{Discretization}
-\subsubsection{F}
-
+\subsection{Discretization for F}
+The midpoints of 3 directions will be towards to evaluate the derivative of u,v and w:\\
 \begin{equation}
 \left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k} =
 \frac{u_{i+1,j,k} - 2u_{i,j,k} + u_{i-1,j,k}}{(\delta x)^2}
@@ -115,7 +105,7 @@ w_{i,j,k} & + \delta t \Bigl(
 \right) + \\
 & \frac{\gamma}{\delta x}
 \left(
-	\frac{|u_{i,j,k}+u_{i+1,j,k}|}{2} \frac{(u_{i,j,k}-u_{i+1,j,k})}{2} +
+	\frac{|u_{i,j,k}+u_{i+1,j,k}|}{2} \frac{(u_{i,j,k}-u_{i+1,j,k})}{2} -
 	\frac{|u_{i-1,j,k}+u_{i,j,k}|}{2} \frac{(u_{i-1,j,k}-u_{i,j,k})}{2}
 \right)
 \end{split}
@@ -152,199 +142,22 @@ w_{i,j,k} & + \delta t \Bigl(
 \right)
 \end{split}
 \end{equation}
-
-\subsubsection{G}
-\begin{equation}
-\left[\frac{\partial^2 v}{\partial x^2}\right]_{i,j,k} =
-\frac{v_{i+1,j,k} - 2v_{i,j,k} + v_{i-1,j,k}}{(\delta x)^2}
-\end{equation}
-
-\begin{equation}
-\left[\frac{\partial^2 v}{\partial y^2}\right]_{i,j,k} =
-\frac{v_{i,j+1,k} - 2v_{i,j,k} + v_{i,j-1,k}}{(\delta y)^2}
-\end{equation}
-
-\begin{equation}
-\left[\frac{\partial^2 v}{\partial z^2}\right]_{i,j,k} =
-\frac{v_{i,j,k+1} - 2v_{i,j,k} + v_{i,j,k-1}}{(\delta z)^2}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-\left[\frac{\partial(uv)}{\partial x}\right]_{i,j,k} = &
-\frac{1}{\delta x}
-\left(
-	\frac{(u_{i,j,k}+u_{i,j+1,k})}{2} \frac{(v_{i,j,k}+v_{i+1,j,k})}{2} -
-	\frac{(u_{i-1,j,k}+u_{i-1,j+1,k})}{2} \frac{(v_{i-1,j,k}+v_{i,j,k})}{2}
-\right) + \\
-& \frac{1}{\delta x}
-\left(
-	\frac{|u_{i,j,k}+u_{i,j+1,k}|}{2} \frac{(v_{i,j,k}-v_{i+1,j,k})}{2} -
-	\frac{|u_{i-1,j,k}+u_{i-1,j+1,k}|}{2} \frac{(v_{i-1,j,k}-v_{i,j,k})}{2}
-\right)
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-\left[\frac{\partial(v^2)}{\partial y}\right]_{i,j,k} = &
-\frac{1}{\delta y}
-\left(
-	\left(\frac{v_{i,j,k}+v_{i,j+1,k}}{2}\right)^2 -
-	\left(\frac{v_{i,j-1,k}+v_{i,j,k}}{2}\right)^2
-\right) + \\
-& \frac{\gamma}{\delta x}
-\left(
-	\frac{|v_{i,j,k}+v_{i,j+1,k}|}{2} \frac{(v_{i,j,k}-v_{i,j+1,k})}{2} +
-	\frac{|v_{i,j-1,k}+v_{i,j,k}|}{2} \frac{(v_{i,j-1,k}-u_{i,j,k})}{2}
-\right)
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-\left[\frac{\partial(vw)}{\partial z}\right]_{i,j,k} = &
-\frac{1}{\delta z}
-\left(
-	\frac{(w_{i,j,k}+w_{i,j+1,k})}{2} \frac{(v_{i,j,k}+v_{i,j,k+1})}{2} -
-	\frac{(w_{i,j,k-1}+w_{i,j+1,k-1})}{2} \frac{(v_{i,j,k-1}+v_{i,j,k})}{2}
-\right) + \\
-& \frac{\gamma}{\delta z}
-\left(
-	\frac{|w_{i,j,k}+w_{i,j+1,k}|}{2} \frac{(v_{i,j,k}-v_{i,j,k+1})}{2} -
-	\frac{|w_{i,j,k-1}+w_{i,j+1,k-1}|}{2} \frac{(v_{i,j,k-1}-v_{i,j,k})}{2}
-\right)
-\end{split}
-\end{equation}
-
-\subsubsection{H}
-\begin{equation}
-\left[\frac{\partial^2 w}{\partial x^2}\right]_{i,j,k} =
-\frac{w_{i+1,j,k} - 2w_{i,j,k} + w_{i-1,j,k}}{(\delta x)^2}
-\end{equation}
-
-\begin{equation}
-\left[\frac{\partial^2 w}{\partial y^2}\right]_{i,j,k} =
-\frac{w_{i,j+1,k} - 2w_{i,j,k} + w_{i,j-1,k}}{(\delta y)^2}
-\end{equation}
-
-\begin{equation}
-\left[\frac{\partial^2 w}{\partial z^2}\right]_{i,j,k} =
-\frac{w_{i,j,k+1} - 2w_{i,j,k} + w_{i,j,k-1}}{(\delta z)^2}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-\left[\frac{\partial(uw)}{\partial x}\right]_{i,j,k} = &
-\frac{1}{\delta x}
-\left(
-	\frac{(u_{i,j,k}+u_{i,j,k+1})}{2} \frac{(w_{i,j,k}+w_{i+1,j,k})}{2} -
-	\frac{(u_{i-1,j,k}+u_{i-1,j,k+1})}{2} \frac{(w_{i-1,j,k}+w_{i,j,k})}{2}
-\right) + \\
-& \frac{1}{\delta x}
-\left(
-	\frac{|u_{i,j,k}+u_{i,j,k+1}|}{2} \frac{(w_{i,j,k}-w_{i+1,j,k})}{2} -
-	\frac{|u_{i-1,j,k}+u_{i-1,j,k+1}|}{2} \frac{(w_{i-1,j,k}-w_{i,j,k})}{2}
-\right)
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-\left[\frac{\partial(vw)}{\partial y}\right]_{i,j,k} = &
-\frac{1}{\delta y}
-\left(
-	\frac{(v_{i,j,k}+v_{i,j,k+1})}{2} \frac{(w_{i,j,k}+w_{i,j+1,k})}{2} -
-	\frac{(v_{i,j-1,k}+v_{i,j-1,k+1})}{2} \frac{(w_{i,j-1,k}+w_{i,j,k})}{2}
-\right) + \\
-& \frac{\gamma}{\delta y}
-\left(
-	\frac{|v_{i,j,k}+v_{i,j,k+1}|}{2} \frac{(w_{i,j,k}-w_{i,j+1,k})}{2} -
-	\frac{|v_{i,j-1,k}+v_{i,j-1,k+1}|}{2} \frac{(w_{i,j-1,k}-w_{i,j,k})}{2}
-\right)
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-\left[\frac{\partial(w^2)}{\partial z}\right]_{i,j,k} = &
-\frac{1}{\delta z}
-\left(
-	\left(\frac{w_{i,j,k}+w_{i,j,k+1}}{2}\right)^2 -
-	\left(\frac{w_{i,j,k-1}+w_{i,j,k}}{2}\right)^2
-\right) + \\
-& \frac{\gamma}{\delta x}
-\left(
-	\frac{|w_{i,j,k}+v_{i,j,k+1}|}{2} \frac{(w_{i,j,k}-w_{i,j,k+1})}{2} +
-	\frac{|w_{i,j,k-1}+w_{i,j,k}|}{2} \frac{(w_{i,j,k-1}-w_{i,j,k})}{2}
-\right)
-\end{split}
-\end{equation}
-
-
-\section{SOR solver}
-\begin{equation}
-\begin{split}
-p^{it+1}_{i,j,k} = & (1 - \omega) p^{it}_{i,j,k} + \frac{\omega}{2 (\frac{1}{(\delta x)^2} + \frac{1}{(\delta y)^2} + \frac{1}{(\delta z)^2})} \left( \frac{p^{it}_{i+1,j,k} + p^{it+1}_{i-1,j,k}}{(\delta x)^2} + \frac{p^{it}_{i,j+1,k} + p^{it+1}_{i,j-1,k}}{(\delta y)^2} + \frac{p^{it}_{i,j,k+1} + p^{it+1}_{i,j,k-1}}{(\delta z)^2} - rs_{i,j,k} \right)\\
-& it = 1,\ldots,itmax; \quad i = 1,\ldots,imax; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-res := & \left( \sum_{i=1}^{imax} \sum_{j=1}^{jmax} \sum_{k=1}^{kmax} \left( \frac{p_{i+1,j,k} - 2 p_{i,j,k} + p_{i-1,j,k}}{(\delta x)^2} + \frac{p_{i,j+1,k} - 2 p_{i,j,k} + p_{i,j-1,k}}{(\delta y)^2} + \frac{p_{i,j,k+1} - 2 p_{i,j,k} + p_{i,j,k-1}}{(\delta z)^2} \right. \right. \\
-& \left. \left. - rs_{i,j,k} \right)^2 / (imax \cdot jmax \cdot kmax) \right)^{1/2}
-\end{split}
-\end{equation}
-
-\section{calculate uvw}
-\begin{equation}
-\begin{split}
-u^{(n+1)}_{i,j,k} = & F^{(n)}_{i,j,k} - \frac{\delta t}{\delta x}\left(p^{(n+1)}_{i+1,j,k} - p^{(n+1)}_{i,j,k}\right)\\
-& i = 1,\ldots,imax-1; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-v^{(n+1)}_{i,j,k} = & G^{(n)}_{i,j,k} - \frac{\delta t}{\delta y}\left(p^{(n+1)}_{i,j+1,k} - p^{(n+1)}_{i,j,k}\right)\\
-& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax-1; \quad k = 1,\ldots,kmax
-\end{split}
-\end{equation}
-
-\begin{equation}
-\begin{split}
-w^{(n+1)}_{i,j,k} = & H^{(n)}_{i,j,k} - \frac{\delta t}{\delta z}\left(p^{(n+1)}_{i,j,k+1} - p^{(n+1)}_{i,j,k}\right)\\
-& i = 1,\ldots,imax; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax-1
-\end{split}
-\end{equation}
-
-\section{Energy Equation}
-\subsection{equation}
-
+\subsection{Energy equation and Discretization}
+The energy equation in 3D and its discretization are easy to compute:\\
+\\
+Energy Equation:\\
 \begin{equation}
 T^{(n+1)}_{i,j,k} = T^{(n)}_{i,j,k} +  \delta t \left(
-\frac{1}{Re} \frac{1}{Pr} \left( \left[\frac{\partial^2 T}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial z^2}\right]_{i,j,k} \right) - 
+\frac{1}{Re} \frac{1}{Pr} \left( \left[\frac{\partial^2 T}{\partial x^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial y^2}\right]_{i,j,k} + \left[\frac{\partial^2 T}{\partial z^2}\right]_{i,j,k} \right) 
+- 
 \left[\frac{\partial(uT)}{\partial x}\right]_{i,j,k} -\left[\frac{\partial (vT)}{\partial y}\right]_{i,j,k} - 
 \left[\frac{\partial (wT)}{\partial z}\right]_{i,j,k}
 \right)
 \end{equation}
-
-\subsection{Discretization}
-
+Discretization:\\
 \begin{equation}
 \left[\frac{\partial^2 T}{\partial x^2}\right]_{i,j,k} =
 \frac{T_{i+1,j,k} - 2T_{i,j,k} + T_{i-1,j,k}}{(\delta x)^2}
-\end{equation}
-
-\begin{equation}
-\left[\frac{\partial^2 T}{\partial y^2}\right]_{i,j,k} =
-\frac{T_{i,j+1,k} - 2T_{i,j,k} + T_{i,j-1,k}}{(\delta y)^2}
-\end{equation}
-
-\begin{equation}
-\left[\frac{\partial^2 T}{\partial z^2}\right]_{i,j,k} =
-\frac{T_{i,j,k+1} - 2T_{i,j,k} + T_{i,j,k-1}}{(\delta z)^2}
 \end{equation}
 
 \begin{equation}
@@ -362,37 +175,138 @@ T^{(n+1)}_{i,j,k} = T^{(n)}_{i,j,k} +  \delta t \left(
 \right)
 \end{split}
 \end{equation}
-
+\subsection{SOR Solver}
+Pressure:\\
 \begin{equation}
 \begin{split}
-\left[\frac{\partial(vT)}{\partial y}\right]_{i,j,k} = &
-\frac{1}{\delta y}
-\left(
-	v_{i,j,k} \frac{T_{i,j,k}+T_{i,j+1,k}}{2} -
-	v_{i,j-1,k} \frac{T_{i,j-1,k}+T_{i,j,k}}{2}
-\right) + \\
-& \frac{\gamma}{\delta y}
-\left(
-	|v_{i,j,k}| \frac{T_{i,j,k}-T_{i,j+1,k}}{2} -
-	|v_{i,j-1,k}| \frac{T_{i,j-1,k}-T_{i,j,k}}{2}
-\right)
+p^{it+1}_{i,j,k} = & (1 - \omega) p^{it}_{i,j,k} + \frac{\omega}{2 (\frac{1}{(\delta x)^2} + \frac{1}{(\delta y)^2} + \frac{1}{(\delta z)^2})} \left( \frac{p^{it}_{i+1,j,k} + p^{it+1}_{i-1,j,k}}{(\delta x)^2} + \frac{p^{it}_{i,j+1,k} + p^{it+1}_{i,j-1,k}}{(\delta y)^2} + \frac{p^{it}_{i,j,k+1} + p^{it+1}_{i,j,k-1}}{(\delta z)^2} - rs_{i,j,k} \right)\\
+& it = 1,\ldots,itmax; \quad i = 1,\ldots,imax; \quad j = 1,\ldots,jmax; \quad k = 1,\ldots,kmax
 \end{split}
 \end{equation}
-
+Residual:\\
 \begin{equation}
 \begin{split}
-\left[\frac{\partial(wT)}{\partial z}\right]_{i,j,k} = &
-\frac{1}{\delta z}
-\left(
-	w_{i,j,k} \frac{T_{i,j,k}+T_{i,j,k+1}}{2} -
-	w_{i,j,k-1} \frac{T_{i,j,k-1}+T_{i,j,k}}{2}
-\right) + \\
-& \frac{\gamma}{\delta z}
-\left(
-	|w_{i,j,k}| \frac{T_{i,j,k}-T_{i,j,k+1}}{2} -
-	|w_{i,j,k-1}| \frac{T_{i,j,k-1}-T_{i,j,k}}{2}
-\right)
+res := & \left( \sum_{i=1}^{imax} \sum_{j=1}^{jmax} \sum_{k=1}^{kmax} \left( \frac{p_{i+1,j,k} - 2 p_{i,j,k} + p_{i-1,j,k}}{(\delta x)^2} + \frac{p_{i,j+1,k} - 2 p_{i,j,k} + p_{i,j-1,k}}{(\delta y)^2} + \frac{p_{i,j,k+1} - 2 p_{i,j,k} + p_{i,j,k-1}}{(\delta z)^2} \right. \right. \\
+& \left. \left. - rs_{i,j,k} \right)^2 / (imax \cdot jmax \cdot kmax) \right)^{1/2}
 \end{split}
 \end{equation}
+\section{Boundary Conditions}
+\subsection{No Slip} 
+Under the no-slip conditions, zero velocities at boundary. So we can set it to zero lying right on the boundary. Moreover, the boundary value zero is achieved by averaging the values on both sides of the boundary. For example, left wall case: $u_{0,j,k}$ = 0 ,$v_{0,j,k}$ = -$v_{1,j,k}$, $w_{0,j,k}$ = -$w_{1,j,k}$.
+\subsection{Free Slip} 
+It is the case when fluid flow freely parallel to the boundary but cannot across the boundary. In 3D cases, the fluid freely flow along two dimension but cannot across remaining direction. For example, the velocity u of left wall which is normal(perpendicular) to the wall is 0. Its boundary condition is to set as $u_{0,j,k}$ = 0. And other boundary conditions to set $v_{0,j,k}$ = $v_{1,j,k}$, $w_{0,j,k}$ = $w_{1,j,k}$. See Figure 1 below.
+\\
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=6cm, height=5cm]{freeslip}
+    \caption{Free-slip}
+    \label{fig:mesh1}
+\end{figure}
+\\
+\subsection{Outflow}
+the normal velocity derivatives are set to 0 at boundary. So the total velocity does not change in the direction normal to the boundary. The values of velocities at boundary can be set equal to the neighbouring velocities inside the region. For example,left wall case: $u_{0,j,k}$ = $u_{1,j,k}$ ,$v_{0,j,k}$ = $v_{1,j,k}$, $w_{0,j,k}$ = $w_{1,j,k}$
+\subsection{Boundary conditions for pressure and temperature}
+The boundary conditions for the pressure derived from momentum equation, resulting in discrete Neumann conditions. The boundary conditions for temperature derived from energy equation, resulting in discrete Dirichlet Condition for cold wall and hot wall separately. For example, left wall case: $P_{0,j,k}$ = $P_{1,j,k}$.  $T_{0,j,k}$ = $2*T_c/T_h$ – $T_{1,j,k}$.
+
+\section{3D incompressible Navier-Stokes equations CUDA Solver}
+First of all, on consumer hardware, the CUDA solver and the OpenCL solver had considerable advantages over the CPU solvers. All examples in figure .....? were run on a NVIDIA GeForce GTX 1070 and a 6-core Intel Core i7-8700. Graphics cards offer a much higher number of cores available for applications to utilize compared to similar prized-processors. However, GPUs execute workloads in a SIMD-fashion in lockstep, which means that a thread warp (that usually consists of 32 or 64 individual threads) would need to go the same route in the code without any diverging branches to reach the maximum possible performance. Furthermore, another problem is that especially NVIDIA limits their double-precision performance on consumer-level graphics cards to create an additional sales rationale for their high-priced workstation cards.\\
+\\
+In theory, according to [1], the throughput of arithmetic double-precision floating point instructions on the GTX 1070 would be 1 : 32. However, the CUDA solver proved to be only approximately 48\text{\%} slower in our test case for double-precision floating points values compared to single-precision floating point values. This can be probably attributed to the application being memory throughput limited for floating point operations rather than being limited by the throughput of arithmetic instructions.\\
+\\
+On modern CPU architectures, the floating point units (FPUs) don’t offer separate modules for single-precision and double-precision instructions anymore. Thus, as expected, the CPU solvers were only approximately 2\text{\%} slower for double-precision floating-point numbers compared to single-precision floating-point numbers. The slight reduce in performance can probably also be attributed to the higher memory throughput of 64-bit wide double-precision floating-point numbers.\\
+\\
+When comparing the scalability of the solvers, it is of course clear that the MPI solver offers the best scalability, as a memory-distributed program can be scaled to an arbitrary amount of cores. The weakness of the MPI solver comes into play when comparing it to a shared-memory implementation of the CFD solver on systems with a moderate number of cores. On our 6-core test system, the MPI solver was approximately 35\text{\%} slower than the OpenMP solver. This is of course due to the communication overhead for the MPI solver. The advantage of MPI comes into play when utilizing multiple nodes of a cluster at once with distributed memory.
+When using two nodes and 56 cores, the MPI solver (with a domain decomposition of 7x4x2) gave by far the best performance results of all CPU solvers, but the CUDA solver still was 85\text{\%} faster on the NVIDIA GeForce GTX 1070 even when using double-precision performance. There are probably two reasons for that. First of all, we used strong scaling with a fixed global problem size of 80x20x10 cells. It is of course comprehensible that the overhead for communication becomes really large for this high number of processes and a small local domain size. Secondly, the CUDA solver is able to very efficiently utilize the SIMD functionality of the GPU to provide a really large number of threads accessing very fast shared GDDR5 memory without hardly any communication overhead.\\
+\\
+When parallelizing the CFD solver, it is also necessary to parallelize the solver used for the linear system of equations of the Pressure Poisson Equation (PPE).\\
+\\
+For the parallel solvers, we decided to implement and compare a Jacobi, Gauss-Seidel (GS) and successive over-relaxation (SOR) solver. Each of the solvers has its own advantages and disadvantages.\\
+\\
+Jacobi is the solver to converge slowest (measured by the number of iterations, not the runtime on multiple cores). However, its greatest advantage is that it can be easily parallelized, as it has no data dependencies within one iteration.\\
+\\
+Gauss-Seidel converges in less iterations than Jacobi, but is harder to parallelize. The vanilla SOR algorithm without any adaptions generally cannot run in parallel. Thus, Gauss-Seidel only has an advantage over Jacobi when using a low number of cores. We tested the parallel SOR solver by Cunha and Hopkins [2], but for sparse system matrices like in our case, the sequential update step in the end of the algorithm quickly becomes limiting for a high number of cores due to Amdahl’s law.\\
+\\
+SOR is an algorithm based on Gauss-Seidel that couples the algorithm with an over-relaxation factor that can increase the convergence speed. In our program, we tested multiple values, and got the best results for an over-relaxation factor of 1.5. Again, SOR suffers from the same weakness as Gauss-Seidel that it can’t be parallelized easily. Thus, again, for a high number of cores, the Jacobi solver was able to beat the SOR solver.\\
+\\
+Another method for solving a system of linear equations mentioned less often is the Jacobi over-relaxation (JOR), which transfers the principle of SOR to the Jacobi solver. However, for over-relaxation factors greater than 1, the solution would not converge. Thus, we rejected the JOR solver, as it can only increase convergence speed for a factor larger than 1. In the literature, we couldn’t find any other source having success with JOR coupled with a factor greater than 1.\\
+\\
+Taking all factors mentioned above into account, we decided to select the Jacobi solver as the standard solver in our program, as it converges considerably faster in the same time compared to the SOR solver for a high number of cores.
+\section{Arbitrary Geometries}
+\subsection{u,v,w}
+Unlike the 2D cases which is necessarily to set the arbitrary geometries of velocities for 8 directions(4 lines + 4 corners of a square), there are total 26 directions (12 lines, 8 corners and 6 faces of a cube) to be set. Then setting it in 3D brought difficulties if we used the method from ws2.  Therefore, we designed a new algorithm to set arbitrary geometries.\\
+\\
+We observed that we could set velocity to zero lying right on the boundary. Moreover, the boundary value zero was achieved by averaging the values on both sides of the boundary. It was the similar case to set no-slip boundary condition on walls.  We set u,v and w separately . The flag of direction was checked if the velocity was lying on. If yes, the velocity was set to zero. Then an indicator was inserted that this velocity was not changed anymore. Otherwise, the velocity was set to equal to the negative of the neighbouring velocity.  For example, here is pseudo code of the arbitrary geometry setting of u on left wall.
+
+\begin{algorithm}
+\caption{Algorithm on left boundary}\label{euclid}
+\begin{algorithmic}
+\For{over i,j,k}
+	\State $a\gets 0$
+	\State $b\gets 0$ 
+	\If {Flag is not fluid}
+    	\If {Left flag is obstacle}
+    		\State $u_{i-1,j,k}\gets 0$
+    		\State $a\gets 1$
+    	\EndIf
+    	\If {Up flag is obstacle}
+    		\If {$a == 0$}
+    			\State $u_{i-1,j,k}\gets -u_{i-1,j+1,k}$
+    			\State $b\gets 1$
+    		\EndIf	
+    	\EndIf
+    	\If {Down flag is obstacle}
+    		\If {$a == 0$}
+    			\State $u_{i-1,j,k}\gets -u_{i-1,j-1,k}$
+    			\State $b\gets 1$
+    		\EndIf	
+    	\EndIf 
+    	\If {Back flag is obstacle}
+    		\If {$a == 0$ and $b==0$}
+    			\State $u_{i-1,j,k}\gets -u_{i-1,j,k-1}$
+    			\State $b\gets 1$
+    		\EndIf	
+    	\EndIf    	   	
+    	\If {Front flag is obstacle}
+    		\If {$a == 0$ and $b==0$}
+    			\State $u_{i-1,j,k}\gets -u_{i-1,j,k+1}$
+    			\State $b\gets 1$
+    		\EndIf	
+    	\EndIf       	
+\EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Pressure and Temperature}
+Setting the arbitrary geometry of pressure and temperature are using the same methodology. As the pressure and temperature at the direction is the average of the 6 faces involved, for example, $B\_URF$(up, right and front)’s pressure $P_{ijk} = (P_{i+1jk} + P_{ij+1k} + P_{ijk+1})/3$. So each flag of direction is checked and accumulated .  To sum up the pressure/temperature and take the average of them. 
+
+\begin{algorithm}
+\caption{Algorithm on Pressure}\label{euclid}
+\begin{algorithmic}
+\For{over i,j,k}
+	\State $numDirectFlag\gets 0$
+	\State $P\_temp\gets 0$
+	\If {Flag is not fluid}
+    	\If {Left flag is obstacle}
+    		\State $P\_temp += P_{i+1,j,k}$
+    		\State $numDirectFlag++$
+    	\EndIf
+    \State{...}	    	
+    \State $P_{i,j,k}= P_temp / numDirectFlag$
+\EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\begin{thebibliography}{999}
+
+\bibitem{lamport94}
+Nvidia,https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html\text{\#}arithmetic-instructions,5.4.1. Arithmetic Instructions
+\bibitem{lamport94}
+Rudnei Dias da Cunha, Tim Hopkins: “Parallel Overrelaxation Algorithms for Systems of Linear Equations” (1991)
+\end{thebibliography}
 
 \end{document}
+
