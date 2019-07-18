@@ -250,7 +250,7 @@ After we chose the best solver we tested the performance when using a different 
 
 The results of the tests with OpenMP can be seen in figure~\ref{fig:speedup_openmp}. The speedup is exactly as we expected. At the beginning the performance scales very good while the speedup at the end degrades. At 28 cores the speedup is approximately 14.
 
-To test the MPI implementation we used one node for the first test. The reason we used 27 out of the 28 cores is that the domain could be split better with this amount of mpi processes, since 
+To test the MPI implementation we used one node for the first test. The reason we used 27 out of the 28 cores is that the domain could be split better with this amount of mpi processes, since the domain can be split in 3x3x3 parts, whereas with 28 processes it would be split into 7x2x2 part. We also tested both variants and the version with 27 processes was faster. With 27 cores the speedup is around ten which is not as good as with OpenMP, but when using two nodes with 56 cores altogether, the performance scales almost linearly with an speedup of approximately 19, even though the domain is split in 7x4x2 part, which is not optimal.
 
 
 \begin{figure}[htb]
