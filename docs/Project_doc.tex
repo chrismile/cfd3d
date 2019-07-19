@@ -403,7 +403,7 @@ Free-slip means that the fluid can flow freely parallel to the boundarym but can
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.4\linewidth]{images/BoundaryConditions.pdf}
-\caption{Write caption here.}
+\caption{Boundary conditions for an obstacle wall on the left.}
 \label{fig:boundaryConditions}
 \end{figure}
 
@@ -465,14 +465,14 @@ To test the MPI implementation, we used one node for the first test. The reason 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=1\linewidth]{../tests/graphs/speedup_OpenMP_double.pdf}
-\caption{Write caption here.}
+\caption{All cases tested on a E2-2697 with 28 cores.}
 \label{fig:speedup_openmp}
 \end{figure}
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=1\linewidth]{../tests/graphs/speedup_MPI.pdf}
-\caption{Write caption here.}
+\caption{All cases tested on one or two nodes using a E2-2697 with 28 cores.}
 \label{fig:speedup_MPI}
 \end{figure}
 
@@ -530,7 +530,7 @@ We observed that we could set velocities lying right on the boundary to zero. Mo
 When setting the arbitrary geometry boundary conditions of pressure and temperature, the same methodology is used. As the pressure and temperature at the direction are the average of the values of the fluid neighbors involved, for example, \textit{B\_URF} (up, right and front)’s pressure is $P_{ijk} = (P_{i+1jk} + P_{ij+1k} + P_{ijk+1})/3$. So each flag of direction is checked separately and the values of the neighboring fluid cells are averaged.
 
 \begin{algorithm}
-\caption{Algorithm on Pressure}\label{euclid}
+\caption{Algorithm for pressure boundary conditions}\label{euclid}
 \begin{algorithmic}
 \For{over i,j,k}
 	\State $numDirectFlag\gets 0$
@@ -541,7 +541,7 @@ When setting the arbitrary geometry boundary conditions of pressure and temperat
     		\State $numDirectFlag++$
     	\EndIf
     \State{...}	    	
-    \State $P_{i,j,k}= P_temp / numDirectFlag$
+    \State $P_{i,j,k}= P\_temp / numDirectFlag$
 \EndIf
 \EndFor
 \end{algorithmic}
