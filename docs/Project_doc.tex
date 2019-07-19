@@ -7,7 +7,14 @@
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{graphicx}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue}
+}
 \graphicspath{ {./images/}  }
+
 
 \title{3-Dimensional Navier-Stokes in C++ Framework and Parallelization Techniques Comparison }
 \date{2019\\ May}
@@ -20,7 +27,196 @@
 \section{Introduction}
 
 After experiencing 2D Navier-Stokes Equation, Navier-Stokes Equation in 3D has been implemented in our group project.  C++ framework was replacing the traditional C programming. Then 3D calculation for velocity(u,v,w), force(F,G,H) ,pressure, residual and temperature has been reformed.  Due to increase in the complexity of arbitrary geometry in 3D, a new algorithm was implemented.\\
-Our another goal was to elaborate how the CFD solver could be parallelized in a very efficient way. For this, we chose to compare a solver written in C++ with OpenMP (short: cpp solver), a solver using MPI for distributed-memory parallelism, a solver using CUDA on NVIDIA GPUs and a solver using OpenCL, which can be run on NVIDIA GPUs, Intel iGPUs and AMD GPUs. In the following section, we will compare these solvers regarding their best performance results, their scalability and their parallel efficiency.
+Our another goal was to elaborate how the CFD solver could be parallelized in a very efficient way. For this, we chose to compare a solver written in C++ with OpenMP (short: cpp solver), a solver using MPI for distributed-memory parallelism, a solver using CUDA on NVIDIA GPUs and a solver using OpenCL, which can be run on NVIDIA GPUs, Intel iGPUs and AMD GPUs. In the following section, we will descirbe the code and how to use it as well as compare these solvers regarding their best performance results, their scalability and their parallel efficiency.
+
+\section{Code description}
+\subsection{Code framwork}
+The C++ Code is structured as follows. In the main directory is the main function where the main algorithm resides, which is basically the same algorithm like in the 2D CFD-Code. There also is the Defines.hpp file, which defines the floating-point precision as well as some used define statements for the use of indices.
+
+Then there is the IO folder which holds everthing that has to do with input and output. Escpecially the VTK as well as the NetCDF writer and some classes to read and process different input formats for the geometry.
+
+The importest part is the CdfSolver folder, where all solvers as well as the solver interface is. The interface defines the following methods:\pagebreak
+
+\begin{lstlisting}[language=C++,frame=single]
+void initialize(
+    const std::string &scenarioName,
+    LinearSystemSolverType linearSystemSolverType,
+    bool shallWriteOutput, Real Re, Real Pr, Real omg, Real eps,
+    int itermax, Real alpha, Real beta, Real dt, Real tau,
+    Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
+    int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
+    Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag)
+\end{lstlisting}
+which copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
+
+\begin{lstlisting}[language=C++,frame=single]
+void setBoundaryValues()
+\end{lstlisting}
+which sets the boundary condition values of U, V, W and T using the Flag array.
+
+\begin{lstlisting}[language=C++,frame=single]
+void setBoundaryValuesScenarioSpecific()
+\end{lstlisting}
+which sets special boundary conditions (typically something like inflow) specific to the different scenarios.
+
+\begin{lstlisting}[language=C++,frame=single]
+Real calculateDt()
+\end{lstlisting}
+which calculates the smallest possible (plus some safety margin) time step for the simulation at the current state.
+
+\begin{lstlisting}[language=C++,frame=single]
+void calculateTemperature()
+\end{lstlisting}
+which updates the temperature values (using an intermediate copy of the temperature from the last iteration).
+
+\begin{lstlisting}[language=C++,frame=single]
+void calculateFgh()
+\end{lstlisting}
+which computes the values in the helper array F, G and H necessary to compute the right-hand-side of the Pressure.
+
+\begin{lstlisting}[language=C++,frame=single]
+void calculateRs()
+\end{lstlisting}
+which computes the right-hand-side of the Pressure Poisson Equation (PPE).
+
+\begin{lstlisting}[language=C++,frame=single]
+void executeSorSolver()
+\end{lstlisting}
+which executes the SOR solver (successive over-relaxation) for solving the Pressure Poisson Equation (PPE).
+
+\begin{lstlisting}[language=C++,frame=single]
+void calculateUvw()
+\end{lstlisting}
+which updates the values in the arrays U, V and W.
+
+\begin{lstlisting}[language=C++,frame=single]
+void getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T)
+\end{lstlisting}
+which copies the values of the internal representations of U, V, W, P and T to the specified arrays. This is necessary when outputting the simulation results at certain time intervals.
+
+The CfdSolver directory also features classes to work with the flag array as well as to initiallise the arrays for the different variables.
+
+Then there are the folders which have the solvers in them. Each solver has the same basic structure even though some have additional files and classes for different functions. Each solver has a file to manage the boundary values, the actuall CfdSolver class which mostly initiallizes variables and calls the function or kernels of the other files, the SOR solver file, where the SOR, Jacobi and/or the Gauss-Seidel solver are defined and finally the UVW file, which calculates everything what has to do with u,v or w, the temperature or the timestep.
+
+\subsection{Building the code}
+The program is compiled with cmake. To build it some packages have to installed (see README for more information how to install them on ubuntu) and the following commands have to be issued within the repository directory:
+\begin{lstlisting}[language=bash,frame=single]
+mkdir build
+cd build
+cmake ..
+make
+\end{lstlisting}
+
+To use the different solvers some arguments have to be given to cmake. The following list shows these arguments:
+\begin{itemize}
+\item For MPI support: cmake .. -DUSE\_MPI=ON
+\item For CUDA support: cmake .. -DUSE\_CUDA=ON
+\item For OpenCL support: cmake .. -DUSE\_OPENCL=ON
+\end{itemize}
+These arguments can also be used together for the program to support multiple solvers at once.
+
+\subsection{Running the program}
+When executing the program multiple arguments can be passed on the command line. These arguments are shown in the following list as well as their respective valid values.
+\begin{itemize}
+\item scenario:
+	\begin{itemize}
+	\item driven\_cavity
+	\item flow\_over\_step
+	\item natural\_convection
+	\item rayleigh\_benard\_convection\_8-2-1
+	\item rayleigh\_benard\_convection\_8-2-2
+	\item rayleigh\_benard\_convection\_8-2-4
+	\item rayleigh\_benard\_convection\_2d
+	\item single\_tower\item terrain\_1
+	\end{itemize}
+\item solver:
+	\begin{itemize}
+	\item cpp
+	\item mpi
+	\item cuda
+	\item opencl
+	\end{itemize}
+\item outputformat:
+	\begin{itemize}
+	\item netcdf
+	\item vtk (= vtk-binary)
+	\item vtk-binary
+	\item vtk-ascii
+	\end{itemize}
+\item output:
+	\begin{itemize}
+	\item true
+	\item false (whether to write an output file)
+	\end{itemize}
+\item linsolver:
+	\begin{itemize}
+	\item jacobi
+	\item sor
+	\item gauss-seidel
+	\end{itemize}
+\item tracestreamlines:
+	\begin{itemize}
+	\item false
+	\item true
+	\end{itemize}
+\item tracestreaklines:
+	\begin{itemize}
+	\item false
+	\item true
+	\end{itemize}
+\item tracepathlines:
+	\begin{itemize}
+	\item false
+	\item true
+	\end{itemize}
+\item numparticles:
+	\begin{itemize}
+	\item any positive integer number
+	\end{itemize}
+\item numproc
+	\begin{itemize}
+	\item Must be used with the MPI solver. Specifys the number of processes in x, y and z direction and must match the total number of MPI processes.
+	\item possible values: positive integer positive integer positive integer
+	\item example: --numproc = 2 2 2
+	\end{itemize}
+\item blocksize
+	\begin{itemize}
+	\item Can be used with the CUDA or the OpenCL solver. Specifys the block size in x, y and z direction.
+	\item possible values: positive integer positive integer positive integer
+	\item example: --blocksize = 4 4 4
+	\end{itemize}
+\item platformid
+	\begin{itemize}
+	\item Can be used with the OpenCL solver. Specifys the ID of the OpenCL platform to use. If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found outwith the command line tool 'clinfo'.
+	\item possible values: integer
+	\end{itemize}
+\end{itemize}
+
+\noindent The standard values for the arguments are:
+\begin{itemize}
+\item scenario: driven\_cavity
+\item solver: cpp
+\item outputformat: vtk
+\item outputformat: true
+\item linsolver: jacobi
+\item tracestreamlines: false
+\item tracestreaklines: false
+\item tracepathlines: false
+\item numparticles: 1000
+\item blocksize: 8 8 4
+\item platformid: 0
+\end{itemize}
+
+Here are some examples on how the code can be run:
+\begin{lstlisting}[language=bash, frame=single]
+./cfd3d --scenario driven_cavity --solver cpp
+mpirun -np 8 ./cfd3d --solver mpi --numproc 2 2 2
+./cfd3d --scenario driven_cavity --solver cuda
+\end{lstlisting}
+
+
+
+
 
 \section{3D incompressible Navier-Stokes equation}
 Non-stationary incompressible viscous fluid flow is described in 3-dimensional Navier-Stokes Equation. The analysis was carried out in Cartesian coordinates. The quantities are computed as u,v,w and F,G,H as x,y,z directions.
