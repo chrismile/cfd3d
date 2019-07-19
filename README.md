@@ -82,9 +82,8 @@ Here are some examples of how to call the program.
 ```
 ./cfd3d --scenario driven_cavity --solver cpp
 mpirun -np 8 ./cfd3d --scenario driven_cavity --solver mpi --numproc 2 2 2
-./cfd3d --scenario driven_cavity --solver cuda --tracestreamlines true --numparticles 1000
-./cfd3d --scenario natural_convection --solver cuda --tracestreaklines true --numparticles 4000
-./cfd3d --scenario natural_convection --solver cuda --tracepathlines true
+./cfd3d --scenario driven_cavity --solver cuda
+./cfd3d --scenario natural_convection --solver cuda --tracestreamlines true --numparticles 1000
 ```
 
 The solver name is either 'cpp' for the C++ OpenMP-accelerated solver, 'cuda' for the NVIDIA CUDA solver and 'mpi' for
@@ -93,8 +92,8 @@ Please note that for the CUDA solver and the MPI solver, the program needs to be
 
 The valid values for all possible arguments are:
 * scenario: driven_cavity, flow_over_step, natural_convection, rayleigh_benard_convection_8-2-1,
-rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4, rayleigh_benard_convection_2d,
-single_tower, terrain_1
+rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4,
+single_tower, terrain_1, fuji_san, zugspitze
 * solver: cpp, mpi, cuda, opencl
 * outputformat: netcdf, vtk (= vtk-binary), vtk-binary, vtk-ascii
 * output: true, false (whether to write an output file)
