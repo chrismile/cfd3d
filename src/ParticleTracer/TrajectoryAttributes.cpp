@@ -245,7 +245,7 @@ Real trilinearInterpolation_dUdz(
 }
 Real trilinearInterpolation_dVdx(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
-        int imax, int jmax, int kmax, Real dx, Real *U) {
+        int imax, int jmax, int kmax, Real dx, Real *V) {
     rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(1, 1, 0.5);
     glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
@@ -299,7 +299,7 @@ Real trilinearInterpolation_dWdx(
 }
 Real trilinearInterpolation_dWdy(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
-        int imax, int jmax, int kmax, Real dy, Real *U) {
+        int imax, int jmax, int kmax, Real dy, Real *W) {
     rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(0.5, 1, 1);
     glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
