@@ -440,7 +440,7 @@ Jacobi is the solver to converge slowest (measured by the number of iterations, 
 
 Gauss-Seidel converges in less iterations than Jacobi, but is harder to parallelize. The vanilla SOR algorithm without any adaptions generally cannot run in parallel. Thus, Gauss-Seidel only has an advantage over Jacobi when using a low number of cores. We tested the parallel SOR solver by Cunha and Hopkins \cite{parallel-sor}, but for sparse system matrices like in our case, the sequential update step in the end of the algorithm quickly becomes limiting for a high number of cores due to Amdahl’s law.
 
-SOR is an algorithm based on Gauss-Seidel that couples the algorithm with an over-relaxation factor that can increase the convergence speed. In our program, we tested multiple values, and got the best results for an over-relaxation factor of 1.5. In our tests, which can be seen in figure~\ref{fig:solver}, Gauss-Seidel was faster than SOR, which we didn't expect. Again, SOR suffers from the same weakness as Gauss-Seidel that it can’t be parallelized easily. Thus, again, for a high number of cores, the Jacobi solver was able to beat the SOR solver.
+SOR is an algorithm based on Gauss-Seidel that couples the algorithm with an over-relaxation factor that can increase the convergence speed. In our program, we tested multiple values, and generally got the best results for an over-relaxation factor of 1.5. In our tests, which can be seen in figure~\ref{fig:solver}, Gauss-Seidel was faster than SOR, which is not what one might expect. However, when testing multiple over-relaxation factors, we noticed that the test scenario we chose (Rayleigh-Benard convection) needs a much lower over-relaxation factor than other scenarios. For an over-relaxation factor of 1.2, it performed slightly better than Gauss-Seidel. Again, SOR suffers from the same weakness as Gauss-Seidel that it can’t be parallelized easily. Thus, again, for a high number of cores, the Jacobi solver was able to beat the SOR solver.
 
 Another method for solving a system of linear equations mentioned less often is the Jacobi over-relaxation (JOR), which transfers the principle of SOR to the Jacobi solver. However, for over-relaxation factors greater than 1, the solution would not converge. Thus, we rejected the JOR solver, as it can only increase convergence speed for a factor larger than 1. In the literature, we couldn’t find any other source having success with JOR coupled with a factor greater than 1.
 
@@ -462,14 +462,14 @@ The results of the tests with OpenMP can be seen in figure~\ref{fig:speedup_open
 To test the MPI implementation, we used one node for the first test. The reason we used 27 out of the 28 cores is that the domain could be split better with this amount of mpi processes, since the domain can be split in 3x3x3 parts, whereas with 28 processes it would be split into 7x2x2 part. We also tested both variants and the version with 27 processes was faster. With 27 cores the speedup is around ten, which is not as good as with OpenMP, but when using two nodes with 56 cores altogether, the performance scales almost linearly with an speedup of approximately 19, even though the domain is split in 7x4x2 parts, which is not optimal.
 
 
-\begin{figure}[htb]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth]{../tests/graphs/speedup_OpenMP_double.pdf}
 \caption{All cases tested on a E2-2697 with 28 cores.}
 \label{fig:speedup_openmp}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth]{../tests/graphs/speedup_MPI.pdf}
 \caption{All cases tested on one or two nodes using a E2-2697 with 28 cores.}

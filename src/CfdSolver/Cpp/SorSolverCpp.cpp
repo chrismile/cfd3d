@@ -218,8 +218,8 @@ void sorSolverCpp(
         Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
     if (linearSystemSolverType == LINEAR_SOLVER_SOR || linearSystemSolverType == LINEAR_SOLVER_SOR_PARALLEL) {
-        // Successive over-relaxation based on Gauss-Seidl. A factor of 1.5 proved to give the best results here.
-        omg = 1.5;
+        // Successive over-relaxation based on Gauss-Seidl. A factor of 1.2 proved to give the best results here.
+        omg = 1.2;
     } else {
         // A method named JOR (Jacobi over-relaxation) with omega != 1 exists, but doesn't converge for this problem.
         omg = 1.0;
