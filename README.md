@@ -99,8 +99,6 @@ single_tower, terrain_1, fuji_san, zugspitze
 * output: true, false (whether to write an output file)
 * linsolver: jacobi, sor, gauss-seidel
 * tracestreamlines: false, true
-* tracestreaklines: false, true
-* tracepathlines: false, true
 * numparticles: any positive integer number
 
 The standard values for the arguments are:
@@ -110,9 +108,7 @@ The standard values for the arguments are:
 * outputformat: true
 * linsolver: jacobi
 * tracestreamlines: false
-* tracestreaklines: false
-* tracepathlines: false
-* numparticles: 1000
+* numparticles: 500
 
 Additionally, for the MPI solver, the user MUST also specify the number of processes in x, y and z direction (which must
 match the total number of MPI processes):

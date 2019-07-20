@@ -41,7 +41,7 @@ Then there is the IO folder which contains everthing that has to do with input a
 
 The folder ParticleTracer contains classes for tracing the characteristic lines of the flow. However, in the end we didn't use them for our simulation, as we decided to directly use ParaView for tracing the particles and omitted the idea for time reasons to use a program Christoph created for visualizing large line sets created by our application.
 
-The most important part of the program is the CdfSolver folder, where all solvers as well as the solver interface is located. The interface defines the following methods:\pagebreak
+The most important part of the program is the CdfSolver folder, where all solvers as well as the solver interface is located. The interface defines the following methods:
 
 \begin{lstlisting}[language=C++,frame=single]
 void initialize(
@@ -167,35 +167,25 @@ When executing the program, multiple arguments can be passed on the command line
 	\item false
 	\item true
 	\end{itemize}
-\item tracestreaklines:
-	\begin{itemize}
-	\item false
-	\item true
-	\end{itemize}
-\item tracepathlines:
-	\begin{itemize}
-	\item false
-	\item true
-	\end{itemize}
 \item numparticles:
 	\begin{itemize}
 	\item any positive integer number
 	\end{itemize}
 \item numproc
 	\begin{itemize}
-	\item Must be used with the MPI solver. Specifys the number of processes in x, y and z direction and must match the total number of MPI processes.
+	\item Must be used with the MPI solver. Specifies the number of processes in x, y and z direction and must match the total number of MPI processes.
 	\item possible values: positive integer positive integer positive integer
 	\item example: --numproc = 2 2 2
 	\end{itemize}
 \item blocksize
 	\begin{itemize}
-	\item Can be used with the CUDA or the OpenCL solver. Specifys the block size in x, y and z direction.
+	\item Can be used with the CUDA or the OpenCL solver. Specifies the block size in x, y and z direction.
 	\item possible values: positive integer positive integer positive integer
 	\item example: --blocksize = 4 4 4
 	\end{itemize}
 \item platformid
 	\begin{itemize}
-	\item Can be used with the OpenCL solver. Specifys the ID of the OpenCL platform to use. If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found outwith the command line tool 'clinfo'.
+	\item Can be used with the OpenCL solver. Specifies the ID of the OpenCL platform to use. If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found outwith the command line tool 'clinfo'.
 	\item possible values: integer
 	\end{itemize}
 \end{itemize}
@@ -208,9 +198,7 @@ When executing the program, multiple arguments can be passed on the command line
 \item outputformat: true
 \item linsolver: jacobi
 \item tracestreamlines: false
-\item tracestreaklines: false
-\item tracepathlines: false
-\item numparticles: 1000
+\item numparticles: 500
 \item blocksize: 8 8 4
 \item platformid: 0
 \end{itemize}
@@ -225,6 +213,7 @@ mpirun -np 8 ./cfd3d --solver mpi --numproc 2 2 2
 
 
 
+\newpage
 
 \section{3D Incompressible Navier-Stokes equation}
 The flow of non-stationary incompressible viscous fluid is described by the three dimensional Navier-Stokes equations. The quantities are computed as u, v, w and F, G, H as x, y, z directions.
