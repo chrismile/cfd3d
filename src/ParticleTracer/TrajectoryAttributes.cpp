@@ -88,14 +88,14 @@ Real trilinearInterpolationU(
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, U)
-            + frac.x*invFrac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, U)
-            + invFrac.x*frac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, U)
-            + frac.x*frac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, U)
-            + invFrac.x*invFrac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, U)
-            + frac.x*invFrac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, U)
-            + invFrac.x*frac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, U)
-            + frac.x*frac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, U);
+            invFrac.x*invFrac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, U)
+            + frac.x*invFrac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, U)
+            + invFrac.x*frac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, U)
+            + frac.x*frac.y*invFrac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, U)
+            + invFrac.x*invFrac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, U)
+            + frac.x*invFrac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, U)
+            + invFrac.x*frac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, U)
+            + frac.x*frac.y*frac.z*getUAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, U);
     return interpolationValue;
 }
 
@@ -107,14 +107,14 @@ Real trilinearInterpolationV(
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, V)
-            + frac.x*invFrac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, V)
-            + invFrac.x*frac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, V)
-            + frac.x*frac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, V)
-            + invFrac.x*invFrac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, V)
-            + frac.x*invFrac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, V)
-            + invFrac.x*frac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, V)
-            + frac.x*frac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, V);
+            invFrac.x*invFrac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, V)
+            + frac.x*invFrac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, V)
+            + invFrac.x*frac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, V)
+            + frac.x*frac.y*invFrac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, V)
+            + invFrac.x*invFrac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, V)
+            + frac.x*invFrac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, V)
+            + invFrac.x*frac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, V)
+            + frac.x*frac.y*frac.z*getVAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, V);
     return interpolationValue;
 }
 
@@ -126,14 +126,14 @@ Real trilinearInterpolationW(
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, W)
-            + frac.x*invFrac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, W)
-            + invFrac.x*frac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, W)
-            + frac.x*frac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, W)
-            + invFrac.x*invFrac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, W)
-            + frac.x*invFrac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, W)
-            + invFrac.x*frac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, W)
-            + frac.x*frac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, W);
+            invFrac.x*invFrac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, W)
+            + frac.x*invFrac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, W)
+            + invFrac.x*frac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, W)
+            + frac.x*frac.y*invFrac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, W)
+            + invFrac.x*invFrac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, W)
+            + frac.x*invFrac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, W)
+            + invFrac.x*frac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, W)
+            + frac.x*frac.y*frac.z*getWAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, W);
     return interpolationValue;
 }
 
@@ -215,14 +215,14 @@ Real trilinearInterpolation_dUdy(
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, U, dy)
-            + frac.x*invFrac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, U, dy)
-            + invFrac.x*frac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, U, dy)
-            + frac.x*frac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, U, dy)
-            + invFrac.x*invFrac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, U, dy)
-            + frac.x*invFrac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, U, dy)
-            + invFrac.x*frac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, U, dy)
-            + frac.x*frac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, U, dy);
+            invFrac.x*invFrac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, U, dy)
+            + frac.x*invFrac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, U, dy)
+            + invFrac.x*frac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, U, dy)
+            + frac.x*frac.y*invFrac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, U, dy)
+            + invFrac.x*invFrac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, U, dy)
+            + frac.x*invFrac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, U, dy)
+            + invFrac.x*frac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, U, dy)
+            + frac.x*frac.y*frac.z*getdUdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, U, dy);
     return interpolationValue;
 }
 Real trilinearInterpolation_dUdz(
@@ -233,14 +233,14 @@ Real trilinearInterpolation_dUdz(
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, U, dz)
-            + frac.x*invFrac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, U, dz)
-            + invFrac.x*frac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, U, dz)
-            + frac.x*frac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, U, dz)
-            + invFrac.x*invFrac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, U, dz)
-            + frac.x*invFrac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, U, dz)
-            + invFrac.x*frac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, U, dz)
-            + frac.x*frac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, U, dz);
+            invFrac.x*invFrac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, U, dz)
+            + frac.x*invFrac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, U, dz)
+            + invFrac.x*frac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, U, dz)
+            + frac.x*frac.y*invFrac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, U, dz)
+            + invFrac.x*invFrac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, U, dz)
+            + frac.x*invFrac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, U, dz)
+            + invFrac.x*frac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, U, dz)
+            + frac.x*frac.y*frac.z*getdUdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, U, dz);
     return interpolationValue;
 }
 Real trilinearInterpolation_dVdx(
@@ -251,50 +251,50 @@ Real trilinearInterpolation_dVdx(
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, U, dx)
-            + frac.x*invFrac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, U, dx)
-            + invFrac.x*frac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, U, dx)
-            + frac.x*frac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, U, dx)
-            + invFrac.x*invFrac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, U, dx)
-            + frac.x*invFrac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, U, dx)
-            + invFrac.x*frac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, U, dx)
-            + frac.x*frac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, U, dx);
+            invFrac.x*invFrac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, V, dx)
+            + frac.x*invFrac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, V, dx)
+            + invFrac.x*frac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, V, dx)
+            + frac.x*frac.y*invFrac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, V, dx)
+            + invFrac.x*invFrac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, V, dx)
+            + frac.x*invFrac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, V, dx)
+            + invFrac.x*frac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, V, dx)
+            + frac.x*frac.y*frac.z*getdVdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, V, dx);
     return interpolationValue;
 }
 Real trilinearInterpolation_dVdz(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
-        int imax, int jmax, int kmax, Real dz, Real *U) {
+        int imax, int jmax, int kmax, Real dz, Real *V) {
     rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(0.5, 1, 1);
     glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, U, dz)
-            + frac.x*invFrac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, U, dz)
-            + invFrac.x*frac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, U, dz)
-            + frac.x*frac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, U, dz)
-            + invFrac.x*invFrac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, U, dz)
-            + frac.x*invFrac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, U, dz)
-            + invFrac.x*frac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, U, dz)
-            + frac.x*frac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, U, dz);
+            invFrac.x*invFrac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, V, dz)
+            + frac.x*invFrac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, V, dz)
+            + invFrac.x*frac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, V, dz)
+            + frac.x*frac.y*invFrac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, V, dz)
+            + invFrac.x*invFrac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, V, dz)
+            + frac.x*invFrac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, V, dz)
+            + invFrac.x*frac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, V, dz)
+            + frac.x*frac.y*frac.z*getdVdzAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, V, dz);
     return interpolationValue;
 }
 Real trilinearInterpolation_dWdx(
         const rvec3 &particlePosition, const rvec3 &gridOrigin, const rvec3 &gridSize,
-        int imax, int jmax, int kmax, Real dx, Real *U) {
+        int imax, int jmax, int kmax, Real dx, Real *W) {
     rvec3 staggeredGridRealPosition = worldPositionToStaggeredGrid(particlePosition, gridOrigin, gridSize, imax, jmax, kmax) - rvec3(1, 0.5, 1);
     glm::ivec3 staggeredGridPosition = glm::ivec3(staggeredGridRealPosition);
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, U, dx)
-            + frac.x*invFrac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, U, dx)
-            + invFrac.x*frac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, U, dx)
-            + frac.x*frac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, U, dx)
-            + invFrac.x*invFrac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, U, dx)
-            + frac.x*invFrac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, U, dx)
-            + invFrac.x*frac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, U, dx)
-            + frac.x*frac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, U, dx);
+            invFrac.x*invFrac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, W, dx)
+            + frac.x*invFrac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, W, dx)
+            + invFrac.x*frac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, W, dx)
+            + frac.x*frac.y*invFrac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, W, dx)
+            + invFrac.x*invFrac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, W, dx)
+            + frac.x*invFrac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, W, dx)
+            + invFrac.x*frac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, W, dx)
+            + frac.x*frac.y*frac.z*getdWdxAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, W, dx);
     return interpolationValue;
 }
 Real trilinearInterpolation_dWdy(
@@ -305,14 +305,14 @@ Real trilinearInterpolation_dWdy(
     rvec3 frac = glm::fract(staggeredGridRealPosition);
     rvec3 invFrac = rvec3(1.0) - frac;
     Real interpolationValue =
-            invFrac.x*invFrac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, kmax, jmax, U, dy)
-            + frac.x*invFrac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, kmax, jmax, U, dy)
-            + invFrac.x*frac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, kmax, jmax, U, dy)
-            + frac.x*frac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, kmax, jmax, U, dy)
-            + invFrac.x*invFrac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, kmax, jmax, U, dy)
-            + frac.x*invFrac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, kmax, jmax, U, dy)
-            + invFrac.x*frac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, kmax, jmax, U, dy)
-            + frac.x*frac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, kmax, jmax, U, dy);
+            invFrac.x*invFrac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,0), imax, jmax, kmax, W, dy)
+            + frac.x*invFrac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,0), imax, jmax, kmax, W, dy)
+            + invFrac.x*frac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,0), imax, jmax, kmax, W, dy)
+            + frac.x*frac.y*invFrac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,0), imax, jmax, kmax, W, dy)
+            + invFrac.x*invFrac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,0,1), imax, jmax, kmax, W, dy)
+            + frac.x*invFrac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,0,1), imax, jmax, kmax, W, dy)
+            + invFrac.x*frac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(0,1,1), imax, jmax, kmax, W, dy)
+            + frac.x*frac.y*frac.z*getdWdyAtIdx(staggeredGridPosition + glm::ivec3(1,1,1), imax, jmax, kmax, W, dy);
     return interpolationValue;
 }
 

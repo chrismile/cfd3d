@@ -42,13 +42,13 @@ rvec3 integrateParticlePositionEuler(
 std::vector<rvec3> getParticleSeedingLocationsForScenario(
         const std::string &scenarioName, int numParticles, const rvec3 &gridOrigin, const rvec3 &gridSize) {
     std::vector<rvec3> particleSeedingLocations;
-    if (scenarioName == "driven_cavity" || scenarioName == "natural_convection") {
+    /*if (scenarioName == "driven_cavity" || scenarioName == "natural_convection") {
         // Seed along diagonal wall
         for (int i = 0; i < numParticles; i++) {
             Real param = (Real(i) + Real(0.5)) / Real(numParticles);
             particleSeedingLocations.push_back(gridOrigin + param*gridSize);
         }
-    } /*else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
+    } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
         // Seed on top of bottom wall
         int numParticlesX, numParticlesZ;
         numParticlesX = numParticlesZ = std::sqrt(numParticles);
@@ -60,7 +60,7 @@ std::vector<rvec3> getParticleSeedingLocationsForScenario(
                 particleSeedingLocations.push_back(particlePosition);
             }
         }
-    }*/ else {
+    } else*/ {
         // Seed particles at random points within the boundary.
         std::random_device randomDevice;
         std::mt19937 randomGenerator(randomDevice());

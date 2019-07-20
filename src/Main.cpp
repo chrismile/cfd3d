@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <omp.h>
 #include "CfdSolver/Init.hpp"
@@ -344,11 +345,14 @@ int main(int argc, char *argv[]) {
             cfdSolver->getDataForOutput(U, V, W, P, T);
             dataIsUpToDate = true;
         }
-        Real traceDt = dt * Real(10.0);
+        Real traceDt = dt * Real(5.0);
+        if (boost::starts_with(scenarioName, "rayleigh_benard")) {
+            traceDt *= Real(1000.0);
+        }
         Trajectories streamlines = streamlineTracer.trace(
                 particleSeedingLocations, gridOrigin, gridSize, traceDt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
         writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
-        //writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streamlines.binlines", streamlines);
+        writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streamlines.binlines", streamlines);
     }
 
     if (traceStreaklines) {
