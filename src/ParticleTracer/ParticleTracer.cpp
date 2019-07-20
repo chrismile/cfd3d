@@ -42,33 +42,15 @@ rvec3 integrateParticlePositionEuler(
 std::vector<rvec3> getParticleSeedingLocationsForScenario(
         const std::string &scenarioName, int numParticles, const rvec3 &gridOrigin, const rvec3 &gridSize) {
     std::vector<rvec3> particleSeedingLocations;
-    /*if (scenarioName == "driven_cavity" || scenarioName == "natural_convection") {
-        // Seed along diagonal wall
-        for (int i = 0; i < numParticles; i++) {
-            Real param = (Real(i) + Real(0.5)) / Real(numParticles);
-            particleSeedingLocations.push_back(gridOrigin + param*gridSize);
-        }
-    } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
-        // Seed on top of bottom wall
-        int numParticlesX, numParticlesZ;
-        numParticlesX = numParticlesZ = std::sqrt(numParticles);
-        for (int i = 0; i < numParticlesX; i++) {
-            for (int k = 0; k < numParticlesZ; k++) {
-                Real paramX = (Real(i) + Real(0.5)) / Real(numParticlesX);
-                Real paramZ = (Real(k) + Real(0.5)) / Real(numParticlesZ);
-                rvec3 particlePosition = gridOrigin + rvec3(paramX*gridSize.x, 0.1*gridSize.y, paramZ*gridSize.z);
-                particleSeedingLocations.push_back(particlePosition);
-            }
-        }
-    } else*/ {
-        // Seed particles at random points within the boundary.
-        std::random_device randomDevice;
-        std::mt19937 randomGenerator(randomDevice());
-        std::uniform_real_distribution<> dist(0.0, 1.0);
-        for (int i = 0; i < numParticles; i++) {
-            rvec3 particlePosition(dist(randomGenerator), dist(randomGenerator), dist(randomGenerator));
-            particleSeedingLocations.push_back(gridOrigin + particlePosition*gridSize);
-        }
+
+    // Seed particles at random points within the boundary.
+    std::random_device randomDevice;
+    std::mt19937 randomGenerator(randomDevice());
+    std::uniform_real_distribution<> dist(0.0, 1.0);
+    for (int i = 0; i < numParticles; i++) {
+        rvec3 particlePosition(dist(randomGenerator), dist(randomGenerator), dist(randomGenerator));
+        particleSeedingLocations.push_back(gridOrigin + particlePosition*gridSize);
     }
+
     return particleSeedingLocations;
 }
