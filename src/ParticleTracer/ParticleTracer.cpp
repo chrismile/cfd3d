@@ -26,8 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <boost/algorithm/string/predicate.hpp>
+#include <random>
 #include <cassert>
+#include <boost/algorithm/string/predicate.hpp>
 #include "ParticleTracer.hpp"
 
 rvec3 integrateParticlePositionEuler(
@@ -47,7 +48,7 @@ std::vector<rvec3> getParticleSeedingLocationsForScenario(
             Real param = (Real(i) + Real(0.5)) / Real(numParticles);
             particleSeedingLocations.push_back(gridOrigin + param*gridSize);
         }
-    } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
+    } /*else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
         // Seed on top of bottom wall
         int numParticlesX, numParticlesZ;
         numParticlesX = numParticlesZ = std::sqrt(numParticles);
@@ -55,9 +56,18 @@ std::vector<rvec3> getParticleSeedingLocationsForScenario(
             for (int k = 0; k < numParticlesZ; k++) {
                 Real paramX = (Real(i) + Real(0.5)) / Real(numParticlesX);
                 Real paramZ = (Real(k) + Real(0.5)) / Real(numParticlesZ);
-                rvec3 particlePosition = gridOrigin + rvec3(paramX*gridSize.x, 0.5, paramZ*gridSize.z);
+                rvec3 particlePosition = gridOrigin + rvec3(paramX*gridSize.x, 0.1*gridSize.y, paramZ*gridSize.z);
                 particleSeedingLocations.push_back(particlePosition);
             }
+        }
+    }*/ else {
+        // Seed particles at random points within the boundary.
+        std::random_device randomDevice;
+        std::mt19937 randomGenerator(randomDevice());
+        std::uniform_real_distribution<> dist(0.0, 1.0);
+        for (int i = 0; i < numParticles; i++) {
+            rvec3 particlePosition(dist(randomGenerator), dist(randomGenerator), dist(randomGenerator));
+            particleSeedingLocations.push_back(gridOrigin + particlePosition*gridSize);
         }
     }
     return particleSeedingLocations;

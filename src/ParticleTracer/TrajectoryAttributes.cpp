@@ -50,8 +50,8 @@ void pushTrajectoryAttributes(
 Real getUAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U) {
     //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
     //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+2))));
-    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(0,0,0)))
-            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+2)))) {
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax,jmax+1,kmax+1)))) {
         return 0;
     }
     return U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)];
@@ -59,8 +59,8 @@ Real getUAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int 
 Real getVAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V) {
     //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
     //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+2))));
-    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(0,0,0)))
-            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+2)))) {
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+1,jmax,kmax+1)))) {
         return 0;
     }
     return V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)];
@@ -68,8 +68,8 @@ Real getVAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int 
 Real getWAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W) {
     //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
     //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+2,jmax+1))));
-    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(0,0,0)))
-            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+2,jmax+2,jmax+1)))) {
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,kmax)))) {
         return 0;
     }
     return W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)];
@@ -147,38 +147,62 @@ rvec3 getVectorVelocityAt(
 }
 
 Real getdUdyAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U, Real dy) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,jmax+2))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+            || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax,jmax,kmax+1)))) {
+        return 0;
+    }
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,jmax+2))));
     return (U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
             - U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y+1, staggeredGridPosition.z)])/dy;
 }
 Real getdUdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *U, Real dz) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+1))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+        || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax,jmax+1,kmax)))) {
+        return 0;
+    }
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,kmax+1))));
     return (U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
             - U[IDXU(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z+1)])/dz;
 }
 Real getdVdxAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, Real dx) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,jmax+2))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+        || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax,jmax,kmax+1)))) {
+        return 0;
+    }
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+1,kmax+2))));
     return (V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
             - V[IDXV(staggeredGridPosition.x+1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
 }
 Real getdVdzAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *V, Real dz) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+1))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+        || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+1,jmax,kmax)))) {
+        return 0;
+    }
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,kmax+1))));
     return (V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
             - V[IDXV(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z+1)])/dz;
 }
 Real getdWdxAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W, Real dx) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,jmax+1))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+        || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax,jmax+1,kmax)))) {
+        return 0;
+    }
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+1,jmax+2,kmax+1))));
     return (W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
             - W[IDXW(staggeredGridPosition.x+1, staggeredGridPosition.y, staggeredGridPosition.z)])/dx;
 }
 Real getdWdyAtIdx(const glm::ivec3 &staggeredGridPosition, int imax, int jmax, int kmax, Real *W, Real dy) {
-    assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
-           && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,jmax+1))));
+    if (glm::any(glm::lessThan(staggeredGridPosition, glm::ivec3(1,1,1)))
+        || glm::any(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(imax+1,jmax,kmax)))) {
+        return 0;
+    }
+    //assert(glm::all(glm::greaterThanEqual(staggeredGridPosition, glm::ivec3(0,0,0)))
+    //       && glm::all(glm::lessThan(staggeredGridPosition, glm::ivec3(imax+2,jmax+1,kmax+1))));
     return (W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y, staggeredGridPosition.z)]
             - W[IDXW(staggeredGridPosition.x, staggeredGridPosition.y+1, staggeredGridPosition.z)])/dy;
 }

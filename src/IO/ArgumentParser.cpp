@@ -39,14 +39,15 @@ void parseArguments(
         int &openclPlatformId) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
     // fuji_san, zugspitze, ...
-    scenarioName = "flow_over_step";
+    scenarioName = "driven_cavity";
     solverName = "cpp";
     shallWriteOutput = true;
     outputFileWriterType = "vtk";
     linearSystemSolverType = LINEAR_SOLVER_JACOBI;
-    numParticles = 400;
+    numParticles = 500;
     traceStreamlines = false;
     traceStreaklines = false;
+    tracePathlines = false;
     iproc = jproc = kproc = 1;
     blockSizeX = blockSizeY = 8;
     blockSizeZ = 4;

@@ -344,10 +344,11 @@ int main(int argc, char *argv[]) {
             cfdSolver->getDataForOutput(U, V, W, P, T);
             dataIsUpToDate = true;
         }
+        Real traceDt = dt * Real(10.0);
         Trajectories streamlines = streamlineTracer.trace(
-                particleSeedingLocations, gridOrigin, gridSize, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
-        //writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
-        writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streamlines.binlines", streamlines);
+                particleSeedingLocations, gridOrigin, gridSize, traceDt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
+        //writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streamlines.binlines", streamlines);
     }
 
     if (traceStreaklines) {
