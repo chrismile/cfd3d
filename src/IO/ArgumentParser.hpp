@@ -52,7 +52,7 @@ class OutputFileWriter;
  * @param blockSizeZ The block size to use for 3D domains in z direction (CUDA and OpenCL solver only).
  * @param blockSize1D The block size to use for 1D domains (CUDA and OpenCL solver only).
  * @param openclPlatformId The ID of the OpenCL platform to use for computations (OpenCL solver only).
- * Which platform corresponds to which ID can be found outwith the command line tool 'clinfo'.
+ * Which platform corresponds to which ID can be found out with the command line tool 'clinfo'.
  */
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName,

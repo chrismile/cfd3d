@@ -35,11 +35,11 @@ Finally, we simulated multiple scenarios like Rayleigh-Benard convection, and mu
 
 \section{Code description}
 \subsection{Code framwork}
-The C++ Code is structured as follows. The file main.cpp, which is located directly in the source directory, the main function is defined. There the core of the program resides, which is basically of the same structures as the 2D CFD code. Furthermore, there also is the Defines.hpp file, which defines the floating-point precision (float or double) as well as some define statements for the mapping of 3D indices in the staggered grid to 1D array indices. We couldn't use multi-dimensional arrays directly, as they aren't supported by CUDA and OpenCL.
+The C++ Code is structured as follows. In the file main.cpp, which is located directly in the source directory, the main function is defined. There the core of the program resides, which is basically of the same structures as the 2D CFD code. Furthermore, there also is the Defines.hpp file, which defines the floating-point precision (float or double) as well as some define statements for the mapping of 3D indices in the staggered grid to 1D array indices. We couldn't use multi-dimensional arrays directly, as they aren't supported by CUDA and OpenCL.
 
-Then there is the IO folder which contains everthing that has to do with input and output functionality. Among others there are the VTK writer as well as the NetCDF writer and some classes to read and process different input formats for the geometry.
+Then there is the IO folder, which contains everthing that has to do with input and output functionality. Among others there are the VTK writer as well as the NetCDF writer and some classes to read and process different input formats for the geometry.
 
-The folder ParticleTracer contains classes for tracing the characteristic lines of the flow. However, in the end we didn't use them for our simulation, as we decided to directly use ParaView for tracing the particles and omitted the idea for time reasons to use a program Christoph created for visualizing large line sets created by our application.
+The folder ParticleTracer contains classes for tracing the characteristic lines of the flow. It was created for directly exporting the streamlines of the flow if ParaView isn't used for visualization.
 
 The most important part of the program is the CdfSolver folder, where all solvers as well as the solver interface is located. The interface defines the following methods:
 
@@ -98,11 +98,11 @@ which updates the values in the arrays U, V and W.
 \begin{lstlisting}[language=C++,frame=single]
 void getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T)
 \end{lstlisting}
-which copies the values of the internal representations of U, V, W, P and T to the specified arrays. This is necessary when outputting the simulation results at certain time intervals. This function abstracts the process of either copying the values of the internal representation in VRAM on GPUs when using CUDA or OpenCL to the main memory or copying the values of the internal representation of the MPI and OpenMP solvers in main memory to the representation in the main function also in main memory.
+which copies the values of the internal representations of U, V, W, P and T to the specified arrays. This is necessary when outputting the simulation results at certain time intervals. This function abstracts the process of either copying the values of the internal representation in VRAM on GPUs when using CUDA or OpenCL to the main memory or copying the values of the internal representation of the MPI or OpenMP solvers in main memory to the representation in the main function also in main memory.
 
 The CfdSolver directory also features classes to work with the flag array as well as to initialize the arrays for the different variables.
 
-Finally, as sub-folders of the CfdSolver folder, there are the different folders which contain the individual solvers. Each solver has the same basic structure even though some have additional files and classes for different functions. Each solver has a file to manage the boundary values, the actual CfdSolver class, which mostly initializes variables and calls the function or kernels of the other files, the SOR solver file, where the SOR, Jacobi and/or the Gauss-Seidel solver are defined and finally the UVW file, which calculates everything what has to do with u, v and w, the temperature, or the timestep.
+Finally, as sub-folders of the CfdSolver folder, there are the different folders which contain the individual solvers. Each solver has the same basic structure even though some have additional files and classes for different solver-specific functions. Each solver has a file to manage the boundary values, the actual CfdSolver class, which mostly initializes variables and calls the function or kernels of the other files, the SOR solver file, where the SOR, Jacobi and/or the Gauss-Seidel solver are defined, and finally the UVW file, which calculates everything what has to do with u, v and w, the temperature or the timestep.
 
 \subsection{Building the code}
 The program is compiled with cmake. In order to build it, some packages have to installed (see the README file for more information on how to install them on Ubuntu) and the following commands have to be issued within the repository directory:
@@ -185,7 +185,7 @@ When executing the program, multiple arguments can be passed on the command line
 	\end{itemize}
 \item platformid
 	\begin{itemize}
-	\item Can be used with the OpenCL solver. Specifies the ID of the OpenCL platform to use. If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found outwith the command line tool 'clinfo'.
+	\item Can be used with the OpenCL solver. Specifies the ID of the OpenCL platform to use. If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found out with the command line tool 'clinfo'.
 	\item possible values: integer
 	\end{itemize}
 \end{itemize}
@@ -216,7 +216,7 @@ mpirun -np 8 ./cfd3d --solver mpi --numproc 2 2 2
 \newpage
 
 \section{3D Incompressible Navier-Stokes equation}
-The flow of non-stationary incompressible viscous fluid is described by the three dimensional Navier-Stokes equations. The quantities are computed as u, v, w and F, G, H as x, y, z directions.
+The flow of non-stationary incompressible viscous fluid is described by the three dimensional incompressible Navier-Stokes equations. The quantities u, v, w and F, G, H are computed as x, y, z directions, respectively.
 
 \subsection{3D Momentum equations}
 \begin{equation}
@@ -249,7 +249,7 @@ g_z
 \end{equation}
 
 \subsection{Force F and velocity u calculation in x direction}
-The velocity w was added to the calculations from the 2D case and then, the discretization for the derivatives of u, v and w have to be derived with respect to directions x, y and z, respectively. Below, the computation of F and u is exemplified. The computation of G, H and v, w is analogous. \\
+The velocity w was added to the calculations from the 2D case and then, the discretization for the derivatives of u, v and w was derived with respect to directions x, y and z, respectively. Below, the computation of F and u is exemplified. The computation of G, H and v, w is analogous. \\
 \\
 F:
 \begin{equation}
@@ -272,7 +272,7 @@ u^{(n+1)}_{i,j,k} = & F^{(n)}_{i,j,k} - \frac{\delta t}{\delta x}\left(p^{(n+1)}
 \end{equation}
 
 \subsection{Discretization for F}
-The derivatives of the 3 directions are discretized as follows using the midpoint rules and the donor cells scheme (again, exemplified only for u).\\
+The derivatives of the three directions are discretized as follows using the midpoint rules and the donor cells scheme (again, exemplified only for u).\\
 \begin{equation}
 \left[\frac{\partial^2 u}{\partial x^2}\right]_{i,j,k} =
 \frac{u_{i+1,j,k} - 2u_{i,j,k} + u_{i-1,j,k}}{(\delta x)^2}
@@ -387,7 +387,7 @@ res := & \left( \sum_{i=1}^{imax} \sum_{j=1}^{jmax} \sum_{k=1}^{kmax} \left( \fr
 \subsection{No Slip} 
 When using no-slip conditions, zero velocities are imposed at the boundaries. In the staggered grid, it may be necessary to set the negative value at the boundary from within the domain, as averaging the values on both sides of the boundary would then give exactly zero. For example, in the left wall case we have: $u_{0,j,k}$ = 0 ,$v_{0,j,k}$ = -$v_{1,j,k}$, $w_{0,j,k}$ = -$w_{1,j,k}$.
 \subsection{Free Slip} 
-Free-slip means that the fluid can flow freely parallel to the boundary but cannot have a perpendicular flow component at the boundary. In 3D cases, the fluid freely flows along two dimension, but cannot flow along the remaining direction. For example, the velocity at the left wall is imposed to be 0. Its boundary values are set to $u_{0,j,k}$ = 0, $v_{0,j,k}$ = $v_{1,j,k}$, and $w_{0,j,k}$ = $w_{1,j,k}$. For more details see figure~\ref{fig:boundaryConditions} below.
+Free-slip means that the fluid can flow freely parallel to the boundary but cannot have a perpendicular flow component at the boundary. In 3D cases, the fluid freely flows along two dimensions, but cannot flow along the remaining direction. For example, the velocity at the left wall is imposed to be 0. Its boundary values are set to $u_{0,j,k}$ = 0, $v_{0,j,k}$ = $v_{1,j,k}$, and $w_{0,j,k}$ = $w_{1,j,k}$. For more details see figure~\ref{fig:boundaryConditions} below.
 
 \begin{figure}[htb]
 \centering
@@ -397,7 +397,7 @@ Free-slip means that the fluid can flow freely parallel to the boundary but cann
 \end{figure}
 
 \subsection{Outflow}
-For the outflow boundary condition, the normal velocity derivatives are set to 0 at the boundary. This means that the total velocity does not change in the direction normal to the boundary. The values of velocities at boundaries can be set equal to the neighbouring velocities inside the region. For example, in the left wall case we have: $u_{0,j,k}$ = $u_{1,j,k}$ ,$v_{0,j,k}$ = $v_{1,j,k}$, $w_{0,j,k}$ = $w_{1,j,k}$
+For the outflow boundary condition, the normal velocity derivatives are set to 0 at the boundary. This means that the total velocity does not change in the direction normal to the boundary. The values of velocities at boundaries can be set equal to the neighbouring velocities inside the domain. For example, in the left wall case we have: $u_{0,j,k}$ = $u_{1,j,k}$ ,$v_{0,j,k}$ = $v_{1,j,k}$, $w_{0,j,k}$ = $w_{1,j,k}$
 \subsection{Boundary conditions for pressure and temperature}
 The boundary conditions for the pressure are derived from the momentum equation and result in discrete Neumann conditions. The boundary conditions for the temperature, on the other hand, are derived from the energy equation and result in discrete Dirichlet boundary conditions for cold walls and hot walls, respectively. For example, in the left wall case we have: $P_{0,j,k}$ = $P_{1,j,k}$.  $T_{0,j,k}$ = $2*T_c/T_h$ – $T_{1,j,k}$.
 
@@ -448,7 +448,7 @@ After we chose the best solver, we tested the performance when using a different
 
 The results of the tests with OpenMP can be seen in figure~\ref{fig:speedup_openmp}. The speedup is exactly as we expected. At the beginning the performance scales very well while the speedup at the end degrades. At 28 cores the speedup is approximately 14.
 
-To test the MPI implementation, we used one node for the first test. The reason we used 27 out of the 28 cores is that the domain could be split better with this amount of MPI processes, since the domain can be split in 3x3x3 parts, whereas with 28 processes it would be split into 7x2x2 parts. We also tested both variants and the version with 27 processes was faster. With 27 cores the speedup is around ten, which is not as good as with OpenMP, but when using two nodes with 56 cores altogether, the performance scales almost linearly with an speedup of approximately 19, even though the domain is split in 7x4x2 parts, which is not optimal. The resulsts of the MPI speedup can be seen in figure~\ref{fig:speedup_MPI}.
+To test the MPI implementation, we used one node for the first test. The reason we used 27 out of the 28 cores is that the domain could be split better with this amount of MPI processes, since the domain can be split in 3x3x3 parts, whereas with 28 processes it would be split into 7x2x2 parts. We also tested both variants and the version with 27 processes was faster. With 27 cores the speedup is around ten, which is not as good as with OpenMP, but when using two nodes with 56 cores altogether, the performance scales almost linearly with an speedup of approximately 19, even though the domain is split in 7x4x2 parts, which is not optimal. The results of the MPI speedup can be seen in figure~\ref{fig:speedup_MPI}.
 
 
 \begin{figure}[htbp]
@@ -471,7 +471,7 @@ To test the MPI implementation, we used one node for the first test. The reason 
 
 Unlike in the 2D cases, where it is necessary to set the arbitrary geometry boundary conditions for 8 directions (4 lines + 4 corners of a square), there are a total of 26 directions (12 edges, 8 corners and 6 faces of a cube) to be set. Setting the boundary values in 3D with the same method as utilized in worksheet 2 proved to be difficult.  Therefore, we designed a different approach to set the boundary conditions for arbitrary geometries.
 
-We observed that we could set velocities lying right on the boundary to zero. Moreover, for the other values, the boundary value being zero can be achieved by averaging the values on both sides of the boundary. This is an analogous case as when setting no-slip boundary condition on walls. We chose to set u, v and w separately. The direction flag is used to check if the velocity is lying on the wall. If it is, the velocity is set to zero. Then an indicator is inserted that this velocity may not be overwritten anymore. Otherwise, the velocity was set to equal the negative of the neighboring velocity. For example, below is pseudo code of the arbitrary geometry boundary conditions of u on the left wall.
+We observed that we could set velocities lying right on the boundary to zero. Moreover, for the other values, the boundary value being zero can be achieved by averaging the values on both sides of the boundary. This is an analogous case as when setting no-slip boundary condition on walls. We chose to set u, v and w separately. The direction flag is used to check if the velocity is lying on the wall. If it is, the velocity is set to zero. Then an indicator is inserted that this velocity may not be overwritten anymore. Otherwise, the velocity is set to equal the negative of the neighboring velocity. For example, below is pseudo code of the arbitrary geometry boundary conditions of u on the left wall.
 
 \begin{algorithm}
 \caption{Algorithm on the left boundary}\label{euclid}
@@ -539,12 +539,12 @@ When setting the arbitrary geometry boundary conditions of pressure and temperat
 
 
 \begin{thebibliography}{999}
+\bibitem{griebel}
+M. Griebel, T. Dornseifer, and T. Neunhoeffer. SIAM, Philadelphia, 1998. Numerical Simulation in Fluid Dynamics, a Practical Introduction.
 \bibitem{cuda-guide}
 NVIDIA. 2019. CUDA C Programming Guide. \url{https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#arithmetic-instructions} visited on 2019-07-18.
 \bibitem{parallel-sor}
 Rudnei Dias da Cunha, Tim Hopkins. 1991. Parallel Overrelaxation Algorithms for Systems of Linear Equations.
-\bibitem{griebel}
-M. Griebel, T. Dornseifer, and T. Neunhoeffer. SIAM, Philadelphia, 1998. Numerical Simulation in Fluid Dynamics, a Practical Introduction.
 \end{thebibliography}
 
 \end{document}
