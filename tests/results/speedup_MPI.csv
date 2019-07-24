@@ -1,4 +1,7 @@
-threads,time
-1,27918.3
-27,2700.35
-56,1453.15
+threads,time,group
+1,27918.3,cluster
+27,2700.35,cluster
+56,1453.15,cluster
+1,27918.3,optimal
+27,1034.01111111111,optimal
+56,498.541071428571,optimal
