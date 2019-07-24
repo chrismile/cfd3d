@@ -68,7 +68,7 @@ ggsave('graphs/runtime_rayleigh_benard_convection_8-2-1_platforms.pdf', p, width
     
     for(i in 1:nrow(data)) 
     {
-      data[i, "speedup"] <- data[data$threads == 1, "time"]/data[i, "time"]
+      data[i, "speedup"] <- data[data$threads == 1 & data$group == data[i,"group"], "time"]/data[i, "time"]
     }
     levels(data$group)
     data
@@ -84,8 +84,7 @@ ggsave('graphs/runtime_rayleigh_benard_convection_8-2-1_platforms.pdf', p, width
     p <- p + geom_line()
     p <- p + geom_point()
     p <- p + scale_x_continuous(breaks=c(1,27,56))
-    p <- p + scale_y_continuous(breaks=c(2,4,6,8,10,12,14,16,18,20))
-    p <- p + theme_tufte()
+    p <- p + scale_y_continuous(breaks=c(4,8,12,16,20,24,28,32,36,40,44,48,52,56))
     p <- p + theme(plot.title = element_text(hjust = 0.5))
     p <- p + theme(plot.subtitle = element_text(hjust = 0.5))
     p
