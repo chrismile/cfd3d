@@ -38,8 +38,10 @@ void traceStreamlineParticle(
     glm::ivec3 particleGridPosition;
 
     int iterationCounter = 0;
-    const int MAX_ITERATIONS = 1000;
-    while(iterationCounter <= MAX_ITERATIONS) {
+    const int MAX_ITERATIONS = 2000;
+    Real lineLength = 0.0;
+    const Real MAX_LINE_LENGTH = gridSize.x + gridSize.y + gridSize.z;
+    while (iterationCounter <= MAX_ITERATIONS && lineLength <= MAX_LINE_LENGTH) {
         oldParticlePosition = particlePosition;
         // Break if the position is outside of the domain.
         if (glm::any(glm::lessThan(particlePosition, gridOrigin))
@@ -73,7 +75,11 @@ void traceStreamlineParticle(
         rvec3 k4 = dt * getVectorVelocityAt(particlePosition + k3, gridOrigin, gridSize, imax, jmax, kmax, U, V, W);
         particlePosition = particlePosition + k1/Real(6.0) + k2/Real(3.0) + k3/Real(3.0) + k4/Real(6.0);
 
-        if (glm::length(particlePosition - oldParticlePosition) < Real(0.000001)) {
+        Real segmentLength = glm::length(particlePosition - oldParticlePosition);
+        lineLength += segmentLength;
+
+        // Have we reached a singular point?
+        if (segmentLength < Real(0.000001)) {
             break;
         }
 

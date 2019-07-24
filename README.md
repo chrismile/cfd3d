@@ -1,7 +1,7 @@
 # cfd3d
 
 A CFD solver using the incompressible Navier-Stokes equations in 3D.
-The solver is able to use either OpenMP, MPI or CUDA.
+The solver is able to use either OpenMP, MPI, CUDA or OpenCL.
 
 ## Building the programm
 
@@ -82,48 +82,44 @@ Here are some examples of how to call the program.
 ```
 ./cfd3d --scenario driven_cavity --solver cpp
 mpirun -np 8 ./cfd3d --scenario driven_cavity --solver mpi --numproc 2 2 2
-./cfd3d --scenario driven_cavity --solver cuda --tracestreamlines true --numparticles 1000
-./cfd3d --scenario natural_convection --solver cuda --tracestreaklines true --numparticles 4000
-./cfd3d --scenario natural_convection --solver cuda --tracepathlines true
+./cfd3d --scenario driven_cavity --solver cuda
+./cfd3d --scenario rayleigh_benard_convection_8-2-1 --solver cuda --tracestreamlines true --numparticles 500
 ```
 
-The solver name is either 'cpp' for the C++ OpenMP-accelerated solver, 'cuda' for the NVIDIA CUDA solver and 'mpi' for
-the MPI solver.
-Please note that for the CUDA solver and the MPI solver, the program needs to be built with the necessary flags.
+The solver name is either 'cpp' for the C++ OpenMP-accelerated solver, 'mpi' for the MPI solver, 'cuda' for the NVIDIA
+CUDA solver, and 'opencl' for the OpenCL solver.
+Please note that for the MPI solver, CUDA solver and the OpenCL solver, the program needs to be built with the necessary
+flags.
 
 The valid values for all possible arguments are:
 * scenario: driven_cavity, flow_over_step, natural_convection, rayleigh_benard_convection_8-2-1,
-rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4, rayleigh_benard_convection_2d,
-single_tower, terrain_1
+rayleigh_benard_convection_8-2-2, rayleigh_benard_convection_8-2-4,
+single_tower, terrain_1, fuji_san, zugspitze
 * solver: cpp, mpi, cuda, opencl
 * outputformat: netcdf, vtk (= vtk-binary), vtk-binary, vtk-ascii
 * output: true, false (whether to write an output file)
 * linsolver: jacobi, sor, gauss-seidel
 * tracestreamlines: false, true
-* tracestreaklines: false, true
-* tracepathlines: false, true
 * numparticles: any positive integer number
 
 The standard values for the arguments are:
 * scenario: driven_cavity
 * solver: cpp
 * outputformat: vtk
-* outputformat: true
+* output: true
 * linsolver: jacobi
 * tracestreamlines: false
-* tracestreaklines: false
-* tracepathlines: false
-* numparticles: 1000
+* numparticles: 500
 
 Additionally, for the MPI solver, the user MUST also specify the number of processes in x, y and z direction (which must
 match the total number of MPI processes):
-* numproc: integer x integer x integer
+* numproc: integer integer integer
 
 For the CUDA and OpenCL solvers, the user CAN also specify the block size in x, y and z direction:
-* blocksize: integer x integer x integer
+* blocksize: integer integer integer
 
 The standard values for the solvers are:
-* blocksize: 8 x 8 x 4
+* blocksize: 8 8 4
 
 For the OpenCL solver, additonally to the block size, the user can also specify the ID of the OpenCL platform to use.
 If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found outwith the command

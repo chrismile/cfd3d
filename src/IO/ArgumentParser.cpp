@@ -33,20 +33,18 @@
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName,
         std::string &outputFileWriterType, bool &shallWriteOutput, LinearSystemSolverType &linearSystemSolverType,
-        int &numParticles, bool &traceStreamlines, bool &traceStreaklines, bool &tracePathlines,
-        int &iproc, int &jproc, int &kproc,
+        int &numParticles, bool &traceStreamlines, int &iproc, int &jproc, int &kproc,
         int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D,
         int &openclPlatformId) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
     // fuji_san, zugspitze, ...
-    scenarioName = "flow_over_step";
+    scenarioName = "driven_cavity";
     solverName = "cpp";
     shallWriteOutput = true;
     outputFileWriterType = "vtk";
     linearSystemSolverType = LINEAR_SOLVER_JACOBI;
-    numParticles = 400;
+    numParticles = 500;
     traceStreamlines = false;
-    traceStreaklines = false;
     iproc = jproc = kproc = 1;
     blockSizeX = blockSizeY = 8;
     blockSizeZ = 4;
@@ -79,10 +77,6 @@ void parseArguments(
             shallWriteOutput = strcmp(argv[i+1], "false") == 0 ? false : true;
         } else if (strcmp(argv[i], "--tracestreamlines") == 0 && i != argc - 1) {
             traceStreamlines = strcmp(argv[i+1], "false") == 0 ? false : true;
-        } else if (strcmp(argv[i], "--tracestreaklines") == 0 && i != argc - 1) {
-            traceStreaklines = strcmp(argv[i+1], "false") == 0 ? false : true;
-        } else if (strcmp(argv[i], "--tracepathlines") == 0 && i != argc - 1) {
-            tracePathlines = strcmp(argv[i+1], "false") == 0 ? false : true;
         } else if (strcmp(argv[i], "--numproc") == 0 && i < argc - 3) {
             iproc = std::stoi(argv[i+1]);
             jproc = std::stoi(argv[i+2]);
