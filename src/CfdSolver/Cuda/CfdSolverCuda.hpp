@@ -113,13 +113,13 @@ public:
     virtual void calculateTemperature();
 
     /**
-     * Compute the values in the helper array F, G and H necessary to compute the right-hand-side of the Pressure
+     * Compute the values in the helper array F, G and H necessary to compute the right-hand side of the Pressure
      * Poisson equation (PPE).
      */
     virtual void calculateFgh();
 
     /**
-     * Compute the right-hand-side of the Pressure Poisson Equation (PPE).
+     * Compute the right-hand side of the Pressure Poisson Equation (PPE).
      */
     virtual void calculateRs();
 

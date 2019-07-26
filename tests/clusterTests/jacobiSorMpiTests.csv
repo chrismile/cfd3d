@@ -1,4 +1,8 @@
-solver,time
-jacobi, 2700.35s
-sor, 2800.14s
-gauss-seidel, 2672.43s
+solver,precision,time
+jacobi,float,2700.35s
+sor,float,2800.14s
+gauss-seidel,float,2672.43s
+jacobi,double,2793.78s
+sor,double,2888.63s
+gauss-seidel,double,2741.39s
+

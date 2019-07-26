@@ -95,6 +95,7 @@ public:
 /**
  * A super class for particle tracers for time varying flows. This class is implemented by @see PathlineTracer and @see
  * StreaklineTracer.
+ * NOTE: PathlineTracer and StreaklineTracer were unfinished and thus removed from the final project.
  */
 class TimeVaryingParticleTracer
 {

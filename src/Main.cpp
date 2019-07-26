@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <omp.h>
 #include "CfdSolver/Init.hpp"
@@ -53,8 +54,6 @@
 #include "IO/TrajectoriesFile.hpp"
 #include "IO/GeometryCreator.hpp"
 #include "ParticleTracer/StreamlineTracer.hpp"
-#include "ParticleTracer/StreaklineTracer.hpp"
-#include "ParticleTracer/PathlineTracer.hpp"
 
 const std::string scenarioDirectory = "../scenarios/";
 const std::string outputDirectory = "output/";
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]) {
     std::string outputFileWriterType;
     OutputFileWriter *outputFileWriter = nullptr;
     LinearSystemSolverType linearSystemSolverType;
-    bool traceStreamlines = false, traceStreaklines = false, tracePathlines = false;
+    bool traceStreamlines = false;
     std::vector<rvec3> particleSeedingLocations;
     bool dataIsUpToDate = true;
     bool shallWriteOutput = true;
@@ -95,7 +94,7 @@ int main(int argc, char *argv[]) {
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
     parseArguments(
             argc, argv, scenarioName, solverName, outputFileWriterType, shallWriteOutput, linearSystemSolverType,
-            numParticles, traceStreamlines, traceStreaklines, tracePathlines, iproc, jproc, kproc,
+            numParticles, traceStreamlines, iproc, jproc, kproc,
             blockSizeX, blockSizeY, blockSizeZ, blockSize1D, openclPlatformId);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
@@ -137,15 +136,7 @@ int main(int argc, char *argv[]) {
     rvec3 gridOrigin = rvec3(xOrigin, yOrigin, zOrigin);
     rvec3 gridSize = rvec3(xLength, yLength, zLength);
     StreamlineTracer streamlineTracer;
-    StreaklineTracer streaklineTracer(dtWrite*1); // Tracing frequency multiple of write time step.
-    PathlineTracer pathlineTracer;
     particleSeedingLocations = getParticleSeedingLocationsForScenario(scenarioName, numParticles, gridOrigin, gridSize);
-    if (traceStreaklines) {
-        streaklineTracer.setParticleSeedingLocations(gridOrigin, gridSize, particleSeedingLocations);
-    }
-    if (tracePathlines) {
-        pathlineTracer.setParticleSeedingLocations(gridOrigin, gridSize, particleSeedingLocations);
-    }
 
     if (!useTemperature){
         T_c = 0.0;
@@ -171,7 +162,8 @@ int main(int argc, char *argv[]) {
 
     std::string outputFormatEnding = outputFileWriter->getOutputFormatEnding();
 
-    prepareOutputDirectory(outputDirectory, outputFilename, outputFormatEnding, lineDirectory, geometryDirectory);
+    prepareOutputDirectory(
+            outputDirectory, outputFilename, outputFormatEnding, lineDirectory, geometryDirectory, shallWriteOutput);
 
     Real n = 0;
     Real t = 0;
@@ -324,18 +316,6 @@ int main(int argc, char *argv[]) {
             }
             tWrite -= dtWrite;
         }
-        if (traceStreaklines || tracePathlines) {
-            if (!dataIsUpToDate) {
-                cfdSolver->getDataForOutput(U, V, W, P, T);
-                dataIsUpToDate = true;
-            }
-            if (traceStreaklines) {
-                streaklineTracer.timeStep(t, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
-            }
-            if (tracePathlines) {
-                pathlineTracer.timeStep(t, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
-            }
-        }
     }
 
     if (traceStreamlines) {
@@ -343,24 +323,16 @@ int main(int argc, char *argv[]) {
             cfdSolver->getDataForOutput(U, V, W, P, T);
             dataIsUpToDate = true;
         }
+        Real traceDt = dt * Real(5.0);
+        if (boost::starts_with(scenarioName, "rayleigh_benard")) {
+            traceDt *= Real(1000.0);
+        }
         Trajectories streamlines = streamlineTracer.trace(
-                particleSeedingLocations, gridOrigin, gridSize, dt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
-        //writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
+                particleSeedingLocations, gridOrigin, gridSize, traceDt, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
+        writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streamlines.obj", streamlines);
         writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streamlines.binlines", streamlines);
     }
 
-    if (traceStreaklines) {
-        //writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-streaklines.obj",
-        //        streaklineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
-        writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-streaklines.binlines",
-                streaklineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
-    }
-    if (tracePathlines) {
-        //writeTrajectoriesToObjFile(lineDirectory + scenarioName + "-pathlines.obj",
-        //        pathlineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
-        writeTrajectoriesToBinLinesFile(lineDirectory + scenarioName + "-pathlines.binlines",
-                pathlineTracer.getTrajectories(imax, jmax, kmax, dx, dy, dz, U, V, W, P, T));
-    }
 
     auto endTime = std::chrono::system_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
