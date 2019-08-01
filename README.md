@@ -3,6 +3,10 @@
 A CFD solver using the incompressible Navier-Stokes equations in 3D.
 The solver is able to use either OpenMP, MPI, CUDA or OpenCL.
 
+Used literature for the theoretical background:
+- M. Griebel, T. Dornseifer, and T. Neunhoeffer. SIAM, Philadelphia, 1998. Numerical Simulation in Fluid Dynamics,
+a Practical Introduction.
+
 ## Building the programm
 
 On Ubuntu 18.04 for example, you can install all necessary packages with this command:
