@@ -134,24 +134,33 @@ void mpiExchangeCellData(
     int chunk;
 
     // Send to the left, receive from the right.
-    for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = PT[IDXP(il,j,k)];
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = PT[IDXP(il,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            PT[IDXP(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                PT[IDXP(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
 
     // Send to the right, receive from the left.
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = PT[IDXP(iu,j,k)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = PT[IDXP(iu,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
@@ -161,64 +170,96 @@ void mpiExchangeCellData(
             PT[IDXP(il - 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
         }
     }
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                PT[IDXP(il - 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
+            }
+        }
+    }
 
 
     // Send to the bottom, receive from the top.
-    for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = PT[IDXP(i,jl,k)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = PT[IDXP(i,jl,k)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankD, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankU, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            PT[IDXP(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                PT[IDXP(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
 
     // Send to the top, receive from the bottom.
-    for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = PT[IDXP(i,ju,k)];
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = PT[IDXP(i,ju,k)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            PT[IDXP(i,jl - 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                PT[IDXP(i,jl - 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
 
     // Send to the back, receive from the front.
-    for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = PT[IDXP(i,j,kl)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = PT[IDXP(i,j,kl)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            PT[IDXP(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                PT[IDXP(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+            }
         }
     }
 
 
     // Send to the front, receive from the back.
-    for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = PT[IDXP(i,j,ku)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = PT[IDXP(i,j,ku)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            PT[IDXP(i,j,kl - 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                PT[IDXP(i,j,kl - 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+            }
         }
     }
 }
@@ -230,93 +271,132 @@ void mpiExchangeUvw(
     int chunk;
 
     // Send to the left, receive from the right (in the order U, V, W).
-    for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = U[IDXU(il,j,k)];
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = U[IDXU(il,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            U[IDXU(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                U[IDXU(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
-    for (int j = jl - 1; j <= ju && rankL != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXV(il,j,k)];
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl - 1; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXV(il,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 2) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
-    for (int j = jl - 1; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            V[IDXV(iu + 1,j,k)] = bufRecv[(j - jl + 1) * (ku - kl + 1) + (k - kl)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl - 1; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                V[IDXV(iu + 1,j,k)] = bufRecv[(j - jl + 1) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
-    for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            bufSend[(j - jl) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(il,j,k)];
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                bufSend[(j - jl) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(il,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 2);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankL, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankR, 1, MPI_COMM_WORLD, status);
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            W[IDXW(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 2) + (k - kl + 1)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                W[IDXW(iu + 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 2) + (k - kl + 1)];
+            }
         }
     }
 
 
 
     // Send to the right, receive from the left (in the order U, V, W).
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = U[IDXU(iu - 1,j,k)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(j - jl) * (ku - kl + 1) + (k - kl)] = U[IDXU(iu - 1,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankR, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankL, 1, MPI_COMM_WORLD, status);
-    for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            U[IDXU(il - 2,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                U[IDXU(il - 2,j,k)] = bufRecv[(j - jl) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
-    for (int j = jl - 1; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXV(iu,j,k)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl - 1; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(j - jl + 1) * (ku - kl + 1) + (k - kl)] = V[IDXV(iu,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 2) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankR, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankL, 1, MPI_COMM_WORLD, status);
-    for (int j = jl - 1; j <= ju && rankL != MPI_PROC_NULL; j++) {
-        for (int k = kl; k <= ku; k++) {
-            V[IDXV(il - 1,j,k)] = bufRecv[(j - jl + 1) * (ku - kl + 1) + (k - kl)];
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl - 1; j <= ju; j++) {
+            for (int k = kl; k <= ku; k++) {
+                V[IDXV(il - 1,j,k)] = bufRecv[(j - jl + 1) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
-    for (int j = jl; j <= ju && rankR != MPI_PROC_NULL; j++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            bufSend[(j - jl) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(iu,j,k)];
+    if (rankR != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                bufSend[(j - jl) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(iu,j,k)];
+            }
         }
     }
     chunk = (ju - jl + 1) * (ku - kl + 2);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankR, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankL, 1, MPI_COMM_WORLD, status);
-    for (int j = jl; j <= ju && rankL != MPI_PROC_NULL; j++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            W[IDXW(il - 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 2) + (k - kl + 1)];
+    if (rankL != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int j = jl; j <= ju; j++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                W[IDXW(il - 1,j,k)] = bufRecv[(j - jl) * (ku - kl + 2) + (k - kl + 1)];
+            }
         }
     }
 
 
 
     // Send to the bottom, receive from the top (in the order U, V, W).
-    for (int i = il - 1; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(i - il + 1) * (ku - kl + 1) + (k - kl)] = U[IDXU(i,jl,k)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(i - il + 1) * (ku - kl + 1) + (k - kl)] = U[IDXU(i,jl,k)];
+            }
         }
     }
     chunk = (iu - il + 2) * (ku - kl + 1);
@@ -326,156 +406,230 @@ void mpiExchangeUvw(
             U[IDXU(i,ju + 1,k)] = bufRecv[(i - il + 1) * (ku - kl + 1) + (k - kl)];
         }
     }
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                U[IDXU(i,ju + 1,k)] = bufRecv[(i - il + 1) * (ku - kl + 1) + (k - kl)];
+            }
+        }
+    }
 
-    for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = V[IDXV(i,jl,k)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = V[IDXV(i,jl,k)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankD, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankU, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            V[IDXV(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                V[IDXV(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
-    for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            bufSend[(i - il) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(i,jl,k)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                bufSend[(i - il) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(i,jl,k)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 2);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankD, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankU, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            W[IDXW(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 2) + (k - kl + 1)];
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                W[IDXW(i,ju + 1,k)] = bufRecv[(i - il) * (ku - kl + 2) + (k - kl + 1)];
+            }
         }
     }
 
 
 
     // Send to the top, receive from the bottom (in the order U, V, W).
-    for (int i = il - 1; i <= iu && rankU != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(i - il + 1) * (ku - kl + 1) + (k - kl)] = U[IDXU(i,ju,k)];
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(i - il + 1) * (ku - kl + 1) + (k - kl)] = U[IDXU(i,ju,k)];
+            }
         }
     }
     chunk = (iu - il + 2) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
-    for (int i = il - 1; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            U[IDXU(i,jl - 1,k)] = bufRecv[(i - il + 1) * (ku - kl + 1) + (k - kl)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                U[IDXU(i,jl - 1,k)] = bufRecv[(i - il + 1) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
-    for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = V[IDXV(i,ju - 1,k)];
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                bufSend[(i - il) * (ku - kl + 1) + (k - kl)] = V[IDXV(i,ju - 1,k)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl; k <= ku; k++) {
-            V[IDXV(i,jl - 2,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl; k <= ku; k++) {
+                V[IDXV(i,jl - 2,k)] = bufRecv[(i - il) * (ku - kl + 1) + (k - kl)];
+            }
         }
     }
 
-    for (int i = il; i <= iu && rankU != MPI_PROC_NULL; i++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            bufSend[(i - il) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(i,ju,k)];
+    if (rankU != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                bufSend[(i - il) * (ku - kl + 2) + (k - kl + 1)] = W[IDXW(i,ju,k)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ku - kl + 2);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankU, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankD, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankD != MPI_PROC_NULL; i++) {
-        for (int k = kl - 1; k <= ku; k++) {
-            W[IDXW(i,jl - 1,k)] = bufRecv[(i - il) * (ku - kl + 2) + (k - kl + 1)];
+    if (rankD != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int k = kl - 1; k <= ku; k++) {
+                W[IDXW(i,jl - 1,k)] = bufRecv[(i - il) * (ku - kl + 2) + (k - kl + 1)];
+            }
         }
     }
 
 
 
     // Send to the back, receive from the front (in the order U, V, W).
-    for (int i = il - 1; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            bufSend[(i - il + 1) * (ju - jl + 1) + (j - jl)] = U[IDXU(i,j,kl)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                bufSend[(i - il + 1) * (ju - jl + 1) + (j - jl)] = U[IDXU(i,j,kl)];
+            }
         }
     }
     chunk = (iu - il + 2) * (ju - jl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
-    for (int i = il - 1; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            U[IDXU(i,j,ku + 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - jl)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                U[IDXU(i,j,ku + 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - jl)];
+            }
         }
     }
 
-    for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl - 1; j <= ju; j++) {
-            bufSend[(i - il) * (ju - jl + 2) + (j - jl + 1)] = V[IDXV(i,j,kl)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl - 1; j <= ju; j++) {
+                bufSend[(i - il) * (ju - jl + 2) + (j - jl + 1)] = V[IDXV(i,j,kl)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 2);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl - 1; j <= ju; j++) {
-            V[IDXV(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 2) + (j - jl + 1)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl - 1; j <= ju; j++) {
+                V[IDXV(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 2) + (j - jl + 1)];
+            }
         }
     }
 
-    for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = W[IDXW(i,j,kl)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = W[IDXW(i,j,kl)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankB, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankF, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            W[IDXW(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                W[IDXW(i,j,ku + 1)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+            }
         }
     }
 
 
 
     // Send to the front, receive from the back (in the order U, V, W).
-    for (int i = il - 1; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            bufSend[(i - il + 1) * (ju - jl + 1) + (j - jl)] = U[IDXU(i,j,ku)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                bufSend[(i - il + 1) * (ju - jl + 1) + (j - jl)] = U[IDXU(i,j,ku)];
+            }
         }
     }
     chunk = (iu - il + 2) * (ju - jl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
-    for (int i = il - 1; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            U[IDXU(i,j,kl - 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - jl)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il - 1; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                U[IDXU(i,j,kl - 1)] = bufRecv[(i - il + 1) * (ju - jl + 1) + (j - jl)];
+            }
         }
     }
 
-    for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl - 1; j <= ju; j++) {
-            bufSend[(i - il) * (ju - jl + 2) + (j - jl + 1)] = V[IDXV(i,j,ku)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl - 1; j <= ju; j++) {
+                bufSend[(i - il) * (ju - jl + 2) + (j - jl + 1)] = V[IDXV(i,j,ku)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 2);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl - 1; j <= ju; j++) {
-            V[IDXV(i,j,kl - 1)] = bufRecv[(i - il) * (ju - jl + 2) + (j - jl + 1)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl - 1; j <= ju; j++) {
+                V[IDXV(i,j,kl - 1)] = bufRecv[(i - il) * (ju - jl + 2) + (j - jl + 1)];
+            }
         }
     }
 
-    for (int i = il; i <= iu && rankF != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = W[IDXW(i,j,ku - 1)];
+    if (rankF != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                bufSend[(i - il) * (ju - jl + 1) + (j - jl)] = W[IDXW(i,j,ku - 1)];
+            }
         }
     }
     chunk = (iu - il + 1) * (ju - jl + 1);
     MPI_Sendrecv(bufSend, chunk, MPI_REAL_CFD3D, rankF, 1, bufRecv, chunk, MPI_REAL_CFD3D, rankB, 1, MPI_COMM_WORLD, status);
-    for (int i = il; i <= iu && rankB != MPI_PROC_NULL; i++) {
-        for (int j = jl; j <= ju; j++) {
-            W[IDXW(i,j,kl - 2)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+    if (rankB != MPI_PROC_NULL) {
+        #pragma omp parallel for
+        for (int i = il; i <= iu; i++) {
+            for (int j = jl; j <= ju; j++) {
+                W[IDXW(i,j,kl - 2)] = bufRecv[(i - il) * (ju - jl + 1) + (j - jl)];
+            }
         }
     }
 }

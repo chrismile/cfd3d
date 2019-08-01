@@ -115,6 +115,10 @@ Additionally, for the MPI solver, the user MUST also specify the number of proce
 match the total number of MPI processes):
 * numproc: integer integer integer
 
+To use a hybrid MPI-OpenMP solver, one can also specify the number of OpenMP threads to use in addition to the MPI
+domain decomposition:
+* numhybridthreads: integer
+
 For the CUDA and OpenCL solvers, the user CAN also specify the block size in x, y and z direction:
 * blocksize: integer integer integer
 

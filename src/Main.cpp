@@ -80,6 +80,8 @@ int main(int argc, char *argv[]) {
 #endif
     // MPI data
     int iproc = 1, jproc = 1, kproc = 1;
+    // For hybrid MPI solver
+    int numOmpHybridThreads = 1;
 
     // CUDA & OpenCL data
     int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
@@ -94,7 +96,7 @@ int main(int argc, char *argv[]) {
     std::string scenarioName, geometryName, scenarioFilename, geometryFilename, outputFilename, solverName;
     parseArguments(
             argc, argv, scenarioName, solverName, outputFileWriterType, shallWriteOutput, linearSystemSolverType,
-            numParticles, traceStreamlines, iproc, jproc, kproc,
+            numParticles, traceStreamlines, iproc, jproc, kproc, numOmpHybridThreads,
             blockSizeX, blockSizeY, blockSizeZ, blockSize1D, openclPlatformId);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
@@ -105,8 +107,7 @@ int main(int argc, char *argv[]) {
                 rankL, rankR, rankD, rankU, rankB, rankF,
                 threadIdxI, threadIdxJ, threadIdxK, nproc);
 
-        // Don't use OpenMP and MPI simultaneously.
-        omp_set_num_threads(1);
+        omp_set_num_threads(numOmpHybridThreads);
     }
 #endif
 

@@ -47,6 +47,7 @@ class OutputFileWriter;
  * @param iproc The number of processes in x direction (MPI solver only).
  * @param jproc The number of processes in y direction (MPI solver only).
  * @param kproc The number of processes in z direction (MPI solver only).
+ * @param numOmpHybridThreads The number of OpenMP threads to use for a hybrid solver (MPI solver only).
  * @param blockSizeX The block size to use for 3D domains in x direction (CUDA and OpenCL solver only).
  * @param blockSizeY The block size to use for 3D domains in y direction (CUDA and OpenCL solver only).
  * @param blockSizeZ The block size to use for 3D domains in z direction (CUDA and OpenCL solver only).
@@ -57,7 +58,7 @@ class OutputFileWriter;
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName,
         std::string &outputFileWriterType, bool &shallWriteOutput, LinearSystemSolverType &linearSystemSolverType,
-        int &numParticles, bool &traceStreamlines, int &iproc, int &jproc, int &kproc,
+        int &numParticles, bool &traceStreamlines, int &iproc, int &jproc, int &kproc, int &numOmpHybridThreads,
         int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D,
         int &openclPlatformId);
 

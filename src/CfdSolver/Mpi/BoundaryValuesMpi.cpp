@@ -37,6 +37,7 @@ void setLeftRightBoundariesMpi(
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
     if (il == 1) {
+    #pragma omp parallel for
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 // Left wall
@@ -58,6 +59,7 @@ void setLeftRightBoundariesMpi(
                 }
             }
         }
+        #pragma omp parallel for
         for (int j = jl-1; j <= ju; j++) {
             for (int k = kl-1; k <= ku; k++) {
                 // Left wall
@@ -78,6 +80,7 @@ void setLeftRightBoundariesMpi(
     }
 
     if (iu == imax) {
+        #pragma omp parallel for
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 // Right wall
@@ -99,6 +102,7 @@ void setLeftRightBoundariesMpi(
                 }
             }
         }
+        #pragma omp parallel for
         for (int j = jl-1; j <= ju; j++) {
             for (int k = kl-1; k <= ku; k++) {
                 // Right wall
@@ -126,6 +130,7 @@ void setDownUpBoundariesMpi(
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
     if (jl == 1) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int k = kl; k <= ku; k++) {
                 // Down wall
@@ -147,6 +152,7 @@ void setDownUpBoundariesMpi(
                 }
             }
         }
+        #pragma omp parallel for
         for (int i = il-1; i <= iu; i++) {
             for (int k = kl-1; k <= ku; k++) {
                 // Down wall
@@ -165,6 +171,7 @@ void setDownUpBoundariesMpi(
     }
 
     if (ju == jmax) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int k = kl; k <= ku; k++) {
                 // Up wall
@@ -186,6 +193,7 @@ void setDownUpBoundariesMpi(
                 }
             }
         }
+        #pragma omp parallel for
         for (int i = il-1; i <= iu; i++) {
             for (int k = kl-1; k <= ku; k++) {
                 // Up wall
@@ -212,6 +220,7 @@ void setFrontBackBoundariesMpi(
         Real *U, Real *V, Real *W, Real *T,
         FlagType *Flag) {
     if (kl == 1) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int j = jl; j <= ju; j++) {
                 // Back wall
@@ -237,6 +246,7 @@ void setFrontBackBoundariesMpi(
                 }
             }
         }
+        #pragma omp parallel for
         for (int i = il-1; i <= iu; i++) {
             for (int j = jl-1; j <= ju; j++) {
                 // Back wall
@@ -257,6 +267,7 @@ void setFrontBackBoundariesMpi(
     }
 
     if (ku == kmax) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int j = jl; j <= ju; j++) {
                 // Front wall
@@ -282,6 +293,7 @@ void setFrontBackBoundariesMpi(
                 }
             }
         }
+        #pragma omp parallel for
         for (int i = il-1; i <= iu; i++) {
             for (int j = jl-1; j <= ju; j++) {
                 // Front wall
@@ -308,6 +320,7 @@ void setInternalUBoundariesMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
         Real *U,
         FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = il; i <= iu-1; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -377,6 +390,7 @@ void setInternalVBoundariesMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
         Real *V,
         FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju-1; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -446,6 +460,7 @@ void setInternalWBoundariesMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
         Real *W,
         FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku-1; k++) {
@@ -515,6 +530,7 @@ void setInternalTBoundariesMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
         Real *T,
         FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -587,6 +603,7 @@ void setBoundaryValuesScenarioSpecificMpi(
         FlagType *Flag) {
     if (scenarioName == "driven_cavity") {
         if (ju == jmax) {
+            #pragma omp parallel for
             for (int i = il-2; i <= iu+1; i++) {
                 for (int k = kl-1; k <= ku+1; k++) {
                     // Upper wall
@@ -596,6 +613,7 @@ void setBoundaryValuesScenarioSpecificMpi(
         }
     } else if (scenarioName == "flow_over_step") {
         if (il == 1) {
+            #pragma omp parallel for
             for (int j = jmax / 2 + 1; j <= jmax; j++) {
                 for (int k = kl; k <= ku; k++) {
                     // Left wall
@@ -607,6 +625,7 @@ void setBoundaryValuesScenarioSpecificMpi(
         }
     } else if (scenarioName == "single_tower") {
         if (il == 1) {
+            #pragma omp parallel for
             for (int j = jl; j <= ju; j++) {
                 for (int k = kl; k <= ku; k++) {
                     // Left wall
@@ -618,6 +637,7 @@ void setBoundaryValuesScenarioSpecificMpi(
         }
     } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze") {
         if (il == 1) {
+            #pragma omp parallel for
             for (int j = jl; j <= ju; j++) {
                 for (int k = kl; k <= ku; k++) {
                     // Left wall

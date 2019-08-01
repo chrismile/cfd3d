@@ -49,6 +49,7 @@ void calculateFghMpi(
     
     Real Dx = 1/dx, Dy = 1/dy, Dz = 1/dz;
 
+    #pragma omp parallel for private(d2u_dx2, d2u_dy2, d2u_dz2, du2_dx, duv_dy, duw_dz)
     for (int i = il-1; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -98,6 +99,7 @@ void calculateFghMpi(
         }
     }
 
+    #pragma omp parallel for private(d2v_dx2, d2v_dy2, d2v_dz2, duv_dx, dv2_dy, dvw_dz)
     for (int i = il; i <= iu; i++) {
         for (int j = jl-1; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -147,6 +149,7 @@ void calculateFghMpi(
         }
     }
 
+    #pragma omp parallel for private(d2w_dx2, d2w_dy2, d2w_dz2, duw_dx, dvw_dy, dw2_dz)
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl-1; k <= ku; k++) {
@@ -197,6 +200,7 @@ void calculateFghMpi(
     }
 
     if (il == 1) {
+        #pragma omp parallel for
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 F[IDXF(0,j,k)] = U[IDXU(0,j,k)];
@@ -204,6 +208,7 @@ void calculateFghMpi(
         }
     }
     if (iu == imax) {
+        #pragma omp parallel for
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 F[IDXF(imax,j,k)] = U[IDXU(imax,j,k)];
@@ -212,6 +217,7 @@ void calculateFghMpi(
     }
 
     if (jl == 1) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int k = kl; k <= ku; k++) {
                 G[IDXG(i,0,k)] = V[IDXV(i,0,k)];
@@ -219,6 +225,7 @@ void calculateFghMpi(
         }
     }
     if (ju == jmax) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int k = kl; k <= ku; k++) {
                 G[IDXG(i,jmax,k)] = V[IDXV(i,jmax,k)];
@@ -227,6 +234,7 @@ void calculateFghMpi(
     }
 
     if (kl == 1) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int j = jl; j <= ju; j++) {
                 H[IDXH(i,j,0)] = W[IDXW(i,j,0)];
@@ -234,6 +242,7 @@ void calculateFghMpi(
         }
     }
     if (ku == kmax) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int j = jl; j <= ju; j++) {
                 H[IDXH(i,j,kmax)] = W[IDXW(i,j,kmax)];
@@ -247,6 +256,7 @@ void calculateRsMpi(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         Real *F, Real *G, Real *H, Real *RS) {
+    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -267,6 +277,7 @@ void calculateDtMpi(
     Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
 
     // First, compute the maximum absolute velocities in x, y and z direction.
+    #pragma omp parallel for reduction(max: uMaxAbs)
     for (int i = il-1; i <= iu; i++) {
         for (int j = jl-1; j <= ju+1; j++) {
             for (int k = kl-1; k <= ku+1; k++) {
@@ -274,6 +285,8 @@ void calculateDtMpi(
             }
         }
     }
+
+    #pragma omp parallel for reduction(max: vMaxAbs)
     for (int i = il-1; i <= iu+1; i++) {
         for (int j = jl-1; j <= ju; j++) {
             for (int k = kl-1; k <= ku+1; k++) {
@@ -282,6 +295,7 @@ void calculateDtMpi(
         }
     }
 
+    #pragma omp parallel for reduction(max: wMaxAbs)
     for (int i = il-1; i <= iu+1; i++) {
         for (int j = jl-1; j <= ju+1; j++) {
             for (int k = kl-1; k <= ku; k++) {
@@ -323,6 +337,7 @@ void calculateUvwMpi(
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
         Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
+    #pragma omp parallel for
     for (int i = il-1; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -333,6 +348,7 @@ void calculateUvwMpi(
         }
     }
 
+    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl-1; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -343,6 +359,7 @@ void calculateUvwMpi(
         }
     }
 
+    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl-1; k <= ku; k++) {
@@ -366,6 +383,7 @@ void calculateTemperatureMpi(
         Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
     Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
 
+    #pragma omp parallel for private(duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2)
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {

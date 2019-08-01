@@ -41,6 +41,7 @@ void sorSolverIterationMpi(
         Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
     // Set the boundary values for the pressure on the x-y-planes.
     if (kl == 1) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int j = jl; j <= ju; j++) {
                 P[IDXP(i, j, 0)] = P[IDXP(i, j, 1)];
@@ -48,6 +49,7 @@ void sorSolverIterationMpi(
         }
     }
     if (ku == kmax) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int j = jl; j <= ju; j++) {
                 P[IDXP(i, j, kmax + 1)] = P[IDXP(i, j, kmax)];
@@ -57,6 +59,7 @@ void sorSolverIterationMpi(
 
     // Set the boundary values for the pressure on the x-z-planes.
     if (jl == 1) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int k = kl; k <= ku; k++) {
                 P[IDXP(i,0,k)] = P[IDXP(i,1,k)];
@@ -64,6 +67,7 @@ void sorSolverIterationMpi(
         }
     }
     if (ju == jmax) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int k = kl; k <= ku; k++) {
                 P[IDXP(i,jmax+1,k)] = P[IDXP(i,jmax,k)];
@@ -73,6 +77,7 @@ void sorSolverIterationMpi(
 
     // Set the boundary values for the pressure on the y-z-planes.
     if (il == 1) {
+        #pragma omp parallel for
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 P[IDXP(0,j,k)] = P[IDXP(1,j,k)];
@@ -80,6 +85,7 @@ void sorSolverIterationMpi(
         }
     }
     if (iu == imax) {
+        #pragma omp parallel for
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
                 P[IDXP(imax+1,j,k)] = P[IDXP(imax,j,k)];
@@ -88,6 +94,7 @@ void sorSolverIterationMpi(
     }
 
     // Boundary values for arbitrary geometries.
+    #pragma omp parallel for
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -137,6 +144,7 @@ void sorSolverIterationMpi(
 
 
     if (linearSystemSolverType == LINEAR_SOLVER_JACOBI) {
+        #pragma omp parallel for
         for (int i = il-1; i <= iu+1; i++) {
             for (int j = jl-1; j <= ju+1; j++) {
                 for (int k = kl-1; k <= ku+1; k++) {
@@ -162,6 +170,7 @@ void sorSolverIterationMpi(
             }
         }
     } else if (linearSystemSolverType == LINEAR_SOLVER_JACOBI) {
+        #pragma omp parallel for
         for (int i = il; i <= iu; i++) {
             for (int j = jl; j <= ju; j++) {
                 for (int k = kl; k <= ku; k++) {
@@ -184,6 +193,7 @@ void sorSolverIterationMpi(
     // Compute the residual.
     residual = 0;
     int numFluidCells = 0;
+    #pragma omp parallel for reduction(+: residual) reduction(+: numFluidCells)
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {

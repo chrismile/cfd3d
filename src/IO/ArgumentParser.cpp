@@ -33,7 +33,7 @@
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName,
         std::string &outputFileWriterType, bool &shallWriteOutput, LinearSystemSolverType &linearSystemSolverType,
-        int &numParticles, bool &traceStreamlines, int &iproc, int &jproc, int &kproc,
+        int &numParticles, bool &traceStreamlines, int &iproc, int &jproc, int &kproc, int &numOmpHybridThreads,
         int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D,
         int &openclPlatformId) {
     // driven_cavity, natural_convection, rayleigh_benard_convection_8-2-1, flow_over_step, single_tower, terrain_1,
@@ -46,6 +46,7 @@ void parseArguments(
     numParticles = 500;
     traceStreamlines = false;
     iproc = jproc = kproc = 1;
+    numOmpHybridThreads = 1;
     blockSizeX = blockSizeY = 8;
     blockSizeZ = 4;
     blockSize1D = blockSizeX * blockSizeY * blockSizeZ;
@@ -53,15 +54,15 @@ void parseArguments(
 
     // Go over command line arguments.
     for (int i = 1; i < argc; i += 2) {
-        if (strcmp(argv[i], "--scenario") == 0 && i != argc - 1) {
+        if (strcmp(argv[i], "--scenario") == 0 && i < argc - 1) {
             scenarioName = argv[i+1];
-        } else if (strcmp(argv[i], "--solver") == 0 && i != argc - 1) {
+        } else if (strcmp(argv[i], "--solver") == 0 && i < argc - 1) {
             solverName = argv[i+1];
-        } else if (strcmp(argv[i], "--outputformat") == 0 && i != argc - 1) {
+        } else if (strcmp(argv[i], "--outputformat") == 0 && i < argc - 1) {
             outputFileWriterType = argv[i+1];
-        } else if (strcmp(argv[i], "--numparticles") == 0 && i != argc - 1) {
+        } else if (strcmp(argv[i], "--numparticles") == 0 && i < argc - 1) {
             numParticles = std::stoi(argv[i+1]);
-        } else if (strcmp(argv[i], "--linsolver") == 0 && i != argc - 1) {
+        } else if (strcmp(argv[i], "--linsolver") == 0 && i < argc - 1) {
             if (strcmp(argv[i+1], "jacobi") == 0) {
                 linearSystemSolverType = LINEAR_SOLVER_JACOBI;
             } else if (strcmp(argv[i+1], "sor") == 0) {
@@ -73,15 +74,17 @@ void parseArguments(
                 exit(1);
             }
             shallWriteOutput = strcmp(argv[i+1], "false") == 0 ? false : true;
-        } else if (strcmp(argv[i], "--output") == 0 && i != argc - 1) {
+        } else if (strcmp(argv[i], "--output") == 0 && i < argc - 1) {
             shallWriteOutput = strcmp(argv[i+1], "false") == 0 ? false : true;
-        } else if (strcmp(argv[i], "--tracestreamlines") == 0 && i != argc - 1) {
+        } else if (strcmp(argv[i], "--tracestreamlines") == 0 && i < argc - 1) {
             traceStreamlines = strcmp(argv[i+1], "false") == 0 ? false : true;
         } else if (strcmp(argv[i], "--numproc") == 0 && i < argc - 3) {
             iproc = std::stoi(argv[i+1]);
             jproc = std::stoi(argv[i+2]);
             kproc = std::stoi(argv[i+3]);
             i += 2;
+        } else if (strcmp(argv[i], "--numhybridthreads") == 0 && i < argc - 1) {
+            numOmpHybridThreads = std::stoi(argv[i+1]);
         } else if (strcmp(argv[i], "--blocksize") == 0 && i < argc - 3) {
             blockSizeX = std::stoi(argv[i+1]);
             blockSizeY = std::stoi(argv[i+2]);
