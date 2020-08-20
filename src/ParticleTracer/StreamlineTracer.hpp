@@ -39,7 +39,7 @@ public:
      * @param particleSeedingLocations The seeding locations of the particles to trace in world space.
      * @param gridOrigin The origin of the grid in world coordinates.
      * @param gridSize The size of the grid (i.e. the extent in x, y and z) of the grid.
-     * @param tolDt The time step to use for integrating the particle position.
+     * @param dt The time step to use for integrating the particle position.
      * @param imax Number of cells in x direction inside of the domain.
      * @param jmax Number of cells in y direction inside of the domain.
      * @param kmax Number of cells in z direction inside of the domain.
