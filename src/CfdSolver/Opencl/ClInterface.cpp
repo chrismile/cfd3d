@@ -138,23 +138,23 @@ cl::Program ClInterface::loadProgramFromSourceFiles(const std::vector<std::strin
 
 cl::Program ClInterface::loadProgramFromBinaryFile(const char *filename)
 {
-	cl::Program::Binaries binaries;
-	std::ifstream ifile(filename, std::ifstream::binary);
-	ifile.seekg(0, std::ios::end);
-	std::streampos size = ifile.tellg();
-	ifile.seekg(0, std::ios::beg);
-	std::vector<char> buffer(size);
-	ifile.read(buffer.data(), size);
-	ifile.close();
-	binaries.push_back({std::make_pair(buffer.data(), size)});
-	
-	cl::Program program(context, devices, binaries);
-	if (program.build(devices) != CL_SUCCESS){
+    cl::Program::Binaries binaries;
+    std::ifstream ifile(filename, std::ifstream::binary);
+    ifile.seekg(0, std::ios::end);
+    std::streampos size = ifile.tellg();
+    ifile.seekg(0, std::ios::beg);
+    std::vector<unsigned char> buffer(size);
+    ifile.read((char*)buffer.data(), size);
+    ifile.close();
+    binaries.push_back(buffer);
+
+    cl::Program program(context, devices, binaries);
+    if (program.build(devices) != CL_SUCCESS){
         std::cerr << "Error while builing cl::Program: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
-                << std::endl;
-		exit(1);
-	}
-	return program;
+                  << std::endl;
+        exit(1);
+    }
+    return program;
 }
 
 

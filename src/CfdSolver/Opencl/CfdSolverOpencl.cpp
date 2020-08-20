@@ -199,37 +199,40 @@ CfdSolverOpencl::~CfdSolverOpencl() {
 void CfdSolverOpencl::setBoundaryValues() {
     cl::EnqueueArgs eargsYZ(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            setLeftRightBoundariesOpencl(setLeftRightBoundariesOpenclKernel);
+    auto setLeftRightBoundariesOpencl =
+            cl::KernelFunctor<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+                    setLeftRightBoundariesOpenclKernel);
     setLeftRightBoundariesOpencl(eargsYZ, T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     cl::EnqueueArgs eargsXZ(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(kmax, imax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            setDownUpBoundariesOpencl(setDownUpBoundariesOpenclKernel);
+    auto setDownUpBoundariesOpencl =
+            cl::KernelFunctor<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+                    setDownUpBoundariesOpenclKernel);
     setDownUpBoundariesOpencl(eargsXZ, T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
     cl::EnqueueArgs eargsXY(
             queue, cl::NullRange, ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            setFrontBackBoundariesOpencl(setFrontBackBoundariesOpenclKernel);
+    auto setFrontBackBoundariesOpencl =
+            cl::KernelFunctor<Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+                    setFrontBackBoundariesOpenclKernel);
     setFrontBackBoundariesOpencl(eargsXY, T_h, T_c, imax, jmax, kmax, U, V, W, T, Flag);
 
 
     cl::EnqueueArgs eargs3D(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
-            setInternalUBoundariesOpencl(setInternalUBoundariesOpenclKernel);
+    auto setInternalUBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(
+            setInternalUBoundariesOpenclKernel);
     setInternalUBoundariesOpencl(eargs3D, imax, jmax, kmax, U, Flag);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
-            setInternalVBoundariesOpencl(setInternalVBoundariesOpenclKernel);
+    auto setInternalVBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(
+            setInternalVBoundariesOpenclKernel);
     setInternalVBoundariesOpencl(eargs3D, imax, jmax, kmax, V, Flag);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
-            setInternalWBoundariesOpencl(setInternalWBoundariesOpenclKernel);
+    auto setInternalWBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(
+            setInternalWBoundariesOpenclKernel);
     setInternalWBoundariesOpencl(eargs3D, imax, jmax, kmax, W, Flag);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
-            setInternalTBoundariesOpencl(setInternalTBoundariesOpenclKernel);
+    auto setInternalTBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(
+            setInternalTBoundariesOpenclKernel);
     setInternalTBoundariesOpencl(eargs3D, imax, jmax, kmax, T, Flag);
 }
 
@@ -237,26 +240,27 @@ void CfdSolverOpencl::setBoundaryValuesScenarioSpecific() {
     if (scenarioName == "driven_cavity") {
         cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
                 ClInterface::get()->rangePadding2D(kmax, imax + 1, workGroupSize2D), workGroupSize2D);
-        cl::make_kernel<int, int, int, cl::Buffer>
-                setDrivenCavityBoundariesOpencl(setDrivenCavityBoundariesOpenclKernel);
+        auto setDrivenCavityBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer>(
+                setDrivenCavityBoundariesOpenclKernel);
         setDrivenCavityBoundariesOpencl(eargsXZ, imax, jmax, kmax, U);
     } else if (scenarioName == "flow_over_step") {
         cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
                 ClInterface::get()->rangePadding2D(kmax, jmax - (jmax / 2 + 1) + 1, workGroupSize2D), workGroupSize2D);
-        cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer>
-                setFlowOverStepBoundariesOpencl(setFlowOverStepBoundariesOpenclKernel);
+        auto setFlowOverStepBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer>(
+                setFlowOverStepBoundariesOpenclKernel);
         setFlowOverStepBoundariesOpencl(eargsYZ, imax, jmax, kmax, U, V, W);
     } else if (scenarioName == "single_tower") {
         cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
                 ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
-        cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer>
-                setSingleTowerBoundariesOpencl(setSingleTowerBoundariesOpenclKernel);
+        auto setSingleTowerBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer>(
+                setSingleTowerBoundariesOpenclKernel);
         setSingleTowerBoundariesOpencl(eargsYZ, imax, jmax, kmax, U, V, W);
     } else if (scenarioName == "terrain_1" || scenarioName == "fuji_san" || scenarioName == "zugspitze") {
         cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
                 ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
-        cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-                setMountainBoundariesOpencl(setMountainBoundariesOpenclKernel);
+        auto setMountainBoundariesOpencl =
+                cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+                        setMountainBoundariesOpenclKernel);
         setMountainBoundariesOpencl(eargsYZ, imax, jmax, kmax, U, V, W, Flag);
     }
 }
@@ -282,8 +286,8 @@ void CfdSolverOpencl::calculateTemperature() {
     cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
-    cl::make_kernel<Real, Real, Real, Real, Real, Real, Real, int, int, int,
-        cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> calculateTemperatureOpencl(
+    auto calculateTemperatureOpencl = cl::KernelFunctor<Real, Real, Real, Real, Real, Real, Real, int, int, int,
+            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
             calculateTemperatureOpenclKernel);
     calculateTemperatureOpencl(eargs, Re, Pr, alpha, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, T_temp, Flag);
 }
@@ -292,25 +296,25 @@ void CfdSolverOpencl::calculateFgh() {
     cl::EnqueueArgs eargs3D(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
-    cl::make_kernel<Real, Real, Real, Real, Real, Real, Real, Real, Real, Real, int, int, int,
-        cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            calculateFghOpencl(calculateFghOpenclKernel);
+    auto calculateFghOpencl = cl::KernelFunctor<Real, Real, Real, Real, Real, Real, Real, Real, Real, Real, int, int,
+            int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+            calculateFghOpenclKernel);
     calculateFghOpencl(
             eargs3D, Re, GX, GY, GZ, alpha, beta, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, T, F, G, H, Flag);
 
     cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> setFBoundariesOpencl(setFBoundariesOpenclKernel);
+    auto setFBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(setFBoundariesOpenclKernel);
     setFBoundariesOpencl(eargsYZ, imax, jmax, kmax, U, F);
 
     cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(kmax, imax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> setGBoundariesOpencl(setGBoundariesOpenclKernel);
+    auto setGBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(setGBoundariesOpenclKernel);
     setGBoundariesOpencl(eargsXZ, imax, jmax, kmax, V, G);
 
     cl::EnqueueArgs eargsXY(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> setHBoundariesOpencl(setHBoundariesOpenclKernel);
+    auto setHBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(setHBoundariesOpenclKernel);
     setHBoundariesOpencl(eargsXY, imax, jmax, kmax, W, H);
 }
 
@@ -318,8 +322,9 @@ void CfdSolverOpencl::calculateRs() {
     cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
-    cl::make_kernel<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-        calculateRsOpencl(calculateRsOpenclKernel);
+    auto calculateRsOpencl =
+            cl::KernelFunctor<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+                    calculateRsOpenclKernel);
     calculateRsOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, F, G, H, RS);
 }
 
@@ -343,8 +348,8 @@ void CfdSolverOpencl::calculateUvw() {
     cl::EnqueueArgs eargs(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
-    cl::make_kernel<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
-        cl::Buffer, cl::Buffer, cl::Buffer> calculateUvwOpencl(calculateUvwOpenclKernel);
+    auto calculateUvwOpencl = cl::KernelFunctor<Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer,
+            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(calculateUvwOpenclKernel);
     calculateUvwOpencl(eargs, dt, dx, dy, dz, imax, jmax, kmax, U, V, W, F, G, H, P, Flag);
 }
 

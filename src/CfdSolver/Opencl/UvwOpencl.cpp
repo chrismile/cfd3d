@@ -41,7 +41,7 @@ void calculateDtOpencl(
         bool useTemperature) {
     Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
 
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateMaximum(calculateMaximumKernel);
+    auto calculateMaximum = cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int>(calculateMaximumKernel);
 
     cl::Buffer *U_reductionInput = &U;
     cl::Buffer *V_reductionInput = &V;

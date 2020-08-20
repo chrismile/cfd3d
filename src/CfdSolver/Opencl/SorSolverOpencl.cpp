@@ -38,7 +38,7 @@ Real reduceSumOpenclReal(
         cl::Buffer &input, unsigned int numValues, cl::Buffer &openclReductionHelperArray, int blockSize1D) {
     Real sumValue = Real(0);
 
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateSum(calculateSumKernel);
+    auto calculateSum = cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int>(calculateSumKernel);
 
     cl::Buffer *reductionInput = &input;
     cl::Buffer *reductionOutput = &openclReductionHelperArray;
@@ -85,7 +85,7 @@ unsigned int reduceSumOpenclUint(
         cl::Buffer &input, unsigned int numValues, cl::Buffer &openclReductionHelperArray, int blockSize1D) {
     unsigned int sumValue = 0u;
 
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int> calculateSum(calculateSumKernel);
+    auto calculateSum = cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::LocalSpaceArg, int>(calculateSumKernel);
 
     cl::Buffer *reductionInput = &input;
     cl::Buffer *reductionOutput = &openclReductionHelperArray;
@@ -150,35 +150,37 @@ void sorSolverOpencl(
 
     cl::EnqueueArgs eargsXY(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(jmax, imax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<int, int, int, cl::Buffer> setXYPlanesPressureBoundariesOpencl(
+    auto setXYPlanesPressureBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer>(
             setXYPlanesPressureBoundariesOpenclKernel);
 
     cl::EnqueueArgs eargsXZ(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(kmax, imax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<int, int, int, cl::Buffer> setXZPlanesPressureBoundariesOpencl(
+    auto setXZPlanesPressureBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer>(
             setXZPlanesPressureBoundariesOpenclKernel);
 
     cl::EnqueueArgs eargsYZ(queue, cl::NullRange,
             ClInterface::get()->rangePadding2D(kmax, jmax, workGroupSize2D), workGroupSize2D);
-    cl::make_kernel<int, int, int, cl::Buffer> setYZPlanesPressureBoundariesOpencl(
+    auto setYZPlanesPressureBoundariesOpencl = cl::KernelFunctor<int, int, int, cl::Buffer>(
             setYZPlanesPressureBoundariesOpenclKernel);
 
     cl::EnqueueArgs eargs3D(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax, jmax, imax, workGroupSize3D), workGroupSize3D);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer>
-            setBoundaryConditionsPressureInDomainOpencl(setBoundaryConditionsPressureInDomainOpenclKernel);
+    auto setBoundaryConditionsPressureInDomainOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(
+            setBoundaryConditionsPressureInDomainOpenclKernel);
 
     cl::EnqueueArgs eargsWholeDomain3D(
             queue, cl::NullRange,
             ClInterface::get()->rangePadding3D(kmax+2, jmax+2, imax+2, workGroupSize3D), workGroupSize3D);
-    cl::make_kernel<int, int, int, cl::Buffer, cl::Buffer> copyPressureOpencl(copyPressureOpenclKernel);
+    auto copyPressureOpencl = cl::KernelFunctor<int, int, int, cl::Buffer, cl::Buffer>(copyPressureOpenclKernel);
 
-    cl::make_kernel<Real, Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            sorSolverIterationOpencl(sorSolverIterationOpenclKernel);
+    auto sorSolverIterationOpencl = cl::KernelFunctor<
+            Real, Real, Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+            sorSolverIterationOpenclKernel);
 
-    cl::make_kernel<Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>
-            sorSolverComputeResidualArrayOpencl(sorSolverComputeResidualArrayOpenclKernel);
+    auto sorSolverComputeResidualArrayOpencl = cl::KernelFunctor<
+            Real, Real, Real, int, int, int, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(
+            sorSolverComputeResidualArrayOpenclKernel);
 
 
     const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));

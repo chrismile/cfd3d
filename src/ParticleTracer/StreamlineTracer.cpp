@@ -67,7 +67,7 @@ void traceStreamlineParticle(
                 currentTrajectory, gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
 
         // Integrate to the new position using Runge-Kutta of 4th order.
-        /*
+
         rvec3 k1 = dt * getVectorVelocityAt(particlePosition, gridOrigin, gridSize, imax, jmax, kmax, U, V, W);
         rvec3 k2 = dt * getVectorVelocityAt(particlePosition + k1/Real(2.0), gridOrigin, gridSize, imax, jmax, kmax,
                 U, V, W);
@@ -75,11 +75,11 @@ void traceStreamlineParticle(
                 U, V, W);
         rvec3 k4 = dt * getVectorVelocityAt(particlePosition + k3, gridOrigin, gridSize, imax, jmax, kmax, U, V, W);
         particlePosition = particlePosition + k1/Real(6.0) + k2/Real(3.0) + k3/Real(3.0) + k4/Real(6.0);
-        */
+
 
         // Integrate to the new position using the Runge-Kutta-Fehlberg method (RKF45).
         // For more details see: http://maths.cnam.fr/IMG/pdf/RungeKuttaFehlbergProof.pdf
-        rvec3 approximationRK4, approximationRK5;
+        /*rvec3 approximationRK4, approximationRK5;
         bool timestepNeedsAdaptation = false;
         do {
             rvec3 k1 = dt * getVectorVelocityAt(particlePosition, gridOrigin, gridSize, imax, jmax, kmax, U, V, W);
@@ -110,7 +110,7 @@ void traceStreamlineParticle(
             }
             dt = s*dt;
         } while(timestepNeedsAdaptation);
-        particlePosition = approximationRK4;
+        particlePosition = approximationRK4;*/
 
 
         Real segmentLength = glm::length(particlePosition - oldParticlePosition);
@@ -127,7 +127,7 @@ void traceStreamlineParticle(
 }
 
 Trajectories StreamlineTracer::trace(
-        const std::vector<rvec3> &particleSeedingLocations, const rvec3 &gridOrigin, const rvec3 &gridSize, Real tolDt,
+        const std::vector<rvec3> &particleSeedingLocations, const rvec3 &gridOrigin, const rvec3 &gridSize, Real dt,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real *U, Real *V, Real *W, Real *P, Real *T) {
     Trajectories trajectories;
     trajectories.resize(particleSeedingLocations.size());

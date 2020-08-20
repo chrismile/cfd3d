@@ -29,13 +29,13 @@
 #ifndef CLINTERFACE_HPP_
 #define CLINTERFACE_HPP_
 
-#define CL_TARGET_OPENCL_VERSION 120
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_TARGET_OPENCL_VERSION 120
 #define CL_HPP_ENABLE_EXCEPTIONS
-#define __CL_ENABLE_EXCEPTIONS
 
 #include <vector>
 #include <string>
-#include "CL/cl.hpp"
+#include "CL/cl2.hpp"
 #include "Singleton.hpp"
 
 /// Represents information on OpenCL context creation
