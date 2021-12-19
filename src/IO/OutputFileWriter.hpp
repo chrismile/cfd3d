@@ -37,7 +37,7 @@
  */
 class OutputFileWriter {
 public:
-    virtual ~OutputFileWriter() {}
+    virtual ~OutputFileWriter() = default;
 
     /**
      * @return The file ending of the format.

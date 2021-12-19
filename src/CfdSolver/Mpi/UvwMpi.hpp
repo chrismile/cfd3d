@@ -38,7 +38,7 @@ void calculateFghMpi(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
-        Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag);
+        Real *U, Real *V, Real *W, const Real *T, Real *F, Real *G, Real *H, FlagType *Flag);
 
 /*
  * Computes the right hand side of the Pressure Poisson Equation (PPE).
@@ -46,7 +46,7 @@ void calculateFghMpi(
 void calculateRsMpi(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
-        Real *F, Real *G, Real *H, Real *RS);
+        const Real *F, const Real *G, const Real *H, Real *RS);
 
 /*
  * Determines the maximum time step size. The time step size is restricted according to the CFL theorem.
@@ -65,7 +65,7 @@ void calculateUvwMpi(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
-        Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag);
+        Real *U, Real *V, Real *W, const Real *F, const Real *G, const Real *H, const Real *P, FlagType *Flag);
 
 /*
  * Calculates the new temperature values.
@@ -76,6 +76,6 @@ void calculateTemperatureMpi(
         int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
-        Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag);
+        Real *U, Real *V, Real *W, Real *T, const Real *T_temp, FlagType *Flag);
 
 #endif //CFD3D_UVWMPI_HPP

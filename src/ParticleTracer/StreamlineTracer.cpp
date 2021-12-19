@@ -35,7 +35,7 @@ void traceStreamlineParticle(
         Real *U, Real *V, Real *W, Real *P, Real *T) {
     rvec3 particlePosition = particleStartPosition;
     rvec3 oldParticlePosition;
-    glm::ivec3 particleGridPosition;
+    //glm::ivec3 particleGridPosition;
 
     int iterationCounter = 0;
     const int MAX_ITERATIONS = 2000;
@@ -46,7 +46,7 @@ void traceStreamlineParticle(
         // Break if the position is outside of the domain.
         if (glm::any(glm::lessThan(particlePosition, gridOrigin))
                 || glm::any(glm::greaterThan(particlePosition, gridOrigin+gridSize))) {
-            if (currentTrajectory.positions.size() >= 1) {
+            if (!currentTrajectory.positions.empty()) {
                 // Clamp the position to the boundary.
                 rvec3 rayOrigin = currentTrajectory.positions.back();
                 rvec3 rayDirection = particlePosition - rayOrigin;

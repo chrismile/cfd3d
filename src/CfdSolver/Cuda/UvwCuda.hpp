@@ -73,6 +73,6 @@ __global__ void calculateTemperatureCuda(
         Real Re, Real Pr, Real alpha,
         Real dt, Real dx, Real dy, Real dz,
         int imax, int jmax, int kmax,
-        Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag);
+        Real *U, Real *V, Real *W, Real *T, const Real *T_temp, FlagType *Flag);
 
 #endif //CFD3D_UVWCUDA_HPP

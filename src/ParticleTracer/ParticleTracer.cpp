@@ -28,7 +28,6 @@
 
 #include <random>
 #include <cassert>
-#include <boost/algorithm/string/predicate.hpp>
 #include "ParticleTracer.hpp"
 
 rvec3 integrateParticlePositionEuler(

@@ -41,11 +41,11 @@ std::vector<uint32_t> loadValuesFromGeometryFile(
         return {};
     }
 
-    file.seekg(0, file.end);
+    file.seekg(0, std::ifstream::end);
     size_t size = file.tellg();
     file.seekg(0);
     char *buffer = new char[size]; // BinaryReadStream does deallocation
-    file.read(buffer, size);
+    file.read(buffer, std::streamsize(size));
     file.close();
 
     BinaryReadStream stream(buffer, size);
@@ -77,7 +77,7 @@ void storeValuesInGeometryFile(
         std::cerr << "Error in storeValuesInGeometryFile: File \"" + geometryFilename + "\" not found." << std::endl;
         return;
     }
-    assert(values.size() == width*height*depth);
+    assert(values.size() == size_t(width) * size_t(height) * size_t(depth));
 
     BinaryWriteStream stream;
     stream.write((uint32_t)GEOMETRY_FILE_FORMAT_VERSION);
@@ -86,6 +86,6 @@ void storeValuesInGeometryFile(
     stream.write((uint32_t)depth);
     stream.write((void*)&values.front(), sizeof(uint32_t)*values.size());
 
-    file.write((const char*)stream.getBuffer(), stream.getSize());
+    file.write((const char*)stream.getBuffer(), std::streamsize(stream.getSize()));
     file.close();
 }

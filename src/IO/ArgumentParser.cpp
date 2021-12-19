@@ -72,11 +72,11 @@ void parseArguments(
                 std::cerr << "Specified invalid linear systems solver name." << std::endl;
                 exit(1);
             }
-            shallWriteOutput = strcmp(argv[i+1], "false") == 0 ? false : true;
+            shallWriteOutput = strcmp(argv[i + 1], "false") != 0;
         } else if (strcmp(argv[i], "--output") == 0 && i != argc - 1) {
-            shallWriteOutput = strcmp(argv[i+1], "false") == 0 ? false : true;
+            shallWriteOutput = strcmp(argv[i + 1], "false") != 0;
         } else if (strcmp(argv[i], "--tracestreamlines") == 0 && i != argc - 1) {
-            traceStreamlines = strcmp(argv[i+1], "false") == 0 ? false : true;
+            traceStreamlines = strcmp(argv[i + 1], "false") != 0;
         } else if (strcmp(argv[i], "--numproc") == 0 && i < argc - 3) {
             iproc = std::stoi(argv[i+1]);
             jproc = std::stoi(argv[i+2]);

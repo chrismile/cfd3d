@@ -52,7 +52,7 @@ std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, i
  * @param heightOut The height of the resulting bitmap.
  */
 void nearestNeighborUpsamplingPgm2D(
-        const std::vector<unsigned int> bitmapIn,
+        const std::vector<unsigned int> &bitmapIn,
         int widthIn,
         int heightIn,
         std::vector<unsigned int> &bitmapOut,
@@ -70,7 +70,7 @@ void nearestNeighborUpsamplingPgm2D(
  * @param heightOut The height of the resulting bitmap.
  */
 void nearestNeighborUpsampling2D(
-        const std::vector<unsigned int> bitmapIn,
+        const std::vector<unsigned int> &bitmapIn,
         int widthIn,
         int heightIn,
         std::vector<unsigned int> &bitmapOut,

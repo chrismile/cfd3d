@@ -160,7 +160,7 @@ T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray, i
     T *reductionInput = input;
     T *reductionOutput = cudaReductionHelperArray;
 
-    int numberOfBlocks = numValues;
+    int numberOfBlocks = int(numValues);
     int inputSize;
     bool finished = false;
 

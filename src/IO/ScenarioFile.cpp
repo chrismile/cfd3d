@@ -43,13 +43,13 @@ std::map<std::string, std::string> loadVariablesFromDatFile(const std::string &f
 
     std::string lineString;
     while (getline(file, lineString)) {
-        while (lineString.size() > 0 && (lineString[lineString.size()-1] == '\r' || lineString[lineString.size()-1] == ' ')) {
+        while (!lineString.empty() && (lineString[lineString.size()-1] == '\r' || lineString[lineString.size()-1] == ' ')) {
             // Remove '\r' of Windows line ending
             lineString = lineString.substr(0, lineString.size() - 1);
         }
 
         // Skip empty lines or lines with a comment character.
-        if (lineString.size() == 0 || lineString.at(0) == '#') {
+        if (lineString.empty() || lineString.at(0) == '#') {
             continue;
         }
 
@@ -58,7 +58,7 @@ std::map<std::string, std::string> loadVariablesFromDatFile(const std::string &f
         boost::algorithm::split(line, lineString, boost::is_any_of("\t "), boost::token_compress_on);
 
         // Empty line with only whitespace characters.
-        if (line.size() == 0) {
+        if (line.empty()) {
             continue;
         }
         assert(line.size() == 2);
@@ -72,7 +72,7 @@ std::map<std::string, std::string> loadVariablesFromDatFile(const std::string &f
     return variables;
 }
 
-std::string readStringVariable(const std::map<std::string, std::string> variables, const std::string &name) {
+std::string readStringVariable(const std::map<std::string, std::string> &variables, const std::string &name) {
     auto it = variables.find(name);
     if (it == variables.end()) {
         std::cerr << "Variable '" << name << "' not found in .dat file." << std::endl;
@@ -82,7 +82,7 @@ std::string readStringVariable(const std::map<std::string, std::string> variable
 }
 
 std::string readStringVariableOptional(
-        const std::map<std::string, std::string> variables, const std::string &name,
+        const std::map<std::string, std::string> &variables, const std::string &name,
         const std::string &fallback, bool &variableFound) {
     auto it = variables.find(name);
     if (it == variables.end()) {
@@ -92,7 +92,7 @@ std::string readStringVariableOptional(
     return it->second;
 }
 
-int readIntVariable(const std::map<std::string, std::string> variables, const std::string &name) {
+int readIntVariable(const std::map<std::string, std::string> &variables, const std::string &name) {
     auto it = variables.find(name);
     if (it == variables.end()) {
         std::cerr << "Variable '" << name << "' not found in .dat file." << std::endl;
@@ -102,7 +102,7 @@ int readIntVariable(const std::map<std::string, std::string> variables, const st
 }
 
 int readIntVariableOptional(
-        const std::map<std::string, std::string> variables, const std::string &name,
+        const std::map<std::string, std::string> &variables, const std::string &name,
         int fallback, bool &variableFound) {
     auto it = variables.find(name);
     if (it == variables.end()) {
@@ -112,7 +112,7 @@ int readIntVariableOptional(
     return std::stoi(it->second);
 }
 
-Real readRealVariable(const std::map<std::string, std::string> variables, const std::string &name) {
+Real readRealVariable(const std::map<std::string, std::string> &variables, const std::string &name) {
     auto it = variables.find(name);
     if (it == variables.end()) {
         std::cerr << "Variable '" << name << "' not found in .dat file." << std::endl;
@@ -122,7 +122,7 @@ Real readRealVariable(const std::map<std::string, std::string> variables, const 
 }
 
 Real readRealVariableOptional(
-        const std::map<std::string, std::string> variables, const std::string &name,
+        const std::map<std::string, std::string> &variables, const std::string &name,
         Real fallback, bool &variableFound) {
     auto it = variables.find(name);
     if (it == variables.end()) {

@@ -77,61 +77,61 @@ public:
      * @param T The temperature values.
      * @param Flag The flag values (@see Flag.hpp for more information).
      */
-    virtual void initialize(
+    void initialize(
             const std::string &scenarioName, LinearSystemSolverType linearSystemSolverType, bool shallWriteOutput,
             Real Re, Real Pr, Real omg, Real eps, int itermax, Real alpha, Real beta, Real dt, Real tau,
             Real GX, Real GY, Real GZ, bool useTemperature, Real T_h, Real T_c,
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
-            Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag);
+            Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag) override;
 
     /**
      * The destructor frees the memory of the internal representations of U, V, W, P, T and Flag.
      */
-    ~CfdSolverCuda();
+    ~CfdSolverCuda() override;
 
 
     /**
      * Sets the boundary condition values of U, V, W and T using the Flag array.
      */
-    virtual void setBoundaryValues();
+    void setBoundaryValues() override;
 
     /**
      * Sets special boundary conditions (typically something like inflow) specific to the different scenarios.
      */
-    virtual void setBoundaryValuesScenarioSpecific();
+    void setBoundaryValuesScenarioSpecific() override;
 
     /**
      * Calculates the largest possible (plus some safety margin) time step for the simulation at the current state.
      * @return The time step.
      */
-    virtual Real calculateDt();
+    Real calculateDt() override;
 
 
     /**
      * Updates the temperature values (using an intermediate copy of the temperature from the last iteration).
      */
-    virtual void calculateTemperature();
+    void calculateTemperature() override;
 
     /**
      * Compute the values in the helper array F, G and H necessary to compute the right-hand side of the Pressure
      * Poisson equation (PPE).
      */
-    virtual void calculateFgh();
+    void calculateFgh() override;
 
     /**
      * Compute the right-hand side of the Pressure Poisson Equation (PPE).
      */
-    virtual void calculateRs();
+    void calculateRs() override;
 
     /**
      * Execute the SOR solver (successive over-relaxation) for solving the Pressure Poisson Equation (PPE).
      */
-    virtual void executeSorSolver();
+    void executeSorSolver() override;
 
     /**
      * Updates the values in the arrays U, V and W.
      */
-    virtual void calculateUvw();
+    void calculateUvw() override;
 
 
     /**
@@ -143,7 +143,7 @@ public:
      * @param P The pressure values.
      * @param T The temperature values.
      */
-    virtual void getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T);
+    void getDataForOutput(Real *U, Real *V, Real *W, Real *P, Real *T) override;
 
 private:
     std::string scenarioName;

@@ -46,8 +46,7 @@ bool writeTrajectoriesToObjFile(const std::string &filename, const Trajectories 
     size_t objPointIndex = 1;
 
     size_t trajectoryFileIndex = 0;
-    for (size_t trajectoryIndex = 0; trajectoryIndex < trajectories.size(); trajectoryIndex++) {
-        const Trajectory &trajectory = trajectories.at(trajectoryIndex);
+    for (const auto &trajectory : trajectories) {
         size_t trajectorySize = trajectory.positions.size();
         if (trajectorySize < 2) {
             continue;
@@ -91,7 +90,7 @@ bool writeTrajectoriesToBinLinesFile(const std::string &filename, const Trajecto
     }
 
     uint32_t numTrajectories = trajectories.size();
-    uint32_t numAttributes = trajectories.size() == 0 ? 0 : trajectories.at(0).attributes.size();
+    uint32_t numAttributes = trajectories.empty() ? 0 : trajectories.at(0).attributes.size();
 
     BinaryWriteStream stream;
     stream.write((uint32_t)LINE_FILE_FORMAT_VERSION);
@@ -131,7 +130,7 @@ bool writeTrajectoriesToBinLinesFile(const std::string &filename, const Trajecto
         }
     }
 
-    file.write((const char*)stream.getBuffer(), stream.getSize());
+    file.write((const char*)stream.getBuffer(), std::streamsize(stream.getSize()));
     file.close();
     return true;
 }

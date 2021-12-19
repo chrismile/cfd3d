@@ -116,7 +116,7 @@ void mpiDomainDecompositionScheduling(int numElements, int numProcesses, int myr
     const int a = n / k;
     const int b = iceil(n, k);
     const int lambda1 = a == b ? 0 : (n - k*b)/(a - b);
-    const int lambda2 = k - lambda1;
+    //const int lambda2 = k - lambda1;
 
     if (myrank < lambda1) {
         lower = myrank * a + 1;

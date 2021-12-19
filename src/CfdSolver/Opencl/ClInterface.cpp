@@ -31,9 +31,7 @@
 #include <fstream>
 #include "ClInterface.hpp"
 
-ClInterface::~ClInterface()
-{
-}
+ClInterface::~ClInterface() = default;
 
 void ClInterface::initialize(CLContextInfo contextInfo)
 {
@@ -47,7 +45,7 @@ void ClInterface::initialize(CLContextInfo contextInfo)
 
 	// 2. Get right OpenCL device(s)
 	platform.getDevices(CL_DEVICE_TYPE_ALL, &allDevices);
-	if(allDevices.size() == 0){
+	if(allDevices.empty()){
         std::cout << "No OpenCL devices found. Please check your installation!" << std::endl;
 		exit(1);
 	}
@@ -101,7 +99,7 @@ cl::Program ClInterface::compileSourceFile(const std::string &filename) {
 	std::cout << "Compiling " << filename << "..." << std::endl;
 
 	cl::Program::Sources sources;
-	std::string kernelCode = prependHeader + "\n" + loadTextFile(filename.c_str());
+	std::string kernelCode = prependHeader + "\n" + loadTextFile(filename);
 	sources.push_back({kernelCode.c_str(), kernelCode.length()});
 	cl::Program program(context, sources);
 	std::string compileArgs = "-Werror";
@@ -127,7 +125,8 @@ cl::Program ClInterface::loadProgramFromSourceFiles(const std::vector<std::strin
 
 	// 5. Link all source files together into one executable
 	cl_int err = CL_SUCCESS;
-	cl::Program linkedProgram = cl::linkProgram(programs, NULL, NULL, NULL, &err);
+	cl::Program linkedProgram = cl::linkProgram(
+            programs, nullptr, nullptr, nullptr, &err);
 	if (err != CL_SUCCESS) {
 		std::cerr << "Error while linking programs:" << std::endl
 		        << linkedProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;

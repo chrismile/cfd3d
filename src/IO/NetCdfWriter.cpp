@@ -191,7 +191,7 @@ void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V
         FlagType *Flag) {
     if (timeStepNumber == 0) {
         Real *geometryData = new Real[imax*jmax*kmax];
-        #pragma omp parallel for
+        #pragma omp parallel for shared(geometryData, Flag) default(none)
         for (int i = 0; i < imax; i++) {
             for (int j = 0; j < jmax; j++) {
                 for (int k = 0; k < kmax; k++) {
@@ -203,7 +203,7 @@ void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V
         delete[] geometryData;
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(U, V, W) default(none)
     for (int i = 0; i < imax; i++) {
         for (int j = 0; j < jmax; j++) {
             for (int k = 0; k < kmax; k++) {

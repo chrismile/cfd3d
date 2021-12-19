@@ -35,17 +35,17 @@ class NetCdfWriter : public OutputFileWriter {
 public:
     NetCdfWriter(int nproc, int myrank) : nproc(nproc), myrank(myrank) {}
 
-    virtual ~NetCdfWriter();
+    ~NetCdfWriter() override;
 
     /**
      * @return The file ending of the format.
      */
-    virtual std::string getOutputFormatEnding() { return ".nc"; }
+    std::string getOutputFormatEnding() override { return ".nc"; }
 
     /**
      * Sets data for use with the MPI solver.
      */
-    virtual void setMpiData(int il, int iu, int jl, int ju, int kl, int ku);
+    void setMpiData(int il, int iu, int jl, int ju, int kl, int ku) override;
 
     /**
      * Opens a NetCDF file for writing.
@@ -61,8 +61,8 @@ public:
      * @param zOrigin The origin of the interior domain in world space (z coordinate).
      * @return true if the file could be opened for writing successfully.
      */
-    virtual bool initializeWriter(const std::string &filename,
-            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
+    bool initializeWriter(const std::string &filename,
+            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin) override;
     /**
      * Writes the data of the current time step to the file.
      * @param timeStepNumber The time step number (i.e., 0 for the initial state, 1 after the first iteration of the
@@ -75,8 +75,8 @@ public:
      * @param T The temperature values.
      * @param Flag The flag values (@see Flag.hpp for more information).
      */
-    virtual void writeTimestep(
-            int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
+    void writeTimestep(
+            int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) override;
 
 private:
     void writeTimeDependentVariable3D_Staggered(int ncVar, int jsize, int ksize, Real *values);
@@ -85,19 +85,19 @@ private:
 
     bool isMpiMode = false;
     int nproc, myrank;
-    int imax, jmax, kmax;
-    int il, iu, jl, ju, kl, ku;
-    Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
-    Real *centerCellU;
-    Real *centerCellV;
-    Real *centerCellW;
+    int imax{}, jmax{}, kmax{};
+    int il{}, iu{}, jl{}, ju{}, kl{}, ku{};
+    Real dx{}, dy{}, dz{}, xOrigin{}, yOrigin{}, zOrigin{};
+    Real *centerCellU{};
+    Real *centerCellV{};
+    Real *centerCellW{};
 
     bool isFileOpen = false;
-    int ncid;
-    size_t writeIndex;
+    int ncid{};
+    size_t writeIndex{};
 
     // NetCDF variables
-    int timeVar, xVar, yVar, zVar, geometryVar, UVar, VVar, WVar, PVar, TVar;
+    int timeVar{}, xVar{}, yVar{}, zVar{}, geometryVar{}, UVar{}, VVar{}, WVar{}, PVar{}, TVar{};
 };
 
 

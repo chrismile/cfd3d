@@ -31,8 +31,7 @@
 #include <cstring>
 #include "PgmFile.hpp"
 
-std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, int &height, int &levels)
-{
+std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, int &height, int &levels) {
     FILE *file = nullptr;
     if ((file = fopen(filename.c_str(), "rb")) == nullptr) {
         std::cerr << "Cannot open file \"" << filename << "\"." << std::endl;
@@ -59,7 +58,7 @@ std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, i
     // Read the number of gray levels
     assert(fgets(line, sizeof line, file) != nullptr);
     sscanf(line, "%d\n", &levels);
-    pgmValues.resize(static_cast<size_t>(width * height));
+    pgmValues.resize(size_t(width) * size_t(height));
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; ++x) {
@@ -68,7 +67,7 @@ std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, i
                 fclose(file);
                 std::cerr << "Invalid number of lines in file \"" << filename << "\"." << std::endl;
             }
-            pgmValues[static_cast<size_t>(x * height + y)] = value;
+            pgmValues[size_t(x) * size_t(height) + size_t(y)] = value;
         }
     }
 
@@ -77,7 +76,7 @@ std::vector<unsigned int> loadPgmFile(const std::string &filename, int &width, i
 }
 
 void nearestNeighborUpsamplingPgm2D(
-        const std::vector<unsigned int> bitmapIn,
+        const std::vector<unsigned int> &bitmapIn,
         int widthIn,
         int heightIn,
         std::vector<unsigned int> &bitmapOut,
@@ -85,7 +84,7 @@ void nearestNeighborUpsamplingPgm2D(
         int heightOut
 ) {
     assert(widthIn >= 3 && heightIn >= 3 && widthOut >= 3 && heightOut >= 3);
-    size_t size = static_cast<size_t>(widthOut * heightOut);
+    size_t size = size_t(widthOut) * size_t(heightOut);
     bitmapOut.resize(size);
 
     // Size already matches?
@@ -95,23 +94,23 @@ void nearestNeighborUpsamplingPgm2D(
     }
 
     // Copy corners
-    bitmapOut[static_cast<size_t>(0*heightOut + 0)] = bitmapIn[static_cast<size_t>(0*heightIn + 0)];
-    bitmapOut[static_cast<size_t>((widthOut-1)*heightOut + 0)] = bitmapIn[static_cast<size_t>((widthIn-1)*heightIn + 0)];
-    bitmapOut[static_cast<size_t>(0*heightOut + heightOut-1)] = bitmapIn[static_cast<size_t>(0 + heightIn-1)];
-    bitmapOut[static_cast<size_t>((widthOut-1)*heightOut + heightOut-1)] = bitmapIn[static_cast<size_t>((widthIn-1)*heightIn + heightIn-1)];
+    bitmapOut[0*heightOut + 0] = bitmapIn[0*heightIn + 0];
+    bitmapOut[(widthOut-1)*heightOut + 0] = bitmapIn[(widthIn-1)*heightIn + 0];
+    bitmapOut[0*heightOut + heightOut-1] = bitmapIn[0 + heightIn-1];
+    bitmapOut[(widthOut-1)*heightOut + heightOut-1] = bitmapIn[(widthIn-1)*heightIn + heightIn-1];
 
     // Upscale borders (in y direction)
     for (int y = 1; y < heightOut-1; y++) {
         int readY = (y-1) * (heightIn-2) / (heightOut-2) + 1;
-        bitmapOut[static_cast<size_t>(0*heightOut + y)] = bitmapIn[static_cast<size_t>(0*heightIn + readY)];
-        bitmapOut[static_cast<size_t>((widthOut-1)*heightOut + y)] = bitmapIn[static_cast<size_t>((widthIn-1)*heightIn + readY)];
+        bitmapOut[0*heightOut + y] = bitmapIn[0*heightIn + readY];
+        bitmapOut[(widthOut-1)*heightOut + y] = bitmapIn[(widthIn-1)*heightIn + readY];
     }
 
     // Upscale borders (in x direction)
     for (int x = 1; x < widthOut-1; x++) {
         int readX = (x-1) * (widthIn-2) / (widthOut-2) + 1;
-        bitmapOut[static_cast<size_t>(x*heightOut + 0)] = bitmapIn[static_cast<size_t>(readX*heightIn + 0)];
-        bitmapOut[static_cast<size_t>(x*heightOut + heightOut-1)] = bitmapIn[static_cast<size_t>(readX*heightIn + heightIn-1)];
+        bitmapOut[x*heightOut + 0] = bitmapIn[readX*heightIn + 0];
+        bitmapOut[x*heightOut + heightOut-1] = bitmapIn[readX*heightIn + heightIn-1];
     }
 
     // Upscale interior cells
@@ -119,13 +118,13 @@ void nearestNeighborUpsamplingPgm2D(
         for (int x = 1; x < widthOut-1; x++) {
             int readX = (x-1) * (widthIn-2) / (widthOut-2) + 1;
             int readY = (y-1) * (heightIn-2) / (heightOut-2) + 1;
-            bitmapOut[static_cast<size_t>(x*heightOut + y*widthOut)] = bitmapIn[static_cast<size_t>(readX*heightIn + readY)];
+            bitmapOut[x*heightOut + y*widthOut] = bitmapIn[readX*heightIn + readY];
         }
     }
 }
 
 void nearestNeighborUpsampling2D(
-        const std::vector<unsigned int> bitmapIn,
+        const std::vector<unsigned int> &bitmapIn,
         int widthIn,
         int heightIn,
         std::vector<unsigned int> &bitmapOut,
@@ -133,7 +132,7 @@ void nearestNeighborUpsampling2D(
         int heightOut
 ) {
     assert(widthIn >= 1 && heightIn >= 1 && widthOut >= 1 && heightOut >= 1);
-    size_t size = static_cast<size_t>(widthOut * heightOut);
+    size_t size = size_t(widthOut) * size_t(heightOut);
     bitmapOut.resize(size);
 
     // Size already matches?
@@ -147,7 +146,7 @@ void nearestNeighborUpsampling2D(
         for (int x = 0; x < widthOut; x++) {
             int readX = x * widthIn / widthOut;
             int readY = y * heightIn / heightOut;
-            bitmapOut[static_cast<size_t>(x*heightOut + y*widthOut)] = bitmapIn[static_cast<size_t>(readX*heightIn + readY)];
+            bitmapOut[x*heightOut + y*widthOut] = bitmapIn[readX*heightIn + readY];
         }
     }
 }

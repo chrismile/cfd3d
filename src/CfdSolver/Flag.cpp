@@ -133,8 +133,9 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
             0x2002
     };
     const unsigned int NUM_PGM_VALUES = sizeof(FLAG_LOOKUP_TABLE) / sizeof(*FLAG_LOOKUP_TABLE);
+    IGNORE_UNUSED(NUM_PGM_VALUES);
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, geometryValues, FLAG_LOOKUP_TABLE, Flag) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
@@ -146,7 +147,7 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, Flag) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
@@ -206,11 +207,18 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
                 bool fluidFront = j <= jmax && (Flag[IDXFLAG(i,j,k+1)] & 0x1) == 1;
                 assert((Flag[IDXFLAG(i,j,k)] & 0x1) == 1
                         || ((!fluidLeft || !fluidRight) && (!fluidDown || !fluidUp) && (!fluidBack || !fluidFront)));
+                IGNORE_UNUSED(fluidLeft);
+                IGNORE_UNUSED(fluidRight);
+                IGNORE_UNUSED(fluidDown);
+                IGNORE_UNUSED(fluidUp);
+                IGNORE_UNUSED(fluidBack);
+                IGNORE_UNUSED(fluidFront);
 
                 // Only one of the four boundary type bits may be set.
-                int boundaryNum = (Flag[IDXFLAG(i,j,k)] >> 1) & 0xF;
+                int boundaryNum = int(Flag[IDXFLAG(i,j,k)] >> 1) & 0xF;
                 assert(boundaryNum == 0x0 || boundaryNum == 0x1 || boundaryNum == 0x2
                         || boundaryNum == 0x4 || boundaryNum == 0x8);
+                IGNORE_UNUSED(boundaryNum);
 
                 // Cells in the interior of the domain may only be fluid or no-slip.
                 // interior cell => cell is fluid or no-slip
@@ -224,7 +232,7 @@ void initFlagFromGeometryFile(const std::string &scenarioName, const std::string
 
 void initFlagNoObstacles(const std::string &scenarioName, int imax, int jmax, int kmax, FlagType *&Flag) {
     // Standard geometry: Fluid surrounded by no-slip boundary cells.
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, Flag) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
@@ -238,7 +246,7 @@ void initFlagNoObstacles(const std::string &scenarioName, int imax, int jmax, in
     }
 
     // Set neighbor values.
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, Flag) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {

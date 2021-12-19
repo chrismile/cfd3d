@@ -27,7 +27,7 @@
  */
 
 #include <glm/glm.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+#include "StringUtils.hpp"
 #include "PgmFile.hpp"
 #include "GeometryFile.hpp"
 #include "GeometryCreator.hpp"
@@ -47,7 +47,7 @@ GeometryCreator::GeometryCreator(int imax, int jmax, int kmax, unsigned int boun
     // Initialize the domain with fluid cells in the interior, and no-slip cells on the boundary.
     geometryValues.resize((imax+2)*(jmax+2)*(kmax+2), boundaryType);
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -67,7 +67,7 @@ void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerSt
     std::vector<unsigned int> pgmValues;
     nearestNeighborUpsamplingPgm2D(pgmValuesRead, pgmWidth, pgmHeight, pgmValues, imax+2, jmax+2);
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, layerStart, layerEnd, pgmValues) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = layerStart; k <= layerEnd; k++) {
@@ -78,7 +78,7 @@ void GeometryCreator::layersFromPgmFile(const std::string &filename, int layerSt
 }
 
 void GeometryCreator::setLayersConstant(FlagType value, int layerStart, int layerEnd) {
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, layerStart, layerEnd, value) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = layerStart; k <= layerEnd; k++) {
@@ -89,8 +89,8 @@ void GeometryCreator::setLayersConstant(FlagType value, int layerStart, int laye
 }
 
 void GeometryCreator::setLayersInObject(
-        FlagType value, int layerStart, int layerEnd, std::function<bool(int,int,int)> membershipFunctor) {
-    #pragma omp parallel for
+        FlagType value, int layerStart, int layerEnd, const std::function<bool(int,int,int)> &membershipFunctor) {
+    #pragma omp parallel for shared(imax, jmax, layerStart, layerEnd, membershipFunctor, value) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = layerStart; k <= layerEnd; k++) {
@@ -102,7 +102,7 @@ void GeometryCreator::setLayersInObject(
     }
 }
 
-bool isValidCell(int i, int j, int k, int imax, int jmax, int kmax, FlagType *Flag) {
+bool isValidCell(int i, int j, int k, int imax, int jmax, int kmax, const FlagType *Flag) {
     // Boundary cells with two opposite fluid cells are excluded (forbidden boundary cells).
     // boundary cell => ((fluid left => not fluid right) and (fluid bottom => not fluid top)
     // and (fluid back => not fluid front))
@@ -230,7 +230,7 @@ void createHeightMapGeometry(
     std::vector<Real> heightMapFloat;
     heightMapFloat.resize(heightMapPgmData.size());
     for (size_t i = 0; i < heightMapPgmData.size(); i++) {
-        heightMapFloat[i] = heightMapPgmData[i]/Real(levels);
+        heightMapFloat[i] = Real(heightMapPgmData[i]) / Real(levels);
     }
 
     // Now set all cells below the specified heights to no-slip obstacles.
@@ -240,7 +240,7 @@ void createHeightMapGeometry(
             return false;
         }
         Real heightMapEntry = heightMapFloat.at((i-1) * kmax + (k-1));
-        int integerHeight = static_cast<int>(heightMapEntry * jmax);
+        int integerHeight = static_cast<int>(heightMapEntry * Real(jmax));
         return j <= integerHeight;
     });
     geometryCreator.removeInvalidCells();
@@ -262,19 +262,19 @@ void generateScenario(
         const std::string &scenarioName, const std::string &geometryFilename, int imax, int jmax, int kmax) {
     if (scenarioName == "natural_convection") {
         createNaturalConvectionGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
-    } else if (boost::starts_with(scenarioName, "rayleigh_benard")) {
+    } else if (startsWith(scenarioName, "rayleigh_benard")) {
         createRayleighBenardGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
-    } else if (boost::starts_with(scenarioName, "flow_over_step")) {
+    } else if (startsWith(scenarioName, "flow_over_step")) {
         createFlowOverStepGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
-    } else if (boost::starts_with(scenarioName, "single_tower")) {
+    } else if (startsWith(scenarioName, "single_tower")) {
         createTowerGeometry(scenarioName, geometryFilename, imax, jmax, kmax);
-    } else if (boost::starts_with(scenarioName, "terrain_1")) {
+    } else if (startsWith(scenarioName, "terrain_1")) {
         createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/heightmap1.pgm", imax, jmax, kmax);
-    } else if (boost::starts_with(scenarioName, "fuji_san")) {
+    } else if (startsWith(scenarioName, "fuji_san")) {
         createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/Fuji-san.pgm", imax, jmax, kmax);
-    } else if (boost::starts_with(scenarioName, "zugspitze")) {
+    } else if (startsWith(scenarioName, "zugspitze")) {
         createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/Zugspitze.pgm", imax, jmax, kmax);
-    } else if (boost::starts_with(scenarioName, "HK_Habor")) {
+    } else if (startsWith(scenarioName, "HK_Habor")) {
         createHeightMapGeometry(scenarioName, geometryFilename, "../geometry-pgm/HK_Habor.pgm", imax, jmax, kmax);
     }
 }

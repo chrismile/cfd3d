@@ -45,7 +45,7 @@ class BinaryWriteStream
     friend class BinaryReadStream;
 public:
     /// @param size: Standard buffer capacity (gets increased if not sufficient).
-    BinaryWriteStream(size_t size = STD_BUFFER_SIZE);
+    explicit BinaryWriteStream(size_t size = STD_BUFFER_SIZE);
     ~BinaryWriteStream();
     /// @return Current size of the used buffer (not the capacity)
     inline size_t getSize() const { return bufferSize; }
@@ -80,7 +80,6 @@ public:
     BinaryWriteStream& operator<<(const std::string &str) { write(str); return *this; }
 
 protected:
-    void resize();
     /// The current buffer size (only the used part of the buffer counts)
     size_t bufferSize;
     /// The maximum buffer size before it needs to be increased/reallocated
@@ -92,7 +91,7 @@ class BinaryReadStream
 {
 public:
     /// Read from passed input stream.
-    BinaryReadStream(BinaryWriteStream &stream);
+    explicit BinaryReadStream(BinaryWriteStream &stream);
     /// Read from passed input buffer.
     BinaryReadStream(void *_buffer, size_t _bufferSize);
     BinaryReadStream(const void *_buffer, size_t _bufferSize);
@@ -122,7 +121,6 @@ public:
     BinaryReadStream& operator>>(std::string &str) { read(str); return *this; }
 
 protected:
-    void resize();
     /// The total buffer size
     size_t bufferSize;
     /// The current point in the buffer where the code reads from

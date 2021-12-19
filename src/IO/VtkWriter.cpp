@@ -121,12 +121,12 @@ void VtkWriter::writeVtkHeader(FILE *file) {
 
 template <typename T>
 void swapEndianness(T *values, int n) {
-    uint8_t *byteArray = (uint8_t*)values;
-    #pragma omp parallel for
+    auto *byteArray = (uint8_t*)values;
+    #pragma omp parallel for shared(byteArray, values, n) default(none)
     for (int i = 0; i < n; i++) {
         uint8_t swappedEntry[sizeof(T)];
-        for (int j = 0; j < sizeof(T); j++) {
-            swappedEntry[j] = byteArray[i*sizeof(T) + sizeof(T)-j-1];
+        for (size_t j = 0; j < sizeof(T); j++) {
+            swappedEntry[j] = byteArray[i * sizeof(T) + sizeof(T) - j - 1];
         }
         values[i] = *((T*)&swappedEntry);
     }
@@ -137,7 +137,7 @@ void VtkWriter::writePointCoordinates(FILE *file,
     fprintf(file, "POINTS %i float\n", (iu-il+2)*(ju-jl+2)*(ku-kl+2));
 
     if (isBinaryVtk) {
-        #pragma omp parallel for
+        #pragma omp parallel for shared(dx, dy, dz, xOrigin, yOrigin, zOrigin) default(none)
         for (int k = kl-1; k <= ku; k++) {
             for (int j = jl-1; j <= ju; j++) {
                 for (int i = il-1; i <= iu; i++) {
@@ -185,7 +185,7 @@ void VtkWriter::writePointData(FILE *file, Real *U, Real *V, Real *W, FlagType *
                 }
             }
         } else {
-            #pragma omp parallel for
+            #pragma omp parallel for shared(U, V, W, Flag) default(none)
             for (int k = kl-1; k <= ku; k++) {
                 for (int j = jl-1; j <= ju; j++) {
                     for (int i = il-1; i <= iu; i++) {
@@ -270,7 +270,7 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
                 }
             }
         } else {
-            #pragma omp parallel for
+            #pragma omp parallel for shared(P, Flag) default(none)
             for (int k = kl; k <= ku; k++) {
                 for (int j = jl; j <= ju; j++) {
                     for (int i = il; i <= iu; i++) {
@@ -329,7 +329,7 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
                 }
             }
         } else {
-            #pragma omp parallel for
+            #pragma omp parallel for shared(T, Flag) default(none)
             for (int k = kl; k <= ku; k++) {
                 for (int j = jl; j <= ju; j++) {
                     for (int i = il; i <= iu; i++) {
@@ -384,7 +384,7 @@ void VtkWriter::writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag) {
                 }
             }
         } else {
-            #pragma omp parallel for
+            #pragma omp parallel for shared(Flag) default(none)
             for (int k = kl; k <= ku; k++) {
                 for (int j = jl; j <= ju; j++) {
                     for (int i = il; i <= iu; i++) {

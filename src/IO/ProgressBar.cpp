@@ -34,9 +34,9 @@ const char suffix[] = "]";
 const size_t prefixLength = sizeof(prefix) - 1;
 const size_t suffixLength = sizeof(suffix) - 1;
 
-void ProgressBar::printOutput(int n, Real t, std::size_t max) {
+void ProgressBar::printOutput(int n, Real t, std::size_t maxVal) {
     char output[] = "\rWrote file at %5s %6i %5s %10f\n";
-    size_t lengthToOverwrite = max + prefixLength + suffixLength + 30;
+    size_t lengthToOverwrite = maxVal + prefixLength + suffixLength + 30;
     std::string buffer(lengthToOverwrite, ' ');
 
     std::cout << "\r" << buffer;
@@ -46,7 +46,7 @@ void ProgressBar::printOutput(int n, Real t, std::size_t max) {
     std::cout.flush();
 }
 
-void ProgressBar::printProgress(Real t, Real tEnd, std::size_t max) {
+void ProgressBar::printProgress(Real t, Real tEnd, std::size_t maxVal) {
     int currentProgressPercent = (int)((t / tEnd) * 100);
     if (lastProgressPercent == currentProgressPercent) {
         // Don't print anything if the percentage hasn't changed.
@@ -54,9 +54,10 @@ void ProgressBar::printProgress(Real t, Real tEnd, std::size_t max) {
     }
     lastProgressPercent = currentProgressPercent;
 
-    const size_t suffix_length = sizeof(suffix) - 1;
-    size_t progressChars = ((t / tEnd) * max);
-    std::string buffer = prefix + std::string(progressChars, '#') + std::string(max - progressChars, ' ') + suffix;
+    //const size_t suffix_length = sizeof(suffix) - 1;
+    auto progressChars = size_t(t / tEnd * Real(maxVal));
+    std::string buffer =
+            prefix + std::string(progressChars, '#') + std::string(maxVal - progressChars, ' ') + suffix;
 
     std::cout << "\r" << char(27) << "[2K\r" << buffer;
     std::cout << currentProgressPercent << "%\tt = " << t;

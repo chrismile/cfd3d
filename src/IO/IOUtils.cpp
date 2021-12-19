@@ -27,29 +27,29 @@
  */
 
 #include <iostream>
+#include <filesystem>
 #include <cstdlib>
-#include <boost/filesystem.hpp>
-#include <boost/algorithm/string.hpp>
+#include "StringUtils.hpp"
 #include "IOUtils.hpp"
 
 void prepareOutputDirectory(
         const std::string &outputDirectory, const std::string &outputFilename, const std::string &outputFormatEnding,
         const std::string &lineDirectory, const std::string &geometryDirectory, bool shallWriteOutput) {
     // Create the directories.
-    if (!boost::filesystem::exists(outputDirectory)) {
-        if (!boost::filesystem::create_directory(outputDirectory)) {
+    if (!std::filesystem::exists(outputDirectory)) {
+        if (!std::filesystem::create_directory(outputDirectory)) {
             std::cerr << "Output directory could not be created." << std::endl;
             exit(1);
         }
     }
-    if (!boost::filesystem::exists(lineDirectory)) {
-        if (!boost::filesystem::create_directory(lineDirectory)) {
+    if (!std::filesystem::exists(lineDirectory)) {
+        if (!std::filesystem::create_directory(lineDirectory)) {
             std::cerr << "Line directory could not be created." << std::endl;
             exit(1);
         }
     }
-    if (!boost::filesystem::exists(geometryDirectory)) {
-        if (!boost::filesystem::create_directory(geometryDirectory)) {
+    if (!std::filesystem::exists(geometryDirectory)) {
+        if (!std::filesystem::create_directory(geometryDirectory)) {
             std::cerr << "Geometry directory could not be created." << std::endl;
             exit(1);
         }
@@ -57,17 +57,17 @@ void prepareOutputDirectory(
 
     // Delete all previous output files for the selected scenario.
     if (shallWriteOutput) {
-        boost::filesystem::path dir(outputDirectory);
-        boost::filesystem::directory_iterator end;
-        for (boost::filesystem::directory_iterator it(dir); it != end; ++it) {
+        std::filesystem::path dir(outputDirectory);
+        std::filesystem::directory_iterator end;
+        for (std::filesystem::directory_iterator it(dir); it != end; ++it) {
             std::string filename = it->path().string();
 #ifdef WIN32
             for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
                 if (*it == '\\') *it = '/';
             }
 #endif
-            if (boost::ends_with(filename, outputFormatEnding) && boost::starts_with(filename, outputFilename)) {
-                boost::filesystem::remove(it->path());
+            if (endsWith(filename, outputFormatEnding) && startsWith(filename, outputFilename)) {
+                std::filesystem::remove(it->path());
             }
         }
     }

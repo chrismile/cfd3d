@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2019, Christoph Neuhauser, Stefan Haas, Paul Ng
+ * Copyright (c) 2021, Christoph Neuhauser
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_PROGRESSBAR_HPP
-#define CFD3D_PROGRESSBAR_HPP
+#include "StringUtils.hpp"
 
-#include <cstdint>
-#include <string>
-#include "Defines.hpp"
+bool startsWith(const std::string& str, const std::string& prefix) {
+    return prefix.length() <= str.length() && std::equal(prefix.begin(), prefix.end(), str.begin());
+}
 
-class ProgressBar {
-public:
-    /**
-     * Prints a progress bar in the terminal. Therefore it overwrites the current line on stdout.
-     * @param t The current time of the simulation.
-     * @param tEnd The end time of the simulation.
-     * @param max The maximal amount of # to show.
-     */
-    void printProgress(Real t, Real tEnd, size_t maxVal);
-
-    /**
-     * Prints a message that a file was written at step n and time t.
-     * @param n The current step of the simulation.
-     * @param t The current time of the simulation.
-     * @param max The amount of # used in progress bar to overwrite it.
-     */
-    static void printOutput(int n, Real t, size_t maxVal);
-
-private:
-    int lastProgressPercent = -1;
-};
-
-
-#endif //CFD3D_PROGRESSBAR_HPP
+bool endsWith(const std::string& str, const std::string& postfix) {
+    return postfix.length() <= str.length() && std::equal(postfix.rbegin(), postfix.rend(), str.rbegin());
+}

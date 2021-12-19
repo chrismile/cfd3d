@@ -35,7 +35,7 @@ class VtkWriter : public OutputFileWriter {
 public:
     VtkWriter(int nproc, int myrank, bool isBinaryVtk = true) : nproc(nproc), myrank(myrank), isBinaryVtk(isBinaryVtk)
     {}
-    virtual ~VtkWriter();
+    ~VtkWriter() override;
 
     /**
      * @return The file ending of the format.
@@ -85,12 +85,11 @@ private:
     void writePointData(FILE *file, Real *U, Real *V, Real *W, FlagType *Flag);
     void writeCellData(FILE *file, Real *P, Real *T, FlagType *Flag);
 
-    bool isBinaryVtk;
     std::string filename;
-
     bool isMpiMode = false;
     int nproc, myrank;
-    int imax, jmax, kmax;
+    bool isBinaryVtk;
+    int imax{}, jmax{}, kmax{};
     int il, iu, jl, ju, kl, ku;
     Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
 

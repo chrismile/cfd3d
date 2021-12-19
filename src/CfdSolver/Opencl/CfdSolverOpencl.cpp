@@ -112,7 +112,7 @@ CfdSolverOpencl::CfdSolverOpencl(int platformId, int blockSizeX, int blockSizeY,
     workGroupSize1D = cl::NDRange(blockSize1D);
     workGroupSize2D = cl::NDRange(blockSizeX, blockSizeY);
     workGroupSize3D = cl::NDRange(blockSizeX, blockSizeY, blockSizeZ);
-    assert(blockSizeX * blockSizeY * blockSizeZ <= maxWorkGroupSize);
+    assert(size_t(blockSizeX) * size_t(blockSizeY) * size_t(blockSizeZ) <= maxWorkGroupSize);
 }
 
 void CfdSolverOpencl::initialize(

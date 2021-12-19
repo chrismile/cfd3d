@@ -86,7 +86,7 @@ public:
      * gets overwritten with the passed value.
      */
     void setLayersInObject(
-            FlagType value, int layerStart, int layerEnd, std::function<bool(int,int,int)> membershipFunctor);
+            FlagType value, int layerStart, int layerEnd, const std::function<bool(int,int,int)> &membershipFunctor);
 
     /**
      * Removes invalid obstacle cells and replaces them with fluid cells.

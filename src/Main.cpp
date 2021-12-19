@@ -28,8 +28,7 @@
 
 #include <iostream>
 #include <chrono>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <omp.h>
 #include "CfdSolver/Init.hpp"
 #include "CfdSolver/Flag.hpp"
@@ -46,6 +45,7 @@
 #include "CfdSolver/Opencl/CfdSolverOpencl.hpp"
 #endif
 #include "IO/IOUtils.hpp"
+#include "IO/StringUtils.hpp"
 #include "IO/ArgumentParser.hpp"
 #include "IO/ProgressBar.hpp"
 #include "IO/ScenarioFile.hpp"
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
     if (geometryName == "none") {
         initFlagNoObstacles(scenarioName, imax, jmax, kmax, FlagAll);
     } else {
-        if (!boost::filesystem::exists(geometryFilename)) {
+        if (!std::filesystem::exists(geometryFilename)) {
             generateScenario(scenarioName, geometryFilename, imax, jmax, kmax);
         }
         initFlagFromGeometryFile(scenarioName, geometryFilename, imax, jmax, kmax, FlagAll);
@@ -324,7 +324,7 @@ int main(int argc, char *argv[]) {
             dataIsUpToDate = true;
         }
         Real traceDt = dt * Real(5.0);
-        if (boost::starts_with(scenarioName, "rayleigh_benard")) {
+        if (startsWith(scenarioName, "rayleigh_benard")) {
             traceDt *= Real(1000.0);
         }
         Trajectories streamlines = streamlineTracer.trace(
@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
     auto endTime = std::chrono::system_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
     if (myrank == 0) {
-        std::cout << "System time elapsed: " << (elapsedTime.count() * 1e-6) << "s" << std::endl;
+        std::cout << "System time elapsed: " << (double(elapsedTime.count()) * 1e-6) << "s" << std::endl;
     }
 
     delete cfdSolver;

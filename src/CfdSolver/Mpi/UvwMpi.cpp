@@ -38,7 +38,7 @@ void calculateFghMpi(
         Real Re, Real GX, Real GY, Real GZ, Real alpha, Real beta,
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
-        Real *U, Real *V, Real *W, Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
+        Real *U, Real *V, Real *W, const Real *T, Real *F, Real *G, Real *H, FlagType *Flag) {
     Real d2u_dx2,d2u_dy2,d2u_dz2,
          d2v_dx2,d2v_dy2,d2v_dz2,
          d2w_dx2,d2w_dy2,d2w_dz2;
@@ -246,7 +246,7 @@ void calculateFghMpi(
 void calculateRsMpi(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
-        Real *F, Real *G, Real *H, Real *RS) {
+        const Real *F, const Real *G, const Real *H, Real *RS) {
     for (int i = il; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -322,7 +322,7 @@ void calculateUvwMpi(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
-        Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
+        Real *U, Real *V, Real *W, const Real *F, const Real *G, const Real *H, const Real *P, FlagType *Flag) {
     for (int i = il-1; i <= iu; i++) {
         for (int j = jl; j <= ju; j++) {
             for (int k = kl; k <= ku; k++) {
@@ -363,7 +363,7 @@ void calculateTemperatureMpi(
         int imax, int jmax, int kmax,
         int il, int iu, int jl, int ju, int kl, int ku,
         int rankL, int rankR, int rankD, int rankU, int rankB, int rankF, Real *bufSend, Real *bufRecv,
-        Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
+        Real *U, Real *V, Real *W, Real *T, const Real *T_temp, FlagType *Flag) {
     Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
 
     for (int i = il; i <= iu; i++) {

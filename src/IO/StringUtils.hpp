@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2019, Christoph Neuhauser, Stefan Haas, Paul Ng
+ * Copyright (c) 2021, Christoph Neuhauser
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CFD3D_PROGRESSBAR_HPP
-#define CFD3D_PROGRESSBAR_HPP
+#ifndef CFD3D_STRINGUTILS_HPP
+#define CFD3D_STRINGUTILS_HPP
 
-#include <cstdint>
 #include <string>
-#include "Defines.hpp"
 
-class ProgressBar {
-public:
-    /**
-     * Prints a progress bar in the terminal. Therefore it overwrites the current line on stdout.
-     * @param t The current time of the simulation.
-     * @param tEnd The end time of the simulation.
-     * @param max The maximal amount of # to show.
-     */
-    void printProgress(Real t, Real tEnd, size_t maxVal);
+/**
+ * Returns whether @str starts with @prefix.
+ * @param str The full string.
+ * @param prefix The prefix.
+ * @return Returns whether the full string starts with the passed prefix.
+ */
+bool startsWith(const std::string& str, const std::string& prefix);
 
-    /**
-     * Prints a message that a file was written at step n and time t.
-     * @param n The current step of the simulation.
-     * @param t The current time of the simulation.
-     * @param max The amount of # used in progress bar to overwrite it.
-     */
-    static void printOutput(int n, Real t, size_t maxVal);
+/**
+ * Returns whether @str ends with @postfix.
+ * @param str The full string.
+ * @param postfix The postfix.
+ * @return Returns whether the full string starts with the passed postfix.
+ */
+bool endsWith(const std::string& str, const std::string& postfix);
 
-private:
-    int lastProgressPercent = -1;
-};
-
-
-#endif //CFD3D_PROGRESSBAR_HPP
+#endif //CFD3D_STRINGUTILS_HPP

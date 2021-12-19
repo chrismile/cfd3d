@@ -31,7 +31,7 @@
 void initArrays(
         Real UI, Real VI, Real WI, Real PI, Real TI, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) {
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, U, UI) default(none)
     for (int i = 0; i <= imax; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
@@ -40,7 +40,7 @@ void initArrays(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, V, VI) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax; j++) {
             for (int k = 0; k <= kmax+1; k++) {
@@ -49,7 +49,7 @@ void initArrays(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, W, WI) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax; k++) {
@@ -58,7 +58,7 @@ void initArrays(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, P, T, PI, TI) default(none)
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {

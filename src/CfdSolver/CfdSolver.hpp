@@ -82,7 +82,7 @@ public:
             int imax, int jmax, int kmax, Real dx, Real dy, Real dz,
             Real *U, Real *V, Real *W, Real *P, Real *T, uint32_t *Flag)=0;
 
-    virtual ~CfdSolver() {}
+    virtual ~CfdSolver() = default;
 
 
     /**
