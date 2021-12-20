@@ -222,10 +222,10 @@ void sorSolverCpp(
         Real *P, Real *P_temp, Real *RS, FlagType *Flag) {
     if (linearSystemSolverType == LINEAR_SOLVER_SOR || linearSystemSolverType == LINEAR_SOLVER_SOR_PARALLEL) {
         // Successive over-relaxation based on Gauss-Seidl. A factor of 1.2 proved to give the best results here.
-        omg = 1.2;
+        omg = Real(1.2);
     } else {
         // A method named JOR (Jacobi over-relaxation) with omega != 1 exists, but doesn't converge for this problem.
-        omg = 1.0;
+        omg = Real(1.0);
     }
 
     const Real coeff = omg / (Real(2.0) * (Real(1.0) / (dx*dx) + Real(1.0) / (dy*dy) + Real(1.0) / (dz*dz)));
