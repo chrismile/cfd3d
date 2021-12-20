@@ -195,7 +195,7 @@ void NetCdfWriter::writeTimestep(int timeStepNumber, Real time, Real *U, Real *V
         for (int i = 0; i < imax; i++) {
             for (int j = 0; j < jmax; j++) {
                 for (int k = 0; k < kmax; k++) {
-                    geometryData[i*jmax*kmax + j*kmax + k] = isFluid(Flag[IDXFLAG(i+1,j+1,k+1)]) ? 1 : 0;
+                    geometryData[i*jmax*kmax + j*kmax + k] = Real(isFluid(Flag[IDXFLAG(i+1,j+1,k+1)]) ? 1 : 0);
                 }
             }
         }

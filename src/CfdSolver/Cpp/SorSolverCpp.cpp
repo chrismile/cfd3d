@@ -37,7 +37,7 @@ void sorSolverIterationCpp(
         LinearSystemSolverType linearSystemSolverType,
         Real *P, Real *P_temp, Real *RS, FlagType *Flag, Real &residual) {
     // Set the boundary values for the pressure on the x-y-planes.
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, P) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             P[IDXP(i,j,0)] = P[IDXP(i,j,1)];
@@ -46,7 +46,7 @@ void sorSolverIterationCpp(
     }
 
     // Set the boundary values for the pressure on the x-z-planes.
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, P) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int k = 1; k <= kmax; k++) {
             P[IDXP(i,0,k)] = P[IDXP(i,1,k)];
@@ -55,7 +55,7 @@ void sorSolverIterationCpp(
     }
 
     // Set the boundary values for the pressure on the y-z-planes.
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, P) default(none)
     for (int j = 1; j <= jmax; j++) {
         for (int k = 1; k <= kmax; k++) {
             P[IDXP(0,j,k)] = P[IDXP(1,j,k)];
@@ -64,7 +64,7 @@ void sorSolverIterationCpp(
     }
 
     // Boundary values for arbitrary geometries.
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, P, Flag) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -117,7 +117,7 @@ void sorSolverIterationCpp(
     if (linearSystemSolverType == LINEAR_SOLVER_JACOBI) {
         // Create a copy of the current state of the pressure array.
         // A parallel loop is potentially faster than 'memcpy' for large domains.
-        #pragma omp parallel for
+        #pragma omp parallel for shared(imax, jmax, kmax, P, P_temp) default(none)
         for (int i = 0; i <= imax+1; i++) {
             for (int j = 0; j <= jmax+1; j++) {
                 for (int k = 0; k <= kmax+1; k++) {
@@ -144,7 +144,7 @@ void sorSolverIterationCpp(
         }
     } else if (linearSystemSolverType == LINEAR_SOLVER_SOR_PARALLEL
             || linearSystemSolverType == LINEAR_SOLVER_GAUSS_SEIDEL_PARALLEL) {
-        #pragma omp parallel for
+        #pragma omp parallel for shared(imax, jmax, kmax, dx, dy, dz, omg, coeff, P, P_temp, RS, Flag) default(none)
         for (int i = 1; i <= imax; i++) {
             for (int j = 1; j <= jmax; j++) {
                 for (int k = 1; k <= kmax; k++) {
@@ -172,7 +172,7 @@ void sorSolverIterationCpp(
             }
         }
     } else if (linearSystemSolverType == LINEAR_SOLVER_JACOBI) {
-        #pragma omp parallel for
+        #pragma omp parallel for shared(imax, jmax, kmax, dx, dy, dz, omg, coeff, P, P_temp, RS, Flag) default(none)
         for (int i = 1; i <= imax; i++) {
             for (int j = 1; j <= jmax; j++) {
                 for (int k = 1; k <= kmax; k++) {
@@ -192,7 +192,10 @@ void sorSolverIterationCpp(
     // Compute the residual.
     residual = Real(0.0);
     int numFluidCells = 0;
-    #pragma omp parallel for reduction(+: residual) reduction(+: numFluidCells)
+#if _OPENMP >= 201107
+    #pragma omp parallel for shared(imax, jmax, kmax, dx, dy, dz, P, RS, Flag) \
+    reduction(+: residual) reduction(+: numFluidCells) default(none)
+#endif
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -210,7 +213,7 @@ void sorSolverIterationCpp(
     }
 
     // The residual is normalized by dividing by the total number of fluid cells.
-    residual = std::sqrt(residual/numFluidCells);
+    residual = std::sqrt(residual / Real(numFluidCells));
 }
 
 void sorSolverCpp(

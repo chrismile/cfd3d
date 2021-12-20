@@ -79,8 +79,8 @@ bool rayBoxPlaneIntersection(
 bool rayBoxIntersection(
         const rvec3 &rayOrigin, const rvec3 &rayDirection, const rvec3 &lower, const rvec3 &upper,
         Real &tNear, Real &tFar) {
-    tNear = -1e20;
-    tFar = 1e20;
+    tNear = Real(-1e20);
+    tFar = Real(1e20);
     for (int i = 0; i < 3; i++) {
         if (!rayBoxPlaneIntersection(rayOrigin[i], rayDirection[i], lower[i], upper[i], tNear, tFar)) {
             return false;

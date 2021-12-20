@@ -78,14 +78,14 @@ void BinaryWriteStream::write(const void *data, size_t size)
 
 void BinaryWriteStream::write(const char *str)
 {
-    uint32_t strSize = strlen(str);
+    uint32_t strSize = uint32_t(strlen(str));
     write(strSize);
     write((void*)str, strSize);
 }
 
 void BinaryWriteStream::write(const std::string &str)
 {
-    uint32_t strSize = str.size();
+    uint32_t strSize = uint32_t(str.size());
     write(strSize);
     write((void*)str.c_str(), strSize);
 }

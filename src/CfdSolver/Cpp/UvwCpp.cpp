@@ -46,7 +46,8 @@ void calculateFghCpp(
     
     Real Dx = 1/dx, Dy = 1/dy, Dz = 1/dz;
 
-    #pragma omp parallel for private(d2u_dx2, d2u_dy2, d2u_dz2, du2_dx, duv_dy, duw_dz)
+    #pragma omp parallel for private(d2u_dx2, d2u_dy2, d2u_dz2, du2_dx, duv_dy, duw_dz) default(none) \
+    shared(imax, jmax, kmax, dx, dy, dz, Dx, Dy, Dz, dt, Re, alpha, beta, GX, U, V, W, T, F, Flag)
     for (int i = 1; i <= imax-1; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -96,7 +97,8 @@ void calculateFghCpp(
         }
     }
 
-    #pragma omp parallel for private(d2v_dx2, d2v_dy2, d2v_dz2, duv_dx, dv2_dy, dvw_dz)
+    #pragma omp parallel for private(d2v_dx2, d2v_dy2, d2v_dz2, duv_dx, dv2_dy, dvw_dz) default(none) \
+    shared(imax, jmax, kmax, dx, dy, dz, Dx, Dy, Dz, dt, Re, alpha, beta, GY, U, V, W, T, G, Flag)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax-1; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -146,7 +148,8 @@ void calculateFghCpp(
         }
     }
 
-    #pragma omp parallel for private(d2w_dx2, d2w_dy2, d2w_dz2, duw_dx, dvw_dy, dw2_dz)
+    #pragma omp parallel for private(d2w_dx2, d2w_dy2, d2w_dz2, duw_dx, dvw_dy, dw2_dz) default(none) \
+    shared(imax, jmax, kmax, dx, dy, dz, Dx, Dy, Dz, dt, Re, alpha, beta, GZ, U, V, W, T, H, Flag)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax-1; k++) {
@@ -196,7 +199,7 @@ void calculateFghCpp(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, U, F) default(none)
     for (int j = 1; j <= jmax; j++) {
         for (int k = 1; k <= kmax; k++) {
             F[IDXF(0,j,k)] = U[IDXU(0,j,k)];         
@@ -204,7 +207,7 @@ void calculateFghCpp(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, V, G) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int k = 1; k <= kmax; k++) {
             G[IDXG(i,0,k)] = V[IDXV(i,0,k)];         
@@ -212,7 +215,7 @@ void calculateFghCpp(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, W, H) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             H[IDXH(i,j,0)] = W[IDXW(i,j,0)];         
@@ -225,7 +228,7 @@ void calculateFghCpp(
 void calculateRsCpp(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *F, Real *G, Real *H, Real *RS) {
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, dx, dy, dz, dt, F, G, H, RS) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -245,7 +248,9 @@ void calculateDtCpp(
     Real uMaxAbs = Real(0.0), vMaxAbs = Real(0.0), wMaxAbs = Real(0.0);
 
     // First, compute the maximum absolute velocities in x, y and z direction.
-    #pragma omp parallel for reduction(max: uMaxAbs)
+#if _OPENMP >= 201107
+    #pragma omp parallel for shared(imax, jmax, kmax, U) reduction(max: uMaxAbs) default(none)
+#endif
     for (int i = 0; i <= imax; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax+1; k++) {
@@ -253,7 +258,9 @@ void calculateDtCpp(
             }
         }
     }
-    #pragma omp parallel for reduction(max: vMaxAbs)
+#if _OPENMP >= 201107
+    #pragma omp parallel for shared(imax, jmax, kmax, V) reduction(max: vMaxAbs) default(none)
+#endif
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax; j++) {
             for (int k = 0; k <= kmax+1; k++) {
@@ -262,7 +269,9 @@ void calculateDtCpp(
         }
     }
 
-    #pragma omp parallel for reduction(max: wMaxAbs)
+#if _OPENMP >= 201107
+    #pragma omp parallel for shared(imax, jmax, kmax, W) reduction(max: wMaxAbs) default(none)
+#endif
     for (int i = 0; i <= imax+1; i++) {
         for (int j = 0; j <= jmax+1; j++) {
             for (int k = 0; k <= kmax; k++) {
@@ -298,7 +307,7 @@ void calculateDtCpp(
 void calculateUvwCpp(
         Real dt, Real dx, Real dy, Real dz, int imax, int jmax, int kmax,
         Real *U, Real *V, Real *W, Real *F, Real *G, Real *H, Real *P, FlagType *Flag) {
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, dx, dt, U, P, F, Flag) default(none)
     for (int i = 1; i <= imax - 1; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -309,7 +318,7 @@ void calculateUvwCpp(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, dy, dt, V, P, G, Flag) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax - 1; j++) {
             for (int k = 1; k <= kmax; k++) {
@@ -320,7 +329,7 @@ void calculateUvwCpp(
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for shared(imax, jmax, kmax, dz, dt, W, P, H, Flag) default(none)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax - 1; k++) {
@@ -339,7 +348,8 @@ void calculateTemperatureCpp(
         Real *U, Real *V, Real *W, Real *T, Real *T_temp, FlagType *Flag) {
     Real duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2;
 
-    #pragma omp parallel for private(duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2)
+    #pragma omp parallel for private(duT_dx, dvT_dy, dwT_dz, d2T_dx2, d2T_dy2, d2T_dz2) default(none) \
+    shared(imax, jmax, kmax, dx, dy, dz, dt, Re, Pr, alpha, U, V, W, T, T_temp, Flag)
     for (int i = 1; i <= imax; i++) {
         for (int j = 1; j <= jmax; j++) {
             for (int k = 1; k <= kmax; k++) {

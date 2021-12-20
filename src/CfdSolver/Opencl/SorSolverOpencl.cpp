@@ -183,7 +183,7 @@ void sorSolverOpencl(
             sorSolverComputeResidualArrayOpenclKernel);
 
 
-    const Real coeff = omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz)));
+    const Real coeff = Real(omg / (2.0 * (1.0 / (dx*dx) + 1.0 / (dy*dy) + 1.0 / (dz*dz))));
     Real residual = 1e9;
     int it = 0;
     while (it < itermax && residual > eps) {

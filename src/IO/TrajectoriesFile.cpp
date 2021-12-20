@@ -89,20 +89,20 @@ bool writeTrajectoriesToBinLinesFile(const std::string &filename, const Trajecto
         return false;
     }
 
-    uint32_t numTrajectories = trajectories.size();
-    uint32_t numAttributes = trajectories.empty() ? 0 : trajectories.at(0).attributes.size();
+    uint32_t numTrajectories = uint32_t(trajectories.size());
+    uint32_t numAttributes = uint32_t(trajectories.empty() ? 0 : trajectories.at(0).attributes.size());
 
     BinaryWriteStream stream;
-    stream.write((uint32_t)LINE_FILE_FORMAT_VERSION);
-    stream.write((uint32_t)numTrajectories);
-    stream.write((uint32_t)numAttributes);
+    stream.write(uint32_t(LINE_FILE_FORMAT_VERSION));
+    stream.write(uint32_t(numTrajectories));
+    stream.write(uint32_t(numAttributes));
 
     for (uint32_t trajectoryIndex = 0; trajectoryIndex < numTrajectories; trajectoryIndex++) {
         const Trajectory &currentTrajectory = trajectories.at(trajectoryIndex);
         size_t trajectoryNumPoints = currentTrajectory.positions.size();
         stream.write(uint32_t(trajectoryNumPoints));
 #ifdef REAL_FLOAT
-        stream.write((void*)&currentTrajectory.positions.front(), sizeof(glm::vec3)*trajectoryNumPoints);
+        stream.write(currentTrajectory.positions.data(), sizeof(glm::vec3) * trajectoryNumPoints);
 #endif
 #ifdef REAL_DOUBLE
         std::vector<glm::vec3> floatVectorArray;
@@ -126,7 +126,7 @@ bool writeTrajectoriesToBinLinesFile(const std::string &filename, const Trajecto
             }
 #endif
             assert(trajectoryNumPoints == currentAttribute.size());
-            stream.write((void*)&currentAttribute.front(), sizeof(float)*trajectoryNumPoints);
+            stream.write(currentAttribute.data(), sizeof(float) * trajectoryNumPoints);
         }
     }
 

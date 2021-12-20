@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
     prepareOutputDirectory(
             outputDirectory, outputFilename, outputFormatEnding, lineDirectory, geometryDirectory, shallWriteOutput);
 
-    Real n = 0;
+    int n = 0;
     Real t = 0;
     Real tWrite = 0;
 

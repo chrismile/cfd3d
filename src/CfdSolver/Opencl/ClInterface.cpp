@@ -163,10 +163,15 @@ cl::NDRange ClInterface::rangePadding1D(int w, int local) {
 }
 
 cl::NDRange ClInterface::rangePadding2D(int w, int h, cl::NDRange local) {
-    return cl::NDRange(iceil(w, local[0])*local[0], iceil(h, local[1])*local[1]);
+    return cl::NDRange(
+            iceil(w, int(local[0]))*local[0],
+            iceil(h, int(local[1]))*local[1]);
 }
 
 cl::NDRange ClInterface::rangePadding3D(int w, int h, int d, cl::NDRange local) {
-    return cl::NDRange(iceil(w, local[0])*local[0], iceil(h, local[1])*local[1], iceil(d, local[2])*local[2]);
+    return cl::NDRange(
+            iceil(w, int(local[0]))*local[0],
+            iceil(h, int(local[1]))*local[1],
+            iceil(d, int(local[2]))*local[2]);
 }
 
