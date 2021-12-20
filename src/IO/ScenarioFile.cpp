@@ -28,8 +28,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include "StringUtils.hpp"
 #include "ScenarioFile.hpp"
 
 std::map<std::string, std::string> loadVariablesFromDatFile(const std::string &filename) {
@@ -55,7 +54,7 @@ std::map<std::string, std::string> loadVariablesFromDatFile(const std::string &f
 
         // Split the line by spaces and tabulators.
         std::vector<std::string> line;
-        boost::algorithm::split(line, lineString, boost::is_any_of("\t "), boost::token_compress_on);
+        splitStringWhitespace(lineString, line);
 
         // Empty line with only whitespace characters.
         if (line.empty()) {

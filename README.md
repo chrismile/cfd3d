@@ -7,12 +7,13 @@ Used literature for the theoretical background:
 - M. Griebel, T. Dornseifer, and T. Neunhoeffer. SIAM, Philadelphia, 1998. Numerical Simulation in Fluid Dynamics,
 a Practical Introduction.
 
+
 ## Building the programm
 
-On Ubuntu 18.04 for example, you can install all necessary packages with this command:
+On Ubuntu 20.04 for example, you can install all necessary packages with this command:
 
 ```
-sudo apt-get install git cmake libboost-filesystem-dev libnetcdf-dev netcdf-bin libglm-dev libopenmpi-dev
+sudo apt-get install git cmake libnetcdf-dev netcdf-bin libglm-dev libopenmpi-dev
 ```
 
 For CUDA support, additionally the following packages are necessary.
@@ -27,16 +28,16 @@ For OpenCL support, additionally the following packages are necessary.
 sudo apt-get install ocl-icd-opencl-dev opencl-headers clinfo
 ```
 
-The application was tested using NVIDIA's OpenCL implementation, Intel NEO and POCL. However, it should also run with different implementations. Depending on the OpenCL implementation you want to use, install one of the following packages.
+The application was tested using NVIDIA's OpenCL implementation, Intel NEO and POCL. However, it should also run with
+different implementations. Depending on the OpenCL implementation you want to use, install one of the following packages.
 
 
 ```
 sudo apt-get install nvidia-opencl-dev intel-opencl-icd beignet-opencl-icd pocl-opencl-icd
 ```
 
-intel-opencl-icd is the new OpenCL implementation of Intel that was added in Ubuntu 19.04 to the distribution repositories. For previous distributions, please use Beignet. POCL is an OpenCL implementation using the user's CPU.
-
-
+intel-opencl-icd is the new OpenCL implementation of Intel that was added in Ubuntu 19.04 to the distribution
+repositories. For previous distributions, please use Beignet. POCL is an OpenCL implementation using the user's CPU.
 
 
 Then, to build the program, execute the following commands in the repository directory.
@@ -48,29 +49,9 @@ cmake ..
 make -j 4
 ```
 
-This builds the program with only the OpenMP solver. If the user wishes to also build the program with MPI or CUDA
-support, run one of the following commands instead.
+The program will try to automatically find the installed CUDA, OpenCL and MPI library locations.
+The program can be built with all solvers enabled at the same time.
 
-
-For MPI support:
-
-```
-cmake .. -DUSE_MPI=ON
-```
-
-For CUDA support:
-
-```
-cmake .. -DUSE_CUDA=ON
-```
-
-For OpenCL support:
-
-```
-cmake .. -DUSE_OPENCL=ON
-```
-
-The program can also be built with all solvers enabled at the same time.
 
 ## Running the program
 
