@@ -114,13 +114,21 @@ endif()
 set(FPHSA_NAME_MISMATCHED TRUE)
 find_package(glm REQUIRED)
 find_package(Boost COMPONENTS system filesystem REQUIRED)
-find_package(NetCDF REQUIRED)
+if(VCPKG_TOOLCHAIN)
+    find_package(netCDF CONFIG REQUIRED)
+else()
+    find_package(NetCDF REQUIRED)
+endif()
 
 target_include_directories(cfd3d PRIVATE ${GLM_INCLUDE_DIR})
 target_include_directories(cfd3d PRIVATE ${Boost_INCLUDE_DIR})
-target_include_directories(cfd3d PRIVATE ${NETCDF_INCLUDE_DIR})
-
-target_link_libraries(cfd3d PRIVATE ${Boost_LIBRARIES} ${NETCDF_LIBRARIES})
+target_link_libraries(cfd3d PRIVATE ${Boost_LIBRARIES})
+if(VCPKG_TOOLCHAIN)
+    target_link_libraries(cfd3d PRIVATE netCDF::netcdf)
+else()
+    target_link_libraries(cfd3d PRIVATE ${NETCDF_LIBRARIES})
+    target_include_directories(cfd3d PRIVATE ${NETCDF_INCLUDE_DIR})
+endif()
 
 # According to https://devblogs.microsoft.com/cppblog/improved-openmp-support-for-cpp-in-visual-studio/,
 # support for LLVM OpenMP was added with Visual Studio 2019 version 16.9. According to
