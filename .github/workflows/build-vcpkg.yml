@@ -34,6 +34,13 @@ jobs:
           exit 1
         fi
 
+    #- uses: nuget/setup-nuget@v1
+    #  if: runner.os == 'Windows'
+
+    - name: Install MSMPI (Windows only)
+      if: runner.os == 'Windows'
+      run: dotnet add package MSMPIsdk --version 10.1.12498.18
+
     - uses: actions/checkout@v2
 
     - uses: lukka/get-cmake@latest
