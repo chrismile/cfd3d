@@ -20,13 +20,23 @@
             ]
         },
         "mpi": {
-            "description": "Build with MPI support.",
+            "description": "Build with MPI support. OpenMPI is used on Unix-based systems, and MSMPI on Windows.",
             "dependencies": [
                 "mpi"
+            ]
+        },
+        "openmpi": {
+            "description": "Build with OpenMPI support. This does not enable any MPI support if on Windows.",
+            "dependencies": [
+                {
+                    "name": "openmpi",
+                    "platform": "!windows"
+                }
             ]
         }
     },
     "default-features": [
-        "opencl", "mpi"
+        "opencl",
+        "openmpi"
     ]
 }

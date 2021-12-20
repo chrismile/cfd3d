@@ -34,13 +34,6 @@ jobs:
           exit 1
         fi
 
-    - uses: nuget/setup-nuget@v1
-      if: runner.os == 'Windows'
-
-    - name: Install MSMPI (Windows only)
-      if: runner.os == 'Windows'
-      run: Install-Package MSMPIsdk -Version 10.1.12498.18 #dotnet add package MSMPIsdk --version 10.1.12498.18
-
     - uses: actions/checkout@v2
 
     - uses: lukka/get-cmake@latest
@@ -59,7 +52,8 @@ jobs:
     - name: Configure CMake
       shell: bash
       run: |
-        cmake -B "${{github.workspace}}/build" -DCMAKE_TOOLCHAIN_FILE="${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVCPKG_TARGET_TRIPLET=${{env.VCPKG_DEFAULT_TRIPLET}}
+        cmake -B "${{github.workspace}}/build" -DCMAKE_TOOLCHAIN_FILE="${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake" \
+        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVCPKG_TARGET_TRIPLET=${{env.VCPKG_DEFAULT_TRIPLET}}
 
     - name: Build
       run: cmake --build "${{github.workspace}}/build" --config ${{env.BUILD_TYPE}}
