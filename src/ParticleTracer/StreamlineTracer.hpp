@@ -53,9 +53,9 @@ public:
      * @param T The temperature values.
      * @return The characteristic lines (an array containing the arrays of line points).
      */
-    virtual Trajectories trace(
+    Trajectories trace(
             const std::vector<rvec3> &particleSeedingLocations, const rvec3 &gridOrigin, const rvec3 &gridSize, Real dt,
-            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real *U, Real *V, Real *W, Real *P, Real *T);
+            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real *U, Real *V, Real *W, Real *P, Real *T) override;
 };
 
 #endif //CFD3D_STREAMLINETRACER_HPP

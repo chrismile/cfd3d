@@ -55,7 +55,7 @@ bool endsWith(const std::string& str, const std::string& postfix);
  * @param listObject The split parts.
  */
 template<class InputIterator>
-void splitString(const std::string &stringObject, char separator, InputIterator listObject) {
+void splitString(const std::string &stringObject, char separator, InputIterator& listObject) {
     std::string buffer;
     for (char c : stringObject) {
         if (c != separator) {
@@ -82,7 +82,7 @@ void splitString(const std::string &stringObject, char separator, InputIterator 
  * 'boost::algorithm::split(listObject, stringObject, boost::is_any_of("\t "), boost::token_compress_on);'.
  */
 template<class InputIterator>
-void splitStringWhitespace(const std::string &stringObject, InputIterator listObject) {
+void splitStringWhitespace(const std::string &stringObject, InputIterator& listObject) {
     std::string buffer;
     for (char c : stringObject) {
         if (c != ' ' && c != '\t') {
