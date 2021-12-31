@@ -31,7 +31,8 @@
 
 #include <glm/vec3.hpp>
 
-#define REAL_FLOAT
+//#define REAL_FLOAT
+#define REAL_DOUBLE
 
 /**
  * The type used for the Flag array. The array stores the type of each cell (i.e., fluid, type of obstacle cell, etc.).

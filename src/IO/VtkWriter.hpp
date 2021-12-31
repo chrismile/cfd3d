@@ -40,12 +40,12 @@ public:
     /**
      * @return The file ending of the format.
      */
-    virtual std::string getOutputFormatEnding() { return ".vtk"; }
+    std::string getOutputFormatEnding() override { return ".vtk"; }
 
     /**
      * Sets data for use with the MPI solver.
      */
-    virtual void setMpiData(int il, int iu, int jl, int ju, int kl, int ku);
+    void setMpiData(int il, int iu, int jl, int ju, int kl, int ku) override;
 
     /**
      * Intializes the file writer.
@@ -61,8 +61,8 @@ public:
      * @param zOrigin The origin of the interior domain in world space (z coordinate).
      * @return true if the file could be opened for writing successfully.
      */
-    virtual bool initializeWriter(const std::string &filename,
-            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin);
+    bool initializeWriter(const std::string &filename,
+            int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real xOrigin, Real yOrigin, Real zOrigin) override;
     /**
      * Writes the data of the current time step to a file.
      * @param timeStepNumber The time step number (i.e., 0 for the initial state, 1 after the first iteration of the
@@ -75,8 +75,8 @@ public:
      * @param T The temperature values.
      * @param Flag The flag values (@see Flag.hpp for more information).
      */
-    virtual void writeTimestep(
-            int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag);
+    void writeTimestep(
+            int timeStepNumber, Real time, Real *U, Real *V, Real *W, Real *P, Real *T, FlagType *Flag) override;
 
 private:
     void writeVtkHeader(FILE *file);
@@ -90,8 +90,8 @@ private:
     int nproc, myrank;
     bool isBinaryVtk;
     int imax{}, jmax{}, kmax{};
-    int il, iu, jl, ju, kl, ku;
-    Real dx, dy, dz, xOrigin, yOrigin, zOrigin;
+    int il{}, iu{}, jl{}, ju{}, kl{}, ku{};
+    Real dx{}, dy{}, dz{}, xOrigin{}, yOrigin{}, zOrigin{};
 
     // For binary mode. (Note: ParaView only supports float, and not double.)
     float *pointData = nullptr;

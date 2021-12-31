@@ -49,12 +49,16 @@ void traceStreamlineParticle(
             if (!currentTrajectory.positions.empty()) {
                 // Clamp the position to the boundary.
                 rvec3 rayOrigin = currentTrajectory.positions.back();
-                rvec3 rayDirection = particlePosition - rayOrigin;
+                rvec3 rayDirection = glm::normalize(particlePosition - rayOrigin);
                 Real tNear, tFar;
                 rayBoxIntersection(rayOrigin, rayDirection, gridOrigin, gridOrigin + gridSize, tNear, tFar);
-
-                rvec3 boundaryParticlePosition = rayOrigin + tNear * rayDirection;
-                currentTrajectory.positions.push_back(boundaryParticlePosition);
+                glm::vec3 boundaryParticlePosition;
+                if (tNear > 0.0f) {
+                    boundaryParticlePosition = rayOrigin + tNear * rayDirection;
+                } else {
+                    boundaryParticlePosition = rayOrigin + tFar * rayDirection;
+                }
+                currentTrajectory.positions.emplace_back(boundaryParticlePosition);
                 pushTrajectoryAttributes(
                         currentTrajectory, gridOrigin, gridSize, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T);
             }
@@ -78,8 +82,9 @@ void traceStreamlineParticle(
 
 
         // Integrate to the new position using the Runge-Kutta-Fehlberg method (RKF45).
-        // For more details see: http://maths.cnam.fr/IMG/pdf/RungeKuttaFehlbergProof.pdf
-        /*rvec3 approximationRK4, approximationRK5;
+        // For more details see: https://maths.cnam.fr/IMG/pdf/RungeKuttaFehlbergProof.pdf
+        /*const Real tol = Real(2.0 * 1e-5);
+        rvec3 approximationRK4, approximationRK5;
         bool timestepNeedsAdaptation = false;
         do {
             rvec3 k1 = dt * getVectorVelocityAt(particlePosition, gridOrigin, gridSize, imax, jmax, kmax, U, V, W);

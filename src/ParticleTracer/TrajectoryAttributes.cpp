@@ -32,7 +32,7 @@ void pushTrajectoryAttributes(
         Trajectory &currentTrajectory, const rvec3 &gridOrigin, const rvec3 &gridSize,
         int imax, int jmax, int kmax, Real dx, Real dy, Real dz, Real *U, Real *V, Real *W, Real *P, Real *T) {
     // Necessary to initialize the data first?
-    if (currentTrajectory.attributes.size() == 0) {
+    if (currentTrajectory.attributes.empty()) {
         currentTrajectory.attributes.resize(2);
     }
 
