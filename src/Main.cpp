@@ -83,6 +83,7 @@ int main(int argc, char *argv[]) {
 
     // CUDA & OpenCL data
     int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
+    int gpuId = 0;
 
     // OpenCL data
     int openclPlatformId = 0;
@@ -95,7 +96,7 @@ int main(int argc, char *argv[]) {
     parseArguments(
             argc, argv, scenarioName, solverName, outputFileWriterType, shallWriteOutput, linearSystemSolverType,
             numParticles, traceStreamlines, iproc, jproc, kproc,
-            blockSizeX, blockSizeY, blockSizeZ, blockSize1D, openclPlatformId);
+            blockSizeX, blockSizeY, blockSizeZ, blockSize1D, gpuId, openclPlatformId);
     scenarioFilename = scenarioDirectory + scenarioName + ".dat";
 
 #ifdef USE_MPI
@@ -253,7 +254,8 @@ int main(int argc, char *argv[]) {
     }
 #ifdef USE_MPI
     else if (solverName == "mpi") {
-        cfdSolver = new CfdSolverMpi(il, iu, jl, ju, kl, ku, myrank, rankL, rankR, rankD, rankU, rankB, rankF);
+        cfdSolver = new CfdSolverMpi(
+                il, iu, jl, ju, kl, ku, myrank, rankL, rankR, rankD, rankU, rankB, rankF);
     }
 #endif
 #ifdef USE_CUDA
@@ -262,7 +264,8 @@ int main(int argc, char *argv[]) {
             std::cerr << "Warning: CUDA solver was selected, but a linear solver different from Jacobi. "
                     << "Only the Jacobi solver is supported for CUDA." << std::endl;
         }
-        cfdSolver = new CfdSolverCuda(blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
+        cfdSolver = new CfdSolverCuda(
+                gpuId, blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
     }
 #endif
 #ifdef USE_OPENCL
@@ -271,14 +274,16 @@ int main(int argc, char *argv[]) {
             std::cerr << "Warning: OpenCL solver was selected, but a linear solver different from Jacobi. "
                       << "Only the Jacobi solver is supported for OpenCL." << std::endl;
         }
-        cfdSolver = new CfdSolverOpencl(openclPlatformId, blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
+        cfdSolver = new CfdSolverOpencl(
+                gpuId, openclPlatformId, blockSizeX, blockSizeY, blockSizeZ, blockSize1D);
     }
 #endif
     else {
         std::cerr << "Fatal error: Unsupported solver name \"" << solverName << "\"." << std::endl;
         exit(1);
     }
-    cfdSolver->initialize(scenarioName, linearSystemSolverType, shallWriteOutput,
+    cfdSolver->initialize(
+            scenarioName, linearSystemSolverType, shallWriteOutput,
             Re, Pr, omg, eps, itermax, alpha, beta, dt, tau, GX, GY, GZ, useTemperature,
             T_h, T_c, imax, jmax, kmax, dx, dy, dz, U, V, W, P, T, Flag);
 

@@ -34,8 +34,8 @@
 #include "CfdSolverCuda.hpp"
 #include "../../Defines.hpp"
 
-
-CfdSolverCuda::CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D) {
+CfdSolverCuda::CfdSolverCuda(int gpuId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D) {
+    this->gpuId = gpuId;
     this->blockSizeX = blockSizeX;
     this->blockSizeY = blockSizeY;
     this->blockSizeZ = blockSizeZ;
@@ -72,6 +72,19 @@ void CfdSolverCuda::initialize(
     this->dx = dx;
     this->dy = dy;
     this->dz = dz;
+
+    int numDevices = 0;
+    cudaGetDeviceCount(&numDevices);
+    if (numDevices == 0) {
+        std::cerr << "Fatal error in CfdSolverCuda::initialize: No CUDA devices were found." << std::endl;
+        exit(1);
+    }
+    if (gpuId >= numDevices) {
+        std::cerr << "Error in CfdSolverCuda::initialize: Invalid device ID specified. Setting device ID to 0."
+                  << std::endl;
+        gpuId = 0;
+    }
+    cudaSetDevice(gpuId);
 
     // Create all arrays for the simulation.
     cudaMalloc(&this->U, (imax+1)*(jmax+2)*(kmax+2)*sizeof(Real));

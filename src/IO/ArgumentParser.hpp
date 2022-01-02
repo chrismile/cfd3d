@@ -53,12 +53,13 @@ class OutputFileWriter;
  * @param blockSize1D The block size to use for 1D domains (CUDA and OpenCL solver only).
  * @param openclPlatformId The ID of the OpenCL platform to use for computations (OpenCL solver only).
  * Which platform corresponds to which ID can be found out with the command line tool 'clinfo'.
+ * @param gpuId Which GPU to use for computations (currently CUDA solver only). Using multiple GPUs is not supported.
  */
 void parseArguments(
         int argc, char *argv[], std::string &scenarioName, std::string &solverName,
         std::string &outputFileWriterType, bool &shallWriteOutput, LinearSystemSolverType &linearSystemSolverType,
         int &numParticles, bool &traceStreamlines, int &iproc, int &jproc, int &kproc,
         int &blockSizeX, int &blockSizeY, int &blockSizeZ, int &blockSize1D,
-        int &openclPlatformId);
+        int &gpuId, int &openclPlatformId);
 
 #endif //CFD3D_ARGUMENTPARSER_HPP

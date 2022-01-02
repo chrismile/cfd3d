@@ -39,7 +39,8 @@
 
 const std::string openclSourceDirectory = "../src/CfdSolver/Opencl/";
 
-CfdSolverOpencl::CfdSolverOpencl(int platformId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D) {
+CfdSolverOpencl::CfdSolverOpencl(int gpuId, int platformId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D) {
+    this->gpuId = gpuId;
     this->platformId = platformId;
     this->blockSizeX = blockSizeX;
     this->blockSizeY = blockSizeY;
@@ -61,6 +62,17 @@ CfdSolverOpencl::CfdSolverOpencl(int platformId, int blockSizeX, int blockSizeY,
 
     context = ClInterface::get()->getContext();
     devices = ClInterface::get()->getDevices();
+    if (devices.empty()) {
+        std::cerr << "Fatal error in CfdSolverOpencl::CfdSolverOpencl: No supported OpenCL devices were found."
+                  << std::endl;
+        exit(1);
+    }
+    if (gpuId >= devices.size()) {
+        std::cerr << "Error in CfdSolverOpencl::CfdSolverOpencl: Invalid device ID specified. Setting device ID to 0."
+                  << std::endl;
+        gpuId = 0;
+    }
+
     ClInterface::get()->setPrependHeader(prependHeader);
     computeProgramBoundaryValues = ClInterface::get()->loadProgramFromSourceFiles({
         openclSourceDirectory + "BoundaryValuesOpencl.cl"});
@@ -100,13 +112,13 @@ CfdSolverOpencl::CfdSolverOpencl(int platformId, int blockSizeX, int blockSizeY,
     calculateTemperatureOpenclKernel = cl::Kernel(computeProgramUvw, "calculateTemperatureOpencl");
 
 #ifndef _PROFILING_CL_
-    queue = cl::CommandQueue(context, devices[0]);
+    queue = cl::CommandQueue(context, devices[gpuId]);
 #else
-    queue = cl::CommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE);
+    queue = cl::CommandQueue(context, devices[gpuId], CL_QUEUE_PROFILING_ENABLE);
 #endif
 
     size_t maxWorkGroupSize;
-    devices[0].getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &maxWorkGroupSize);
+    devices[gpuId].getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &maxWorkGroupSize);
 
     // Set local work size.
     workGroupSize1D = cl::NDRange(blockSize1D);

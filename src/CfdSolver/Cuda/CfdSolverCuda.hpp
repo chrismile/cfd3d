@@ -35,12 +35,13 @@
 class CfdSolverCuda : public CfdSolver {
 public:
     /**
+     * @param gpuId The index of the GPU to use for computations. Using multiple GPUs is not supported at the moment.
      * @param blockSizeX The block size to use for 3D domains in x direction.
      * @param blockSizeY The block size to use for 3D domains in y direction.
      * @param blockSizeZ The block size to use for 3D domains in z direction.
      * @param blockSize1D The block size to use for 1D domains.
      */
-    CfdSolverCuda(int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
+    CfdSolverCuda(int gpuId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
 
     /**
      * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
@@ -156,6 +157,7 @@ private:
     Real dx, dy, dz;
     Real *U, *V, *W , *P, *P_temp, *T, *T_temp, *F, *G, *H, *RS;
     FlagType *Flag;
+    int gpuId;
     int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
 
     // For computing the maximum reduction of the absolute velocities and the sum reduction of the residual.

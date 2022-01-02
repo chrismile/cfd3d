@@ -36,6 +36,7 @@
 class CfdSolverOpencl : public CfdSolver {
 public:
     /**
+     * @param gpuId The index of the GPU to use for computations. Using multiple GPUs is not supported at the moment.
      * @param platformId The ID of the OpenCL platform to use. Which platform corresponds to which ID can be found out
      * with the command line tool 'clinfo'.
      * @param blockSizeX The block size to use for 3D domains in x direction.
@@ -43,7 +44,7 @@ public:
      * @param blockSizeZ The block size to use for 3D domains in z direction.
      * @param blockSize1D The block size to use for 1D domains.
      */
-    CfdSolverOpencl(int platformId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
+    CfdSolverOpencl(int gpuId, int platformId, int blockSizeX, int blockSizeY, int blockSizeZ, int blockSize1D);
 
     /**
      * Copies the passed initial values of U, V, W, P, T and Flag to the internal representation of the solver.
@@ -159,8 +160,8 @@ private:
     Real dx, dy, dz;
     cl::Buffer U, V, W, P, P_temp, T, T_temp, F, G, H, RS;
     cl::Buffer Flag;
+    int gpuId, platformId;
     int blockSizeX, blockSizeY, blockSizeZ, blockSize1D;
-    int platformId;
 
     cl::Context context;
     std::vector<cl::Device> devices;

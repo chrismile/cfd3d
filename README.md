@@ -109,5 +109,7 @@ The standard values for the solvers are:
 For the OpenCL solver, additonally to the block size, the user can also specify the ID of the OpenCL platform to use.
 If the ID is not specified, it is set to zero. Which platform corresponds to which ID can be found outwith the command
 line tool 'clinfo'.
-
 * platformid: integer
+
+For the CUDA and OpenCL solvers, the user CAN also specify the index of the GPU to use for computations (standard is 0):
+* gpu: integer
