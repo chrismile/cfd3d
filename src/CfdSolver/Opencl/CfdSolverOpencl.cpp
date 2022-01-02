@@ -67,7 +67,7 @@ CfdSolverOpencl::CfdSolverOpencl(int gpuId, int platformId, int blockSizeX, int 
                   << std::endl;
         exit(1);
     }
-    if (gpuId >= devices.size()) {
+    if (gpuId >= int(devices.size())) {
         std::cerr << "Error in CfdSolverOpencl::CfdSolverOpencl: Invalid device ID specified. Setting device ID to 0."
                   << std::endl;
         gpuId = 0;
