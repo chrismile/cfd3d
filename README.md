@@ -13,7 +13,7 @@ a Practical Introduction.
 On Ubuntu 20.04 for example, you can install all necessary packages with this command:
 
 ```
-sudo apt-get install git cmake libnetcdf-dev netcdf-bin libglm-dev libopenmpi-dev
+sudo apt-get install git cmake libnetcdf-dev libglm-dev libopenmpi-dev
 ```
 
 For CUDA support, additionally the following packages are necessary.

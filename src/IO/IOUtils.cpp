@@ -56,6 +56,7 @@ void prepareOutputDirectory(
     }
 
     // Delete all previous output files for the selected scenario.
+    const std::string outputFilenameDot = outputFilename + ".";
     if (shallWriteOutput) {
         std::filesystem::path dir(outputDirectory);
         std::filesystem::directory_iterator end;
@@ -66,7 +67,7 @@ void prepareOutputDirectory(
                 if (*it == '\\') *it = '/';
             }
 #endif
-            if (endsWith(filename, outputFormatEnding) && startsWith(filename, outputFilename)) {
+            if (endsWith(filename, outputFormatEnding) && startsWith(filename, outputFilenameDot)) {
                 std::filesystem::remove(it->path());
             }
         }
