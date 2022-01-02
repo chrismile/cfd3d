@@ -188,7 +188,7 @@ T reduceSumCuda(T *input, unsigned int numValues, T *cudaReductionHelperArray, i
         iteration++;
     }
 
-    cudaMemcpy(&sumValue, reductionInput, sizeof(T), cudaMemcpyDeviceToHost);
+    checkCudaError(cudaMemcpy(&sumValue, reductionInput, sizeof(T), cudaMemcpyDeviceToHost));
 
     return sumValue;
 }
@@ -269,18 +269,23 @@ void sorSolverCuda(
         dim3 dimGrid(iceil(kmax, dimBlock.x), iceil(jmax, dimBlock.y), iceil(imax, dimBlock.z));
         setBoundaryConditionsPressureInDomainCuda<<<dimGrid, dimBlock>>>(imax, jmax, kmax, P, Flag);
 
-        cudaMemcpy(P_temp, P, sizeof(Real) * (imax + 2) * (jmax + 2) * (kmax + 2), cudaMemcpyDeviceToDevice);
+        checkCudaError(cudaMemcpy(
+                P_temp, P, sizeof(Real) * (imax + 2) * (jmax + 2) * (kmax + 2),
+                cudaMemcpyDeviceToDevice));
 
         sorSolverIterationCuda<<<dimGrid, dimBlock>>>(
                 omg, dx, dy, dz, coeff, imax, jmax, kmax, P, P_temp, RS, Flag);
 
         sorSolverComputeResidualArrayCuda<<<dimGrid, dimBlock>>>(
-                dx, dy, dz, imax, jmax, kmax, P, RS, Flag, cudaReductionArrayResidual1, cudaReductionArrayNumCells1);
+                dx, dy, dz, imax, jmax, kmax, P, RS, Flag, cudaReductionArrayResidual1,
+                cudaReductionArrayNumCells1);
 
         residual = reduceSumCuda(
-                cudaReductionArrayResidual1, imax*jmax*kmax, cudaReductionArrayResidual2, blockSize1D);
+                cudaReductionArrayResidual1, imax*jmax*kmax,
+                cudaReductionArrayResidual2, blockSize1D);
         unsigned int numFluidCells = reduceSumCuda(
-                cudaReductionArrayNumCells1, imax*jmax*kmax, cudaReductionArrayNumCells2, blockSize1D);
+                cudaReductionArrayNumCells1, imax*jmax*kmax,
+                cudaReductionArrayNumCells2, blockSize1D);
         residual = std::sqrt(residual / Real(numFluidCells));
 
         it++;

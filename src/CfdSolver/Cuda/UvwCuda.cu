@@ -88,9 +88,9 @@ __global__ void calculateFghCudaKernel(
                     GX-(beta/2)*(T[IDXT(i,j,k)]+T[IDXT(i+1,j,k)])*GX
             );
         } else if (B_L(Flag[IDXFLAG(i,j,k)])) {
-                F[IDXF(i-1,j,k)] = U[IDXU(i-1,j,k)];
+            F[IDXF(i-1,j,k)] = U[IDXU(i-1,j,k)];
         } else if (B_R(Flag[IDXFLAG(i,j,k)])) {
-                F[IDXF(i,j,k)] = U[IDXU(i,j,k)];
+            F[IDXF(i,j,k)] = U[IDXU(i,j,k)];
         }
     }
 
@@ -383,9 +383,9 @@ void calculateDtCuda(
         iteration++;
     }
 
-    cudaMemcpy(&uMaxAbs, U_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&vMaxAbs, V_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&wMaxAbs, W_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost);
+    checkCudaError(cudaMemcpy(&uMaxAbs, U_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost));
+    checkCudaError(cudaMemcpy(&vMaxAbs, V_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost));
+    checkCudaError(cudaMemcpy(&wMaxAbs, W_reductionInput, sizeof(Real), cudaMemcpyDeviceToHost));
 
     if (tau < Real(0.0)) {
         // Constant time step manually specified in configuration file. Check for stability.

@@ -20,4 +20,12 @@ __device__ inline bool isHot(unsigned int flag) { return (flag >> 11) & 1; }
 __device__ inline bool isCold(unsigned int flag) { return (flag >> 12) & 1; }
 __device__ inline bool isCoupling(unsigned int flag) { return (flag >> 13) & 1; }
 
+#ifndef TOSTRING
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#endif
+
+void _checkCudaError(cudaError_t result, const char *expression, const char *locationText);
+#define checkCudaError(expr) _checkCudaError(expr, #expr, __FILE__ ":" TOSTRING(__LINE__))
+
 #endif //CFD3D_CUDADEFINES_HPP
