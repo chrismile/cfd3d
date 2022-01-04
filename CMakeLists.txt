@@ -134,6 +134,18 @@ else()
     target_include_directories(cfd3d PRIVATE ${NETCDF_INCLUDE_DIR})
 endif()
 
+if (UNIX AND NOT APPLE)
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
+            target_link_libraries(cfd3d stdc++fs)
+        endif()
+    elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+            target_link_libraries(cfd3d c++fs)
+        endif()
+    endif()
+endif()
+
 # According to https://devblogs.microsoft.com/cppblog/improved-openmp-support-for-cpp-in-visual-studio/,
 # support for LLVM OpenMP was added with Visual Studio 2019 version 16.9. According to
 # https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=msvc-170,
