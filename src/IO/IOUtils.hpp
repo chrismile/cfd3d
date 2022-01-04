@@ -43,4 +43,11 @@ void prepareOutputDirectory(
         const std::string &outputDirectory, const std::string &outputFilename, const std::string &outputFormatEnding,
         const std::string &lineDirectory, const std::string &geometryDirectory, bool shallWriteOutput);
 
+/**
+ * Returns whether the passed file exists.
+ * @param filename The path to the file.
+ * @return True if the file exists and false otherwise.
+ */
+bool fileExists(const std::string& filename);
+
 #endif //CFD3D_IOUTILS_HPP

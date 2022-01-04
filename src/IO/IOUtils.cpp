@@ -86,3 +86,7 @@ void prepareOutputDirectory(
         }
     }
 }
+
+bool fileExists(const std::string& filename) {
+    return fs::exists(filename) && !fs::is_directory(filename);
+}

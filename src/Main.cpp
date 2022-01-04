@@ -28,7 +28,6 @@
 
 #include <iostream>
 #include <chrono>
-#include <filesystem>
 #include <omp.h>
 #include "CfdSolver/Init.hpp"
 #include "CfdSolver/Flag.hpp"
@@ -214,7 +213,7 @@ int main(int argc, char *argv[]) {
     if (geometryName == "none") {
         initFlagNoObstacles(scenarioName, imax, jmax, kmax, FlagAll);
     } else {
-        if (!std::filesystem::exists(geometryFilename)) {
+        if (!fileExists(geometryFilename)) {
             generateScenario(scenarioName, geometryFilename, imax, jmax, kmax);
         }
         initFlagFromGeometryFile(scenarioName, geometryFilename, imax, jmax, kmax, FlagAll);
