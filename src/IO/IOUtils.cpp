@@ -27,29 +27,42 @@
  */
 
 #include <iostream>
-#include <filesystem>
 #include <cstdlib>
 #include "StringUtils.hpp"
 #include "IOUtils.hpp"
+
+/*
+ * Fix for compatibility with older versions of GCC, as used e.g. on Ubuntu 18.04:
+ * https://askubuntu.com/questions/1256440/how-to-get-libstdc-with-c17-filesystem-headers-on-ubuntu-18-bionic
+ */
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#else
+#error Missing the <filesystem> header.
+#endif
 
 void prepareOutputDirectory(
         const std::string &outputDirectory, const std::string &outputFilename, const std::string &outputFormatEnding,
         const std::string &lineDirectory, const std::string &geometryDirectory, bool shallWriteOutput) {
     // Create the directories.
-    if (!std::filesystem::exists(outputDirectory)) {
-        if (!std::filesystem::create_directory(outputDirectory)) {
+    if (!fs::exists(outputDirectory)) {
+        if (!fs::create_directory(outputDirectory)) {
             std::cerr << "Output directory could not be created." << std::endl;
             exit(1);
         }
     }
-    if (!std::filesystem::exists(lineDirectory)) {
-        if (!std::filesystem::create_directory(lineDirectory)) {
+    if (!fs::exists(lineDirectory)) {
+        if (!fs::create_directory(lineDirectory)) {
             std::cerr << "Line directory could not be created." << std::endl;
             exit(1);
         }
     }
-    if (!std::filesystem::exists(geometryDirectory)) {
-        if (!std::filesystem::create_directory(geometryDirectory)) {
+    if (!fs::exists(geometryDirectory)) {
+        if (!fs::create_directory(geometryDirectory)) {
             std::cerr << "Geometry directory could not be created." << std::endl;
             exit(1);
         }
@@ -58,9 +71,9 @@ void prepareOutputDirectory(
     // Delete all previous output files for the selected scenario.
     const std::string outputFilenameDot = outputFilename + ".";
     if (shallWriteOutput) {
-        std::filesystem::path dir(outputDirectory);
-        std::filesystem::directory_iterator end;
-        for (std::filesystem::directory_iterator it(dir); it != end; ++it) {
+        fs::path dir(outputDirectory);
+        fs::directory_iterator end;
+        for (fs::directory_iterator it(dir); it != end; ++it) {
             std::string filename = it->path().string();
 #ifdef WIN32
             for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
@@ -68,7 +81,7 @@ void prepareOutputDirectory(
             }
 #endif
             if (endsWith(filename, outputFormatEnding) && startsWith(filename, outputFilenameDot)) {
-                std::filesystem::remove(it->path());
+                fs::remove(it->path());
             }
         }
     }
